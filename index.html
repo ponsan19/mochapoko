@@ -487,6 +487,33 @@ body{background:radial-gradient(circle at 12% 8%,rgba(179,226,246,.35),transpare
 nav.tabs .in{grid-template-columns:1fr 1fr 1.5fr 1fr!important;padding-inline:8px!important;gap:2px}
 .addbtn{font-size:15px!important;white-space:nowrap}
 .tab{min-width:0;white-space:nowrap}
+
+/* 仲間のひとこと */
+.say{display:flex;align-items:center;gap:10px;margin-top:14px;border:0;background:none;padding:0;text-align:left;width:100%;color:#2c4a5d}
+.say img{flex:none;width:58px;height:58px;border-radius:50%;object-fit:cover;border:3px solid #fff;box-shadow:0 4px 10px rgba(42,146,208,.2)}
+.say-b{position:relative;background:#fff;border-radius:16px;padding:8px 14px;font-family:var(--display);font-weight:900;font-size:16px;line-height:1.35;box-shadow:0 3px 10px rgba(42,146,208,.1)}
+.say-b small{display:block;font-size:11px;color:var(--accent);font-weight:900}
+.say-b::before{content:"";position:absolute;left:-7px;top:50%;margin-top:-7px;border:7px solid transparent;border-left:0;border-right-color:#fff}
+.say.none .say-b::before{display:none}
+.say.none .say-b{font-size:14px;color:#4f7488}
+@media (prefers-reduced-motion:no-preference){.say img{animation:sayBob 2.6s ease-in-out infinite}@keyframes sayBob{0%,100%{transform:none}50%{transform:translateY(-3px) rotate(-3deg)}}}
+/* 差し色 */
+:root{--accent:#ff6f91}
+.h2-today b,.h2-band-top b,.item .amt,.day-head b{color:var(--accent)!important}
+.h2-go{background:linear-gradient(120deg,#ff8fa8,#ff6f91)!important;box-shadow:0 6px 14px rgba(255,111,145,.3)!important}
+.nf.empty .q{font-size:30px;color:var(--accent);border-color:#ffc6d3;background:#fff6f8}
+.nf.empty b{color:var(--accent)!important}
+/* 仲間たちページ */
+.zk-prog{background:linear-gradient(145deg,#f1fbff,#c6ebfa);border-radius:22px;padding:14px 18px;box-shadow:0 10px 22px rgba(42,146,208,.12)}
+.zk-prog-top{display:flex;justify-content:space-between;align-items:baseline;font-weight:700;color:#4f7488}
+.zk-prog-top b{font-family:var(--display);font-weight:900;font-size:30px;color:#2c4a5d}
+.zk-prog-top b small{font-size:14px;color:#7a93a2}
+.zk-bar{display:block;margin-top:8px;height:12px;border-radius:99px;background:rgba(255,255,255,.9);overflow:hidden}
+.zk-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#ff8fa8,#ff6f91)}
+.dots{display:grid;grid-template-columns:repeat(6,1fr);gap:8px 6px}
+.dot-q{display:flex;flex-direction:column;align-items:center;gap:2px}
+.dot-q i{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:#fff;border:1.5px dashed #cfe6f2;font-style:normal;font-family:var(--display);font-weight:900;font-size:15px;color:#b3cbd8}
+.dot-q small{font-size:10px;color:#9db3c0;font-weight:700}
 </style>
 </head>
 <body>
@@ -515,7 +542,7 @@ nav.tabs .in{grid-template-columns:1fr 1fr 1.5fr 1fr!important;padding-inline:8p
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.10.01-10";
+const APP_VERSION="2026.10.01-11";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -651,16 +678,16 @@ function gachaRowHTML(){
   </div>`;
 }
 function renderZukan(){
-  const cells=[];
-  for(let i=0;i<SLOTS();i++){
-    const c=CHARACTERS[i];
-    cells.push(c&&state.owned.includes(c.id)
-      ?`<button class="zk" data-char="${c.id}"><img src="${c.img}" alt=""><span class="no">No.${i+1}</span><b>${esc(c.name)}</b></button>`
-      :`<div class="zk unknown"><div class="q">？</div><span class="no">No.${i+1}</span><b>？？？</b></div>`);
-  }
+  const n=state.owned.length, total=SLOTS();
+  const met=[],notyet=[];
+  for(let i=0;i<total;i++){const c=CHARACTERS[i];
+    if(c&&state.owned.includes(c.id)) met.push(`<button class="zk" data-char="${c.id}"><img src="${c.img}" alt=""><span class="no">No.${i+1}</span><b>${esc(c.name)}</b></button>`);
+    else notyet.push(`<span class="dot-q"><i>?</i><small>${i+1}</small></span>`);}
   $("#view").innerHTML=`
-    <div class="sec-head" style="margin-top:0"><span class="count-big">${state.owned.length}<small>／${SLOTS()}</small></span></div>
-    <div class="zukan">${cells.join("")}</div>
+    <div class="zk-prog"><div class="zk-prog-top"><span>集めた仲間</span><b>${n}<small> / ${total}</small></b></div><span class="zk-bar"><i style="width:${Math.max(n?2:0,n/total*100)}%"></i></span></div>
+    ${met.length?`<div class="sec-head"><h2>会えた仲間</h2></div><div class="zukan">${met.join("")}</div>`:""}
+    <div class="sec-head"><h2>まだ会っていない仲間</h2></div>
+    <div class="dots">${notyet.join("")}</div>
   `;
 }
 function openCharDetail(id){
@@ -675,6 +702,13 @@ function openCharDetail(id){
       <button class="btn" id="gachaClose" style="margin-top:16px">とじる</button>
     </div></div>`;
 }
+let heroPick=null;
+function heroFriend(){
+  const own=state.owned.map(charById).filter(Boolean);
+  if(!own.length) return null;
+  if(!heroPick||!own.includes(heroPick)) heroPick=own[Math.floor(Math.random()*own.length)];
+  return heroPick;
+}
 function renderHome(){
   const now=new Date(), k=mkey(now);
   const month=inMonth(k);
@@ -686,6 +720,7 @@ function renderHome(){
         <div class="h2-label">${now.getMonth()+1}月の節約${state.name?"・"+esc(state.name)+"さん":""}<span class="spk"></span></div>
         <div class="h2-total">${yen(sum(month))}</div>
         <div class="h2-today">今日<b>+${yen(sum(today))}</b></div>
+        ${(()=>{const f=heroFriend();return f?`<button class="say" data-char="${f.id}"><img src="${f.img}" alt=""><span class="say-b"><small>${esc(f.name)}</small>${esc(f.line)}</span></button>`:`<div class="say none"><span class="say-b">ガチャで最初の仲間に会おう！</span></div>`;})()}
       </div>
       <button class="h2-band" id="${ticketsLeft()?"gachaBtn":"bandInfo"}">
         <span class="h2-band-top"><span>${ticketsLeft()?`チケット <b>${ticketsLeft()}</b>枚！ガチャを引こう`:`あと <b>${yen(toNextTicket())}</b> でガチャ！`}</span></span>
@@ -698,7 +733,7 @@ function renderHome(){
     <section class="gacha-card">
       <div class="new3">${(()=>{const own=state.owned.slice(-3).reverse().map(charById).filter(Boolean);
         const cells=own.map(c=>`<button class="nf" data-char="${c.id}"><span class="nf-img"><img src="${c.img}" alt=""><em>NEW</em></span><b>${esc(c.name)}</b></button>`);
-        while(cells.length<3) cells.push(`<div class="nf empty"><span class="nf-img"><span class="q">？</span></span><b>${cells.length===0?"ガチャで会おう":"？？？"}</b></div>`);
+        if(cells.length<3) cells.push(`<div class="nf empty"><span class="nf-img"><span class="q">＋</span></span><b>ガチャで会おう</b></div>`);
         return cells.join("");})()}</div>
     </section>
     <div class="sec-head"><h2>最近の記録</h2><button class="link" data-go="history">月別の履歴 ›</button></div>
@@ -1044,7 +1079,7 @@ function closeSheet(){$("#sheetRoot").innerHTML="";}
 // ---------- events ----------
 document.addEventListener("click",e=>{
   const t=e.target;
-  const go=t.closest("[data-tab],[data-go]"); if(go){tab=go.dataset.tab||go.dataset.go;confirmDel=null;openId=null;render();window.scrollTo(0,0);return;}
+  const go=t.closest("[data-tab],[data-go]"); if(go){tab=go.dataset.tab||go.dataset.go;if(tab==="home")heroPick=null;confirmDel=null;openId=null;render();window.scrollTo(0,0);return;}
   if(t.closest("#avatarBtn")){tab="settings";confirmDel=null;render();window.scrollTo(0,0);return;}
   if(t.closest("#addBtn")){openSheet();return;}
   if(t.closest("#gachaBtn")){openGacha();return;}
