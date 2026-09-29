@@ -412,6 +412,24 @@ header.top{justify-content:space-between;align-items:center}
 .day-head{display:flex;justify-content:space-between;align-items:baseline;margin:22px 4px 8px;font-size:14px;font-weight:700;color:var(--muted)}
 .day-head b{font-family:var(--display);font-size:15px;color:var(--hue-deep)}
 @media(max-width:360px){.app{padding-inline:15px}.logo{font-size:19px}.hero{padding-inline:18px}.stat{padding-inline:9px}}
+
+/* ホームの上のカード（新構成） */
+.h2card{background:var(--surface);border:2.5px solid var(--fg);border-radius:24px;overflow:hidden;box-shadow:var(--shadow)}
+.h2-top{padding:16px 18px 16px}
+.h2-label{position:relative;display:inline-block;font-family:var(--display);font-weight:900;font-size:17px;color:var(--fg)}
+.spk{position:absolute;right:-22px;top:-2px;width:14px;height:14px}
+.spk::before,.spk::after{content:"";position:absolute;width:3px;height:12px;border-radius:2px;background:var(--hue)}
+.spk::before{left:0;transform:rotate(25deg)}.spk::after{left:7px;transform:rotate(45deg);height:9px;top:4px}
+.h2-total{font-family:var(--display);font-weight:900;font-size:clamp(44px,14vw,58px);line-height:1.08;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--fg);margin-top:2px}
+.h2-today{display:flex;align-items:baseline;gap:18px;margin-top:8px;background:var(--hue-soft);border-radius:999px;padding:7px 18px;font-weight:700;font-size:14px;color:var(--fg)}
+.h2-today b{font-family:var(--display);font-weight:900;font-size:21px;color:var(--hue-deep);font-variant-numeric:tabular-nums}
+.h2-band{display:block;width:100%;border:0;border-top:2.5px solid var(--fg);background:var(--hue-deep);color:#fff;padding:12px 18px 12px;text-align:left}
+.h2-band-top{display:flex;justify-content:space-between;align-items:center;font-family:var(--display);font-weight:900;font-size:17px}
+.h2-band-top b{font-size:22px;margin:0 2px}
+.h2-bar{display:block;margin-top:8px;height:16px;border-radius:99px;background:#fff;border:2px solid var(--fg);overflow:hidden}
+.h2-bar i{display:block;height:100%;background:var(--hue);border-radius:99px}
+.h2-scale{display:flex;justify-content:space-between;margin-top:4px;font-size:12px;font-weight:700}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .h2-today b{color:var(--plus)}}
 </style>
 </head>
 <body>
@@ -438,7 +456,7 @@ header.top{justify-content:space-between;align-items:center}
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.09.30-10";
+const APP_VERSION="2026.10.01-5";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -604,17 +622,18 @@ function renderHome(){
   const today=month.filter(r=>new Date(r.at).toDateString()===now.toDateString());
   const recent=sorted().slice(0,5);
   $("#view").innerHTML=`
-    <section class="hero" aria-label="今月の合計">
-      <div class="label">${now.getMonth()+1}月${state.name?"・"+esc(state.name)+"さん":""}</div>
-      <div class="total">${yen(sum(month))}</div>
-      <div class="sub">節約したよ！</div>
-      <button class="goal${sum(month)>=goalOf()?" done":""}" data-go="settings" aria-label="今月の目標を変更">
-        <div class="goal-top"><span>今月の目標 ${yen(goalOf())}</span><b>${sum(month)>=goalOf()?"達成！🎉":"あと "+yen(goalOf()-sum(month))}</b></div>
-        <div class="goal-bar"><i style="width:${Math.min(100,Math.round(sum(month)/goalOf()*100))}%"></i></div>
-      </button>
-      <div class="stats">
-        <div class="stat">今日<b>+${yen(sum(today))}</b></div>
+    <section class="h2card" aria-label="今月の節約">
+      <div class="h2-top">
+        <div class="h2-label">${now.getMonth()+1}月の節約${state.name?"・"+esc(state.name)+"さん":""}<span class="spk"></span></div>
+        <div class="h2-total">${yen(sum(month))}</div>
+        <div class="h2-today">今日<b>+${yen(sum(today))}</b></div>
       </div>
+      <button class="h2-band" id="${ticketsLeft()?"gachaBtn":"bandInfo"}">
+        <span class="h2-band-top"><span>${ticketsLeft()?`チケット <b>${ticketsLeft()}</b>枚！ガチャを引こう`:`あと <b>${yen(toNextTicket())}</b> でガチャ！`}</span>
+          <svg width="30" height="30" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="15" fill="#fff" stroke="#21394a" stroke-width="2.4"/><path d="M5 20a15 15 0 0 1 30 0z" fill="#a9daf0" stroke="#21394a" stroke-width="2.4"/><path d="M11 13a9 9 0 0 1 7-4" stroke="#fff" stroke-width="2.4" stroke-linecap="round" fill="none"/></svg></span>
+        <span class="h2-bar"><i style="width:${ticketsLeft()?100:Math.round((TICKET_YEN-toNextTicket())/TICKET_YEN*100)}%"></i></span>
+        ${ticketsLeft()?"":`<span class="h2-scale"><span>${yen(realTotal())}</span><span>${yen(realTotal()+toNextTicket())}</span></span>`}
+      </button>
     </section>
     ${hasSample()?`<div class="sample"><span>いま表示しているのはサンプルです。最初の記録を追加すると自動で消えます。</span><button id="clearSample">今すぐ消す</button></div>`:""}
     <div class="sec-head"><h2>森の仲間たち <small class="count">${state.owned.length}／${SLOTS()}</small></h2><button class="link" data-go="zukan">一覧を見る ›</button></div>
@@ -622,7 +641,6 @@ function renderHome(){
       <div class="friends">${state.owned.length
         ?state.owned.slice(-3).reverse().map(charById).filter(Boolean).map(c=>`<button class="friend" data-char="${c.id}"><img src="${c.img}" alt=""><span>${esc(c.name)}</span></button>`).join("")
         :`<div class="friend unknown"><div class="q">？</div><span>ガチャで<br>仲間を呼ぼう</span></div>`}</div>
-      ${gachaRowHTML()}
     </section>
     <div class="sec-head"><h2>最近の記録</h2><button class="link" data-go="history">月別の履歴 ›</button></div>
     <div class="list">${recent.length?recent.map(itemHTML).join(""):`<div class="empty">まだ記録がありません。<br>下の「＋ 記録する」から、我慢できたことや割引で浮いた金額を記録しましょう。</div>`}</div>
