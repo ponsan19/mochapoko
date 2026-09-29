@@ -527,7 +527,7 @@ nav.tabs .in{border:2px solid var(--line)!important;box-shadow:0 8px 24px rgba(1
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.10.01-2";
+const APP_VERSION="2026.10.01-3";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -762,8 +762,6 @@ function renderGacha(){
       <h2 class="gp-title">${treeIcon(30)}森のガチャ</h2>
       <div class="gp-tix">${ticketSVG(30)}<span>チケット</span><b>${tl}</b><span>枚</span></div>
       <div class="gp-stage">${machineSVG()}
-        ${own[0]?`<img class="gp-friend r ${own[0].cut?"cut":"photo"}" src="${own[0].cut||own[0].img}" alt="">`:""}
-        ${own[1]?`<img class="gp-friend l ${own[1].cut?"cut":"photo"}" src="${own[1].cut||own[1].img}" alt="">`:""}
       </div>
       <p class="gp-q"><span class="sp l"></span>どんな仲間に会えるかな？<span class="sp r"></span></p>
       <button class="gp-btn" id="gachaBtn" ${tl?"":"disabled"}>ガチャを引く ›</button>
@@ -811,7 +809,7 @@ function renderHistory(){
       <button id="nextM" aria-label="次の月" ${histMonth>=mkey(now)?"disabled":""}>›</button>
     </div>
     <div class="bars"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="月ごとの節約額">${bars}</svg></div>
-    ${cats.length?`<div class="card h-cats">
+    ${cats.length>1?`<div class="card h-cats">
       <div class="h-stack">${cats.map(x=>`<i style="width:${(x.v/mTotal*100).toFixed(2)}%;background:${x.color}"></i>`).join("")}</div>
       <ul>${cats.map(x=>`<li><span class="dot" style="background:${x.color}"></span>${esc(x.c.label)}<b>${yen(x.v)}</b><small>${Math.round(x.v/mTotal*100)}%</small></li>`).join("")}</ul>
     </div>`:""}
@@ -834,13 +832,6 @@ function renderSettings(){
         </div>
       </div>
       <div class="err" id="profileErr" aria-live="polite"></div>
-    </div>
-    <div class="sec-head"><h2>「どうやって？」を編集</h2></div>
-    <div class="card stack">
-      <p class="note" style="margin:0">最大6個。名前の変更は過去の記録にも反映されます。</p>
-      ${activeCats().map(c=>`<div class="cat-edit-row">${catIcon(c.id)}<input data-cat-name="${esc(c.id)}" aria-label="${esc(c.label)}の名前" maxlength="18" value="${esc(c.label)}"><button class="remove" data-cat-remove="${esc(c.id)}" aria-label="${esc(c.label)}を削除">削除</button></div>`).join("")}
-      <div class="cat-edit-row"><input id="newCatName" maxlength="18" placeholder="新しい選択肢" aria-label="新しい選択肢" ${activeCats().length>=MAX_CATS?"disabled":""}><button id="addCatBtn" ${activeCats().length>=MAX_CATS?"disabled":""}>追加</button></div>
-      <div class="err" id="catMsg" aria-live="polite"></div>
     </div>
     <div class="sec-head"><h2>効果音</h2></div>
     <div class="card sound-row"><span>記録やガチャのときに音を鳴らす<br><span class="note">音が出ないときは、iPhoneの音量を上げてみてね</span></span>
@@ -872,13 +863,11 @@ function render(){
 
 // ---------- add sheet ----------
 function openSheet(){
-  let cat=activeCats()[0].id;
+  const cat="other";
   $("#sheetRoot").innerHTML=`<div class="scrim" id="scrim"><form class="sheet stack" id="addForm" novalidate>
     <h3>いくら節約した？</h3>
     <div class="amount-in"><span>¥</span><input id="amtIn" inputmode="numeric" pattern="[0-9]*" placeholder="0" autocomplete="off" aria-label="金額"></div>
     <div class="chips">${[20,50,100,300,500,1000].map(v=>`<button type="button" class="chip" data-quick="${v}">+${v}</button>`).join("")}</div>
-    <div class="field"><label>どうやって？</label><div class="chips" id="catChips">${activeCats().map(c=>`<button type="button" class="chip" data-cat="${esc(c.id)}" aria-pressed="${c.id===cat}">${catIcon(c.id)}${esc(c.label)}</button>`).join("")}${activeCats().length<MAX_CATS?'<button type="button" class="chip" data-cat="__custom" aria-pressed="false">＋ 自分で入力</button>':""}</div>
-      <input id="customCatIn" maxlength="18" placeholder="例：ポイントを使った" aria-label="どうやって節約したかを入力" hidden style="margin-top:9px"></div>
     <div class="field"><label for="titleIn">なにをした？</label><input id="titleIn" maxlength="40" placeholder="例：自販機で水を買うのを我慢した"></div>
     <div class="field"><label for="memoIn">ひとこと（任意）</label><input id="memoIn" maxlength="60" placeholder="例：水筒を持ってきてよかった"></div>
     <div class="err" id="formErr"></div>
@@ -890,24 +879,13 @@ function openSheet(){
   $("#scrim").addEventListener("click",e=>{
     if(e.target.id==="scrim"||e.target.id==="cancelBtn"){closeSheet();return;}
     const q=e.target.closest("[data-quick]"); if(q){amt.value=String((Number(amt.value.replace(/\D/g,""))||0)+Number(q.dataset.quick));return;}
-    const c=e.target.closest("[data-cat]"); if(c){cat=c.dataset.cat;document.querySelectorAll("#catChips .chip").forEach(b=>b.setAttribute("aria-pressed",b.dataset.cat===cat));$("#customCatIn").hidden=cat!=="__custom";if(cat==="__custom") $("#customCatIn").focus();}
   });
   amt.addEventListener("input",()=>{amt.value=amt.value.replace(/[^\d]/g,"").slice(0,7);});
   $("#addForm").addEventListener("submit",e=>{
     e.preventDefault();
     const n=Number(amt.value);
     if(!n||n<1){$("#formErr").textContent="金額を1円以上で入力してください";amt.focus();return;}
-    if(cat==="__custom"){
-      const label=$("#customCatIn").value.trim();
-      if(!label){$("#formErr").textContent="「どうやって？」を入力してください";$("#customCatIn").focus();return;}
-      const existing=activeCats().find(c=>c.label===label);
-      if(existing) cat=existing.id;
-      else{
-        if(activeCats().length>=MAX_CATS){$("#formErr").textContent="選択肢は6個までです。マイページで名前を変えるか1つ削除してください";return;}
-        cat="custom_"+uid();const iconIndex=nextIconIndex();state.categories.push({id:cat,label,iconIndex});state.categoryIconMap[cat]=iconIndex;
-      }
-    }
-    const title=$("#titleIn").value.trim()||catOf(cat).label;
+    const title=$("#titleIn").value.trim()||"節約した";
     if(hasSample()) state.records=state.records.filter(r=>!r.sample);
     const before=sum(inMonth(mkey(new Date())));
     state.records.push({id:uid(),title,memo:$("#memoIn").value.trim(),amount:n,cat,at:new Date().toISOString()});
