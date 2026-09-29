@@ -1,6 +1,6 @@
 {
-  "name": "ぴっちゃかお得帳",
-  "short_name": "ぴっちゃかお得帳",
+  "name": "みんなで節約",
+  "short_name": "みんなで節約",
   "description": "我慢や割引で浮いたお金を記録する節約アプリ",
   "start_url": "./",
   "scope": "./",
