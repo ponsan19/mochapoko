@@ -1,0 +1,24 @@
+{
+  "name": "ぴっちゃかお得帳",
+  "short_name": "ぴっちゃかお得帳",
+  "description": "我慢や割引で浮いたお金を記録する節約アプリ",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f8f9",
+  "theme_color": "#9cc7dd",
+  "lang": "ja",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
