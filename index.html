@@ -458,6 +458,20 @@ header.top{padding-block:8px 10px!important}
 .h2-bar i{background:linear-gradient(90deg,var(--hue-deep),#4fa3c4)!important}
 .h2-scale{color:#6f8796;font-size:11px!important}
 .h2-go{background:linear-gradient(120deg,var(--hue-deep),#4fa3c4)!important;color:#fff!important;border:0!important;border-radius:16px!important;box-shadow:0 6px 14px rgba(47,111,143,.22)!important;font-size:17px!important}
+
+/* 明るめに調整 */
+:root:not([data-theme="dark"]){--hue:#b3e2f6;--hue-deep:#2a92d0;--hue-soft:#e8f6fc;--plus:#2a92d0;--fg:#2c4a5d;--muted:#7a93a2;--line:#dcf0f8}
+body{background:radial-gradient(circle at 12% 8%,rgba(179,226,246,.35),transparent 32%),radial-gradient(circle at 95% 40%,rgba(220,244,252,.4),transparent 30%),#f6fcff!important}
+.statusbar-cover{background:#f6fcff!important}
+.h2card,.h-total{background:linear-gradient(145deg,#f1fbff 0%,#c6ebfa 100%)!important;box-shadow:0 12px 28px rgba(42,146,208,.14)!important}
+.h2-total,.h-total b,.h2-today b,.h2-band-top{color:#2c4a5d!important}
+.h2-label,.h2-today{color:#4f7488!important}
+.h2-today,.h2-band{background:rgba(255,255,255,.9)!important}
+.h2-bar i,.goal-bar i{background:linear-gradient(90deg,#2a92d0,#6cc4ec)!important}
+.h2-go{background:linear-gradient(120deg,#2a92d0,#62c0ea)!important}
+.page-title{color:#2c4a5d!important}
+.tab[aria-current="page"]{background:var(--hue-soft)}
+.addbtn{background:linear-gradient(120deg,#b3e2f6,#e8f6fc)!important;color:#2c4a5d!important}
 </style>
 </head>
 <body>
@@ -484,7 +498,7 @@ header.top{padding-block:8px 10px!important}
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.10.01-8";
+const APP_VERSION="2026.10.01-9";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -657,8 +671,7 @@ function renderHome(){
         <div class="h2-today">今日<b>+${yen(sum(today))}</b></div>
       </div>
       <button class="h2-band" id="${ticketsLeft()?"gachaBtn":"bandInfo"}">
-        <span class="h2-band-top"><span>${ticketsLeft()?`チケット <b>${ticketsLeft()}</b>枚！ガチャを引こう`:`あと <b>${yen(toNextTicket())}</b> でガチャ！`}</span>
-          <svg width="30" height="30" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="15" fill="#fff" stroke="#21394a" stroke-width="2.4"/><path d="M5 20a15 15 0 0 1 30 0z" fill="#a9daf0" stroke="#21394a" stroke-width="2.4"/><path d="M11 13a9 9 0 0 1 7-4" stroke="#fff" stroke-width="2.4" stroke-linecap="round" fill="none"/></svg></span>
+        <span class="h2-band-top"><span>${ticketsLeft()?`チケット <b>${ticketsLeft()}</b>枚！ガチャを引こう`:`あと <b>${yen(toNextTicket())}</b> でガチャ！`}</span></span>
         ${ticketsLeft()?`<span class="h2-go">ガチャを引く ›</span>`:`<span class="h2-bar"><i style="width:${Math.round((TICKET_YEN-toNextTicket())/TICKET_YEN*100)}%"></i></span>`}
         ${ticketsLeft()?"":`<span class="h2-scale"><span>${yen(realTotal())}</span><span>${yen(realTotal()+toNextTicket())}</span></span>`}
       </button>
@@ -675,7 +688,7 @@ function renderHome(){
   `;
 }
 
-const CAT_COLORS=["#28799b","#4fa3c4","#86c9e2","#b9e0f0","#5b8fa8","#9fb8c6"];
+const CAT_COLORS=["#2a92d0","#6cc4ec","#a8dcf3","#f7a8b8","#ffd36e","#9fd8b8"];
 function renderHistory(){
   const now=new Date();
   if(!histMonth) histMonth=mkey(now);
