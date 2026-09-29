@@ -193,7 +193,7 @@ header.top{padding-block:24px 18px;gap:12px}
 .sample button{color:var(--hue-deep)}
 .sec-head{align-items:center;margin-top:30px;margin-bottom:11px}
 .sec-head h2{font-size:19px;letter-spacing:.02em}
-.sec-head h2::before{content:"✿";color:var(--hue-deep);font-size:14px;margin-right:8px;vertical-align:2px}
+.sec-head h2::before{content:none}
 .link{color:var(--hue-deep);font-size:12px;font-weight:700}
 .list,.card,.bars{border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow)}
 .list{padding-inline:16px}
@@ -235,7 +235,11 @@ nav.tabs .in{padding:9px 10px;grid-template-columns:1fr 1.45fr 1fr;border:1px so
 .item .del{display:none;border:1px solid var(--line);border-radius:999px;padding:3px 10px;margin-top:6px}
 .item.open .del{display:block}
 /* ごほうび演出 */
-.cheer{position:fixed;inset:0;z-index:40;display:grid;place-items:center;pointer-events:none}
+.cheer{position:fixed;inset:0;z-index:40;display:grid;place-items:center;background:rgba(22,46,58,.28);cursor:pointer;animation:fadeIn .25s ease-out}
+.cheer-close{font-size:12px;font-weight:700;color:#fff;opacity:.85;text-shadow:0 1px 4px rgba(0,0,0,.3)}
+@keyframes fadeIn{from{background:rgba(22,46,58,0)}}
+.cheer.out{animation:fadeOut .3s ease-in forwards}
+@keyframes fadeOut{to{background:rgba(22,46,58,0)}}
 .cheer-card{display:flex;flex-direction:column;align-items:center;gap:12px}
 .cheer-face{width:160px;aspect-ratio:3/4;object-fit:cover;display:block;border-radius:22px;border:5px solid #fff;box-shadow:0 14px 30px rgba(47,111,143,.3)}
 .cheer-bubble{position:relative;max-width:calc(100vw - 32px);background:#fff;color:#23475b;font-family:var(--display);font-weight:900;font-size:24px;border-radius:20px;padding:10px 18px;box-shadow:0 10px 26px rgba(47,111,143,.2);text-align:center;line-height:1.4}
@@ -245,7 +249,8 @@ nav.tabs .in{padding:9px 10px;grid-template-columns:1fr 1.45fr 1fr;border:1px so
 @media (prefers-reduced-motion:no-preference){
   .cheer-card{animation:pop .5s cubic-bezier(.2,1.4,.4,1) both}
   .cheer.out .cheer-card{animation:fade .3s ease-in forwards}
-  .cheer-face{animation:hop .6s .35s ease-out}
+  .cheer-face{animation:hop .6s .35s ease-out,bob 2.4s 1s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:none}50%{transform:translateY(-6px) rotate(-2deg)}}
   .confetti{animation:fall var(--d,1.6s) var(--delay,0s) cubic-bezier(.3,.6,.5,1) forwards}
   .hero .total.bump{animation:bump .5s ease-out}
   @keyframes pop{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
@@ -314,6 +319,73 @@ button.friend{border:0;background:none;padding:0;cursor:pointer}
 .switch::after{content:"";position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.15);transition:transform .2s}
 .switch[aria-checked="true"]{background:var(--hue-deep)}
 .switch[aria-checked="true"]::after{transform:translateX(24px)}
+/* ===== 豪華ガチャ ===== */
+.g-stage{position:fixed;inset:0;z-index:50;overflow:hidden;display:grid;place-items:center;
+  background:radial-gradient(ellipse at 50% 40%,#2b6f93 0%,#173d55 45%,#0c1f2e 100%)}
+.g-stars{position:absolute;inset:0}
+.g-stars i{position:absolute;width:var(--s);height:var(--s);border-radius:50%;background:#fff;opacity:.7;animation:twinkle 2s ease-in-out infinite}
+.g-rays{position:absolute;left:50%;top:50%;width:170vmax;height:170vmax;margin:-85vmax 0 0 -85vmax;border-radius:50%;opacity:0;
+  background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.16) 0deg 7deg,rgba(255,255,255,0) 7deg 20deg);
+  -webkit-mask:radial-gradient(circle,#000 0%,transparent 55%);mask:radial-gradient(circle,#000 0%,transparent 55%);transition:opacity .4s}
+.g-cap{position:absolute;left:50%;top:50%;width:160px;height:160px;margin:-80px 0 0 -80px;cursor:pointer;outline:none;
+  filter:drop-shadow(0 18px 30px rgba(0,0,0,.35))}
+.g-cap i{position:absolute;left:0;width:160px;height:80px;box-sizing:border-box;border:5px solid #fff}
+.g-cap .cap-top{top:0;border-radius:80px 80px 0 0;border-bottom:0;background:radial-gradient(circle at 32% 30%,#e9f7fd 0 12%,#a9daf0 30%,#28799b 100%)}
+.g-cap .cap-bottom{bottom:0;border-radius:0 0 80px 80px;border-top:0;background:radial-gradient(circle at 40% 20%,#fff 0%,#e4f5fb 60%,#bfe3f2 100%)}
+.g-cap .cap-band{top:74px;height:12px;border:0;background:#fff;border-radius:6px}
+.g-glint{position:absolute;left:30px;top:20px;width:34px;height:18px;border-radius:50%;background:rgba(255,255,255,.75);transform:rotate(-25deg)}
+.g-hint{position:absolute;left:0;right:0;top:calc(50% + 110px);text-align:center;color:#fff;font-family:var(--display);font-weight:900;font-size:18px;letter-spacing:.06em;opacity:0;text-shadow:0 2px 10px rgba(0,0,0,.3)}
+.g-card{position:absolute;left:50%;top:50%;width:min(300px,calc(100vw - 40px));transform:translate(-50%,-50%);perspective:1000px;opacity:0;pointer-events:none}
+.g-flip{position:relative;transform-style:preserve-3d;transition:transform .8s cubic-bezier(.2,.9,.3,1.2)}
+.g-back,.g-front{backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:26px}
+.g-back{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--display);font-weight:900;font-size:80px;color:#fff;
+  background:linear-gradient(145deg,#a9daf0,#28799b);border:5px solid #fff}
+.g-front{transform:rotateY(180deg);background:var(--surface);padding:18px 18px 16px;display:flex;flex-direction:column;align-items:center;box-shadow:0 24px 50px rgba(0,0,0,.35);position:relative}
+.g-new{position:absolute;top:-12px;right:-8px;background:linear-gradient(135deg,#ffcf5a,#ff9d4d);color:#fff;font-family:var(--display);font-weight:900;font-size:14px;padding:5px 12px;border-radius:999px;box-shadow:0 4px 12px rgba(255,150,60,.4);transform:rotate(8deg)}
+.g-photo{position:relative;width:170px;aspect-ratio:3/4;border-radius:20px;overflow:hidden;border:5px solid #fff;box-shadow:0 10px 22px rgba(47,111,143,.25)}
+.g-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.g-sweep{position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.75) 48%,transparent 62%);transform:translateX(-120%)}
+.g-no{margin-top:10px;font-size:12px;font-weight:700;color:var(--muted)}
+.g-name{margin-top:10px;font-family:var(--display);font-weight:900;font-size:30px;color:var(--hue-deep);line-height:1.2}
+.g-msg{font-family:var(--display);font-weight:900;font-size:17px;color:var(--fg);text-align:center}
+/* 状態 */
+.s-wait .g-hint{opacity:1}
+.s-charge .g-rays,.s-burst .g-rays{opacity:1}
+.s-burst .g-cap .cap-top{transform:translate(-40px,-160px) rotate(-40deg);opacity:0;transition:transform .45s ease-out,opacity .45s}
+.s-burst .g-cap .cap-bottom{transform:translate(40px,160px) rotate(30deg);opacity:0;transition:transform .45s ease-out,opacity .45s}
+.s-burst .g-cap .cap-band,.s-burst .g-glint,.s-reveal .g-cap,.s-reveal .g-hint{opacity:0}
+.s-reveal .g-cap{display:none}
+.s-reveal .g-rays{opacity:.8}
+.s-reveal.is-empty .g-rays{opacity:0}
+.s-reveal .g-card{opacity:1;pointer-events:auto}
+.s-reveal .g-flip{transform:rotateY(180deg)}
+@media (prefers-reduced-motion:no-preference){
+  .s-drop .g-cap{animation:capDrop .9s cubic-bezier(.3,1.5,.5,1) both}
+  .s-wait .g-cap{animation:wobble 1.1s ease-in-out infinite}
+  .s-wait .g-hint{animation:hintPulse 1.1s ease-in-out infinite}
+  .s-charge .g-cap{animation:charge .9s ease-in both}
+  .s-charge .g-rays{animation:spin 6s linear infinite}
+  .s-reveal .g-rays{animation:spin 14s linear infinite}
+  .s-reveal .g-sweep{animation:sweep 1.2s .7s ease-in-out}
+  .s-reveal .g-new{animation:newPop .5s .8s cubic-bezier(.2,1.6,.4,1) both}
+  .s-reveal .g-name{animation:namePop .5s .75s cubic-bezier(.2,1.6,.4,1) both}
+  .s-reveal .g-card{animation:cardIn .5s ease-out}
+  @keyframes twinkle{0%,100%{opacity:.2}50%{opacity:1}}
+  @keyframes capDrop{0%{transform:translateY(-80vh) rotate(-30deg)}70%{transform:translateY(0) rotate(8deg)}85%{transform:translateY(-18px) rotate(-4deg)}100%{transform:none}}
+  @keyframes wobble{0%,100%{transform:rotate(0)}25%{transform:rotate(-7deg)}75%{transform:rotate(7deg)}}
+  @keyframes hintPulse{0%,100%{transform:scale(1);opacity:.75}50%{transform:scale(1.08);opacity:1}}
+  @keyframes charge{0%{transform:none;filter:drop-shadow(0 0 0 rgba(255,255,255,0))}
+    20%{transform:rotate(-10deg) scale(1.02)}30%{transform:rotate(10deg) scale(1.04)}40%{transform:rotate(-14deg) scale(1.06)}
+    50%{transform:rotate(14deg) scale(1.08)}60%{transform:rotate(-18deg) scale(1.1)}70%{transform:rotate(18deg) scale(1.13)}
+    80%{transform:rotate(-10deg) scale(1.16)}90%{transform:rotate(10deg) scale(1.2)}100%{transform:scale(1.28);filter:drop-shadow(0 0 40px #fff)}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes sweep{to{transform:translateX(120%)}}
+  @keyframes newPop{from{transform:scale(0) rotate(8deg)}to{transform:scale(1) rotate(8deg)}}
+  @keyframes namePop{from{transform:scale(.3);opacity:0}to{transform:none;opacity:1}}
+  @keyframes cardIn{from{transform:translate(-50%,-50%) scale(.5)}to{transform:translate(-50%,-50%) scale(1)}}
+}
+.tix-bar{display:block;width:120px;height:6px;border-radius:99px;background:var(--hue-soft);overflow:hidden;margin:4px 0 2px}
+.tix-bar i{display:block;height:100%;background:var(--hue-deep);border-radius:99px}
 @media(max-width:360px){.app{padding-inline:15px}.logo{font-size:19px}.hero{padding-inline:18px}.stat{padding-inline:9px}}
 </style>
 </head>
@@ -322,7 +394,7 @@ button.friend{border:0;background:none;padding:0;cursor:pointer}
 <div class="statusbar-cover" aria-hidden="true"></div>
 <div class="app">
   <header class="top">
-    <div class="logo">ぴっちゃかお得帳<small>PICCHAKA</small></div>
+    <div class="logo">ぴっちゃかお得帳</div>
     <button class="avatar" id="avatarBtn" aria-label="設定を開く">ぴ</button>
   </header>
   <main id="view"></main>
@@ -341,7 +413,7 @@ button.friend{border:0;background:none;padding:0;cursor:pointer}
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.09.30-5";
+const APP_VERSION="2026.09.30-8";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -465,7 +537,7 @@ function itemHTML(r){
 
 function gachaRowHTML(){
   return `<div class="gacha-row">
-    <div class="tix"><b>🎟 ${ticketsLeft()}<small> 枚</small></b><span>次のチケットまで あと${yen(toNextTicket())}</span></div>
+    <div class="tix"><b>🎟 ${ticketsLeft()}<small> 枚</small></b><span class="tix-bar" aria-label="次のチケットまで あと${yen(toNextTicket())}"><i style="width:${Math.round((TICKET_YEN-toNextTicket())/TICKET_YEN*100)}%"></i></span><span>あと${yen(toNextTicket())}</span></div>
     <button class="gacha-btn" id="gachaBtn" ${ticketsLeft()?"":"disabled"}>ガチャを引く</button>
   </div>`;
 }
@@ -498,7 +570,7 @@ function renderHome(){
   const now=new Date(), k=mkey(now);
   const month=inMonth(k);
   const today=month.filter(r=>new Date(r.at).toDateString()===now.toDateString());
-  const recent=sorted().slice(0,8);
+  const recent=sorted().slice(0,5);
   $("#view").innerHTML=`
     <section class="hero" aria-label="今月の合計">
       <div class="label">${now.getMonth()+1}月${state.name?"・"+esc(state.name)+"さん":""}</div>
@@ -522,7 +594,6 @@ function renderHome(){
     </section>
     <div class="sec-head"><h2>最近の記録</h2><button class="link" data-go="history">月別の履歴 ›</button></div>
     <div class="list">${recent.length?recent.map(itemHTML).join(""):`<div class="empty">まだ記録がありません。<br>下の「＋ 記録する」から、我慢できたことや割引で浮いた金額を記録しましょう。</div>`}</div>
-    ${state.records.length>8?`<p class="note" style="text-align:center">すべての記録は「履歴」から見られます</p>`:""}
   `;
 }
 
@@ -547,7 +618,7 @@ function renderHistory(){
   const list=inMonth(histMonth).sort((a,b)=>b.at.localeCompare(a.at));
   const catTotals=[...new Set(list.map(r=>r.cat))].map(id=>({c:catOf(id),v:sum(list.filter(r=>r.cat===id))})).sort((a,b)=>b.v-a.v);
   $("#view").innerHTML=`
-    <div class="sec-head" style="margin-top:8px"><h2>この半年</h2><span class="note">棒をタップで月を切り替え</span></div>
+    <div class="sec-head" style="margin-top:8px"><h2>この半年</h2></div>
     <div class="bars"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="直近6か月の節約額">${bars}</svg></div>
     <div class="pager">
       <button id="prevM" aria-label="前の月">‹</button>
@@ -587,7 +658,7 @@ function renderSettings(){
       <div class="err" id="catMsg" aria-live="polite"></div>
     </div>
     <div class="sec-head"><h2>効果音</h2></div>
-    <div class="card sound-row"><span>記録やガチャのときに音を鳴らす<br><span class="note">マナーモード中は鳴らないことがあります</span></span>
+    <div class="card sound-row"><span>記録やガチャのときに音を鳴らす<br><span class="note">音が出ないときは、iPhoneの音量を上げてみてね</span></span>
       <button class="switch" id="soundToggle" role="switch" aria-checked="${state.sound!==false}" aria-label="効果音"></button></div>
     <div class="sec-head"><h2>データの引っ越し</h2></div>
     <div class="card stack">
@@ -656,55 +727,83 @@ function openSheet(){
   });
 }
 
-// ---------- 効果音（音声ファイルなしでその場で鳴らす） ----------
-let actx=null;
-function ac(){
-  if(state.sound===false) return null;
-  try{
-    actx=actx||new (window.AudioContext||window.webkitAudioContext)();
-    if(actx.state==="suspended") actx.resume();
-    return actx;
-  }catch(e){return null;}
-}
-function tone(c,freq,at,dur,type="triangle",vol=.18,toFreq){
-  const o=c.createOscillator(),g=c.createGain();
-  o.type=type;o.frequency.setValueAtTime(freq,at);
-  if(toFreq) o.frequency.exponentialRampToValueAtTime(toFreq,at+dur*.8);
-  g.gain.setValueAtTime(.0001,at);g.gain.exponentialRampToValueAtTime(vol,at+.012);g.gain.exponentialRampToValueAtTime(.0001,at+dur);
-  o.connect(g);g.connect(c.destination);o.start(at);o.stop(at+dur+.05);
-}
-function noise(c,at,dur,vol=.25,hp=1200){
-  const len=Math.floor(c.sampleRate*dur),buf=c.createBuffer(1,len,c.sampleRate),d=buf.getChannelData(0);
-  for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*(1-i/len);
-  const s=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();
-  s.buffer=buf;f.type="highpass";f.frequency.value=hp;g.gain.value=vol;
-  s.connect(f);f.connect(g);g.connect(c.destination);s.start(at);
-}
-const SFX={
-  // 記録したとき：「イェーイ！」系の明るいファンファーレ
-  cheer(extra){const c=ac();if(!c)return;const t=c.currentTime+.02;
-    tone(c,392,t,.18,"square",.07,784);                       // ひゅいっ
-    [523.25,659.25,783.99,1046.5].forEach((f,i)=>tone(c,f,t+.12+i*.075,.32,"triangle",.2));
-    [1318.5,1567.98,2093].forEach((f,i)=>tone(c,f,t+.45+i*.05,.45,"sine",.1)); // キラキラ
-    noise(c,t+.12,.18,.08,5000);
-    if(extra) [1567.98,2093,2637].forEach((f,i)=>tone(c,f,t+.8+i*.09,.35,"sine",.13)); // チケットゲット
-  },
-  // ガチャ：だんだん速くなるドキドキ
-  roll(dur){const c=ac();if(!c)return;const t0=c.currentTime+.02;let at=0,gap=.2,n=0;
-    while(at<dur){tone(c,300+n*28,t0+at,.07,"square",.06);at+=gap;gap=Math.max(.05,gap*.85);n++;}
-  },
-  // カプセルが開く＋当たり
-  win(){const c=ac();if(!c)return;const t=c.currentTime+.02;
-    noise(c,t,.25,.3,800);
-    [523.25,659.25,783.99].forEach((f,i)=>tone(c,f,t+.15+i*.1,.22,"triangle",.2));
-    [1046.5,1318.5,1567.98].forEach(f=>tone(c,f,t+.5,.9,"triangle",.12));
-    [2093,2637,3136].forEach((f,i)=>tone(c,f,t+.55+i*.07,.5,"sine",.07));
-  },
-  // 空っぽ：しょんぼり
-  empty(){const c=ac();if(!c)return;const t=c.currentTime+.02;
-    [[392,370],[349,330],[311,262]].forEach(([a,b],i)=>tone(c,a,t+i*.32,i===2?.7:.3,"sawtooth",.07,b));
+// ---------- 効果音 ----------
+// iPhoneのロックダウンモードでは Web Audio が使えないため、
+// 音をその場でWAVデータに書き出して <audio> で鳴らす
+const SR=22050;
+function renderWav(notes,dur){
+  const n=Math.ceil(SR*dur),buf=new Float32Array(n);
+  for(const nt of notes){
+    const s0=Math.floor(nt.at*SR),len=Math.floor(nt.d*SR);let ph=0;
+    for(let i=0;i<len&&s0+i<n;i++){
+      const k=i/len,tt=i/SR;
+      const f=nt.to?nt.f*Math.pow(nt.to/nt.f,Math.min(1,k/.8)):nt.f;
+      ph+=2*Math.PI*f/SR;
+      let v;
+      if(nt.noise) v=Math.random()*2-1;
+      else if(nt.type==="square") v=Math.sin(ph)>=0?.6:-.6;
+      else if(nt.type==="saw") v=((ph/(2*Math.PI))%1)*1.2-.6;
+      else if(nt.type==="sine") v=Math.sin(ph);
+      else v=2/Math.PI*Math.asin(Math.sin(ph));
+      buf[s0+i]+=v*nt.vol*Math.min(1,tt/.01)*Math.pow(1-k,1.6);
+    }
   }
-};
+  let peak=0;for(let i=0;i<n;i++)peak=Math.max(peak,Math.abs(buf[i]));
+  if(peak>.9) for(let i=0;i<n;i++) buf[i]*=.9/peak;
+  const dv=new DataView(new ArrayBuffer(44+n*2)),w=(o,s)=>{for(let i=0;i<s.length;i++)dv.setUint8(o+i,s.charCodeAt(i));};
+  w(0,"RIFF");dv.setUint32(4,36+n*2,true);w(8,"WAVE");w(12,"fmt ");dv.setUint32(16,16,true);dv.setUint16(20,1,true);dv.setUint16(22,1,true);
+  dv.setUint32(24,SR,true);dv.setUint32(28,SR*2,true);dv.setUint16(32,2,true);dv.setUint16(34,16,true);w(36,"data");dv.setUint32(40,n*2,true);
+  for(let i=0;i<n;i++) dv.setInt16(44+i*2,Math.max(-1,Math.min(1,buf[i]))*32767,true);
+  return URL.createObjectURL(new Blob([dv],{type:"audio/wav"}));
+}
+const N=(f,at,d,type="tri",vol=.2,to)=>({f,at,d,type,vol,to});
+function cheerNotes(extra){
+  const a=[N(392,0,.18,"square",.12,784)];
+  [523.25,659.25,783.99,1046.5].forEach((f,i)=>a.push(N(f,.12+i*.075,.32,"tri",.28)));
+  [1318.5,1567.98,2093].forEach((f,i)=>a.push(N(f,.45+i*.05,.45,"sine",.13)));
+  a.push({noise:1,at:.12,d:.15,vol:.05});
+  if(extra) [1567.98,2093,2637].forEach((f,i)=>a.push(N(f,.8+i*.09,.35,"sine",.16)));
+  return a;
+}
+function rollNotes(dur){
+  const a=[];let at=0,gap=.14,k=0;
+  while(at<dur){a.push(N(360+k*40,at,.06,"square",.1));at+=gap;gap=Math.max(.035,gap*.82);k++;}
+  a.push(N(300,0,dur,"saw",.05,1200)); // ぐいーんと上がるため音
+  return a;
+}
+function winNotes(o){
+  const a=[{noise:1,at:o,d:.25,vol:.25}];
+  [523.25,659.25,783.99].forEach((f,i)=>a.push(N(f,o+.15+i*.1,.22,"tri",.26)));
+  [1046.5,1318.5,1567.98].forEach(f=>a.push(N(f,o+.5,.9,"tri",.13)));
+  [2093,2637,3136].forEach((f,i)=>a.push(N(f,o+.55+i*.07,.5,"sine",.08)));
+  return a;
+}
+function sparkleNotes(o){
+  const a=[],sc=[2093,2349,2637,3136,3520,4186];
+  for(let i=0;i<14;i++) a.push(N(sc[Math.floor(Math.random()*sc.length)],o+i*.07,.3,"sine",.06));
+  [523.25,659.25,783.99,1046.5].forEach(f=>a.push(N(f,o+.9,1,"tri",.1)));
+  return a;
+}
+function emptyNotes(o){return [[392,370],[349,330],[311,262]].map(([f,to],i)=>N(f,o+i*.32,i===2?.7:.3,"saw",.12,to));}
+const sndCache={};
+function snd(key){
+  if(sndCache[key]) return sndCache[key];
+  const R=1.9;
+  if(key==="cheer") sndCache[key]=renderWav(cheerNotes(false),1.1);
+  if(key==="cheer2") sndCache[key]=renderWav(cheerNotes(true),1.3);
+  const C=.9; // タップしてから開くまで
+  if(key==="win") sndCache[key]=renderWav(rollNotes(C).concat(winNotes(C),sparkleNotes(C+.35)),C+2.2);
+  if(key==="empty") sndCache[key]=renderWav(rollNotes(C).concat(emptyNotes(C)),C+1.4);
+  if(key==="drop") sndCache[key]=renderWav([N(1400,0,.5,"sine",.12,300),N(110,.5,.25,"sine",.5,60),{noise:1,at:.5,d:.12,vol:.12},N(180,.72,.15,"sine",.25,90)],1.1);
+  return sndCache[key];
+}
+function play(key){
+  if(state.sound===false) return;
+  try{const a=new Audio(snd(key));a.volume=1;const p=a.play();if(p&&p.catch)p.catch(()=>{});}catch(e){}
+}
+const SFX={cheer:extra=>play(extra?"cheer2":"cheer"),gachaWin:()=>play("win"),gachaEmpty:()=>play("empty"),drop:()=>play("drop")};
+// 先に作っておく（押した瞬間にすぐ鳴らすため）
+setTimeout(()=>{try{["cheer","cheer2","win","empty","drop"].forEach(snd);}catch(e){}},800);
 
 // ---------- ごほうび演出 ----------
 // 出てくるキャラ（追加したらここに1行足す → 毎回ランダムで1人出る）
@@ -734,7 +833,7 @@ function celebrate(from,to,n){
   const sub=gotTicket?"🎟 チケットゲット！":hit?"目標たっせい！":"記録しました";
   SFX.cheer(gotTicket||hit);
   box.innerHTML=`<div class="cheer-card"><div class="cheer-bubble">${ch?ch.line:"+"+yen(n)+" 記録しました"}<small>${ch?"+"+yen(n)+" "+sub:(gotTicket?"🎟 チケットゲット！":ticketsLeft()?"ガチャで仲間を呼ぼう":"")}</small></div>
-    ${ch?`<img class="cheer-face" src="${ch.img}" alt="">`:""}</div>`;
+    ${ch?`<img class="cheer-face" src="${ch.img}" alt="">`:""}<span class="cheer-close">タップでとじる</span></div>`;
   document.body.appendChild(box);
   if(!reduce){
     const colors=["#a9daf0","#28799b","#e4f5fb","#ffffff","#7fd0e8","#ffd6e0"];
@@ -748,8 +847,8 @@ function celebrate(from,to,n){
       document.body.appendChild(c);setTimeout(()=>c.remove(),3000);
     }
   }
-  setTimeout(()=>box.classList.add("out"),hit?2200:1500);
-  setTimeout(()=>box.remove(),hit?2600:1900);
+  // タップするまで出たままにする
+  box.addEventListener("click",()=>{if(box.classList.contains("out"))return;box.classList.add("out");setTimeout(()=>box.remove(),320);});
 }
 
 // ---------- ガチャ ----------
@@ -761,43 +860,54 @@ function drawChar(){
 function openGacha(){
   if(!ticketsLeft()) return;
   const ch=drawChar();
-  if(!ch){ showEmptyGacha(); return; }
-  const isNew=true;
-  state.ticketsUsed++; state.owned.push(ch.id); save();
-  const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
-  $("#sheetRoot").innerHTML=`<div class="gacha-scrim" id="gachaScrim" role="dialog" aria-label="ガチャ">
-    <div class="capsule${reduce?" opened":""}" id="capsule"><i class="cap-top"></i><i class="cap-bottom"></i></div>
-    <div class="reveal" id="reveal" ${reduce?"":"hidden"}>
-      <img src="${ch.img}" alt="">
-      <div class="reveal-name">${esc(ch.name)}</div>
-      <div class="reveal-msg">${isNew?"が仲間になった！":"がまた来てくれた！"}</div>
-      <p class="note" style="margin:6px 0 0;text-align:center">${isNew?"これから記録すると出てきてくれるよ":"もう仲間だよ"}</p>
-      <button class="btn" id="gachaClose" style="margin-top:14px">やったね</button>
-    </div></div>`;
-  SFX.roll(reduce?0:1.8);
-  if(!reduce){
-    setTimeout(()=>{$("#capsule")&&$("#capsule").classList.add("opened");flash();SFX.win();},1900);
-    setTimeout(()=>{const r=$("#reveal");if(r){r.hidden=false;confettiBurst(isNew?60:20);}},2150);
-  }else SFX.win();
+  if(ch){ state.ticketsUsed++; state.owned.push(ch.id); save(); }
+  runGacha(ch);
 }
 function flash(){
-  const f=document.createElement("div");f.className="flash";document.body.appendChild(f);setTimeout(()=>f.remove(),700);
+  const f=document.createElement("div");f.className="flash";document.body.appendChild(f);setTimeout(()=>f.remove(),800);
 }
-function showEmptyGacha(){
+// 豪華ガチャ演出：夜空 → カプセル落下 → タップ待ち → ためる → 爆発 → カードがくるっと表に
+function runGacha(ch){
   const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
-  $("#sheetRoot").innerHTML=`<div class="gacha-scrim" role="dialog" aria-label="ガチャ">
-    <div class="capsule${reduce?" opened":""}" id="capsule"><i class="cap-top"></i><i class="cap-bottom"></i></div>
-    <div class="reveal" id="reveal" ${reduce?"":"hidden"}>
-      <div class="empty-cap" aria-hidden="true">🫙</div>
-      <div class="reveal-msg" style="margin-top:8px;text-align:center">空っぽみたい…<br>ぽんさんに連絡しよう！</div>
-      <p class="note" style="margin:8px 0 0;text-align:center">チケットは減っていないよ</p>
-      <button class="btn" id="gachaClose" style="margin-top:14px">とじる</button>
-    </div></div>`;
-  SFX.roll(reduce?0:1.8);
-  if(!reduce){
-    setTimeout(()=>{$("#capsule")&&$("#capsule").classList.add("opened");SFX.empty();},1900);
-    setTimeout(()=>{const r=$("#reveal");if(r)r.hidden=false;},2100);
-  }else SFX.empty();
+  const no=ch?CHARACTERS.indexOf(ch)+1:0;
+  let stars="";for(let i=0;i<40;i++) stars+=`<i style="left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${(Math.random()*2).toFixed(2)}s;--s:${(Math.random()*2+1).toFixed(1)}px"></i>`;
+  const front=ch?`<div class="g-front">
+        <span class="g-new">NEW!</span>
+        <div class="g-photo"><img src="${ch.img}" alt=""><span class="g-sweep"></span></div>
+        <div class="g-name">${esc(ch.name)}</div>
+        <div class="g-msg">が仲間になった！</div>
+        <button class="btn" id="gachaClose" style="margin-top:12px">やったね</button>
+      </div>`:`<div class="g-front">
+        <div class="empty-cap" aria-hidden="true">🫙</div>
+        <div class="g-msg" style="margin-top:6px">空っぽみたい…<br>ぽんさんに連絡しよう！</div>
+        <p class="note" style="margin:6px 0 0;text-align:center">チケットは減っていないよ</p>
+        <button class="btn" id="gachaClose" style="margin-top:12px">とじる</button>
+      </div>`;
+  $("#sheetRoot").innerHTML=`<div class="g-stage${reduce?" s-reveal":" s-drop"}" id="gStage" role="dialog" aria-label="ガチャ">
+    <div class="g-stars">${stars}</div>
+    <div class="g-rays"></div>
+    <div class="g-cap" id="gCap" aria-label="カプセルをタップして開ける" role="button" tabindex="0">
+      <i class="cap-top"></i><i class="cap-bottom"></i><i class="cap-band"></i><span class="g-glint"></span>
+    </div>
+    <div class="g-hint">タップして開けよう！</div>
+    <div class="g-card"><div class="g-flip"><div class="g-back">？</div>${front}</div></div>
+  </div>`;
+  const stage=$("#gStage");
+  if(reduce){ if(ch) SFX.gachaWin(); else SFX.gachaEmpty(); return; }
+  SFX.drop();
+  let opened=false;
+  const wait=setTimeout(()=>stage.classList.replace("s-drop","s-wait"),900);
+  const open=()=>{
+    if(opened) return; opened=true; clearTimeout(wait);
+    stage.className="g-stage s-charge";
+    if(ch) SFX.gachaWin(); else SFX.gachaEmpty();       // タップの瞬間に鳴らす（iPhone対策）
+    setTimeout(()=>{stage.className="g-stage s-burst"+(ch?"":" is-empty");flash();},900);
+    setTimeout(()=>{stage.className="g-stage s-reveal"+(ch?"":" is-empty");if(ch) confettiBurst(70);},1250);
+  };
+  $("#gCap").addEventListener("click",open);
+  $("#gCap").addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" ")open();});
+  // 放っておいても5秒で自動で開く
+  setTimeout(()=>{if(!opened&&document.body.contains(stage)) open();},6000);
 }
 function confettiBurst(count){
   if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
