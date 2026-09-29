@@ -438,6 +438,26 @@ header.top{justify-content:space-between;align-items:center}
 @media (prefers-reduced-motion:no-preference){.h2-go{animation:goPulse 1.6s ease-in-out infinite}@keyframes goPulse{0%,100%{transform:none}50%{transform:scale(1.03)}}}
 header.top{padding-block:8px 10px!important}
 .h2-bar i{background:#1d6f9c!important}
+
+/* ホームカード：前のやわらかい水色の見た目に */
+.h2card{position:relative;overflow:hidden;border:0!important;border-radius:30px!important;background:linear-gradient(145deg,var(--hue-soft) 0%,var(--hue) 100%)!important;box-shadow:0 15px 30px rgba(47,111,143,.16)!important;padding:4px 0 16px}
+.h2card::before{content:"✦  ✿";position:absolute;right:24px;top:16px;color:rgba(255,255,255,.85);font-size:23px;letter-spacing:9px;transform:rotate(-9deg);z-index:0}
+.h2card::after{content:"";position:absolute;right:-45px;top:32px;width:178px;height:178px;border-radius:50%;border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.13);z-index:0}
+.h2card>*{position:relative;z-index:1}
+.h2-top{padding:20px 22px 6px!important}
+.h2-label{display:inline-block;border-radius:999px;padding:4px 12px!important;background:rgba(255,255,255,.65);font-size:12px!important;color:#23475b!important}
+.spk{display:none}
+.h2-total{font-size:clamp(48px,15vw,68px)!important;color:#23475b!important;margin-top:16px!important;letter-spacing:-.035em!important}
+.h2-today{background:rgba(255,255,255,.78)!important;color:#3e677b!important;font-size:13px!important;border-radius:17px!important;padding:8px 16px!important;margin-top:10px!important;box-shadow:0 3px 12px rgba(47,111,143,.05)}
+.h2-today b{color:#23475b!important;font-size:19px!important}
+.h2-band{width:calc(100% - 44px)!important;margin:12px 22px 0;border:0!important;border-radius:20px;background:rgba(255,255,255,.78)!important;color:#23475b!important;padding:12px 14px 10px!important;box-shadow:0 3px 12px rgba(47,111,143,.05)}
+.h2-band-top{font-size:15px!important;color:#23475b}
+.h2-band-top b{color:var(--hue-deep);font-size:20px!important}
+.h2-band-top svg path:first-of-type{fill:var(--hue)}
+.h2-bar{height:10px!important;border:0!important;background:var(--hue-soft)!important;margin-top:8px!important}
+.h2-bar i{background:linear-gradient(90deg,var(--hue-deep),#4fa3c4)!important}
+.h2-scale{color:#6f8796;font-size:11px!important}
+.h2-go{background:linear-gradient(120deg,var(--hue-deep),#4fa3c4)!important;color:#fff!important;border:0!important;border-radius:16px!important;box-shadow:0 6px 14px rgba(47,111,143,.22)!important;font-size:17px!important}
 </style>
 </head>
 <body>
@@ -464,7 +484,7 @@ header.top{padding-block:8px 10px!important}
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.10.01-7";
+const APP_VERSION="2026.10.01-8";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
