@@ -591,15 +591,55 @@ nav.tabs .in{grid-template-columns:repeat(5,1fr)!important;padding:6px 6px!impor
   .s-reveal .g-front{animation:frontGlow 2.4s 1s ease-in-out infinite}
   @keyframes frontGlow{0%,100%{box-shadow:0 24px 50px rgba(42,146,208,.28)}50%{box-shadow:0 24px 60px rgba(255,111,145,.45)}}
 }
+
+/* ===== 上の部分・本格アプリ風 ===== */
+.app{position:relative}
+html,body{overflow-x:hidden}
+.top-deco{position:absolute;left:calc(50% - 50vw);width:100vw;top:0;height:250px;z-index:-1;background:linear-gradient(170deg,#bfe7fa 0%,#dcf2fc 55%,#f6fcff 100%);pointer-events:none}
+.top-deco svg{position:absolute;left:0;bottom:-1px;width:100%;height:60px}
+header.top{padding-block:14px 14px!important}
+.page-title.is-greet{display:flex;flex-direction:column;gap:2px}
+.greet-date{font-family:var(--body);font-size:13px;font-weight:700;color:#4f7488;letter-spacing:.04em}
+.greet{font-family:var(--display);font-weight:900;font-size:25px;color:#2c4a5d;letter-spacing:.01em}
+.h2card{background:rgba(255,255,255,.72)!important;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.9)!important}
+.h2card::before,.h2card::after{display:none!important}
+.hx-row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.hx-main{min-width:0}
+.h2card .h2-label{background:var(--hue-soft)!important}
+.h2card .h2-total{font-size:clamp(38px,11.5vw,52px)!important;margin-top:10px!important;white-space:nowrap}
+.ring{position:relative;flex:none;width:96px;height:96px;border:0;background:none;padding:0}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:var(--hue-soft);stroke-width:10}
+.ring-fg{fill:none;stroke:url(#none);stroke:#2a92d0;stroke-width:10;stroke-linecap:round;transition:stroke-dasharray .8s}
+.ring-t{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}
+.ring-t b{font-family:var(--display);font-weight:900;font-size:24px;color:#2c4a5d}
+.ring-t b small{font-size:12px}
+.ring-t em{font-style:normal;font-size:11px;font-weight:700;color:#7a93a2}
+.goal-line{display:flex;justify-content:space-between;margin-top:8px;font-size:12px;font-weight:700;color:#7a93a2}
+.goal-line b{color:#2c4a5d;font-family:var(--display)}
+.week{margin-top:12px;background:#fff;border-radius:18px;padding:12px 14px 10px;box-shadow:0 3px 12px rgba(42,146,208,.06)}
+.week-top{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;font-weight:700;color:#7a93a2}
+.week-top b{font-family:var(--display);font-size:17px;color:var(--pink)}
+.week-bars{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;align-items:end;height:74px;margin-top:8px}
+.wb{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px}
+.wb i{display:block;width:100%;max-width:22px;border-radius:6px;background:#bfe3f5}
+.wb.today i{background:var(--pink)}
+.wb span{font-size:10px;font-weight:700;color:#9aaab4}
+.wb.today span{color:var(--pink)}
+@media (prefers-reduced-motion:no-preference){.wb i{animation:grow .6s ease-out both}.wb:nth-child(2) i{animation-delay:.04s}.wb:nth-child(3) i{animation-delay:.08s}.wb:nth-child(4) i{animation-delay:.12s}.wb:nth-child(5) i{animation-delay:.16s}.wb:nth-child(6) i{animation-delay:.2s}.wb:nth-child(7) i{animation-delay:.24s}
+  @keyframes grow{from{transform:scaleY(0);transform-origin:bottom}}}
+
+.greet-date{font-family:var(--display)!important;font-size:14px!important;letter-spacing:.08em!important}
+.greet{font-size:40px!important;line-height:1!important;letter-spacing:-.01em!important}
+.greet small{font-size:20px;margin-left:2px}
 </style>
 </head>
 <body>
 
 <div class="statusbar-cover" aria-hidden="true"></div>
-<div class="app">
+<div class="app"><div class="top-deco" aria-hidden="true"><svg viewBox="0 0 390 60" preserveAspectRatio="none"><path d="M0 30 C70 5 140 55 210 30 S330 10 390 28 V60 H0Z" fill="var(--bg-wave,#f6fcff)"/></svg></div>
   <header class="top">
     <h1 class="page-title" id="pageTitle"></h1>
-    <button class="avatar" id="avatarBtn" aria-label="設定を開く">ぴ</button>
   </header>
   <main id="view"></main>
 </div>
@@ -621,7 +661,7 @@ nav.tabs .in{grid-template-columns:repeat(5,1fr)!important;padding:6px 6px!impor
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.10.01-18";
+const APP_VERSION="2026.10.01-20";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -789,16 +829,25 @@ function renderHome(){
   $("#view").innerHTML=`
     <section class="h2card" aria-label="今月の節約">
       <div class="h2-top">
-        <div class="h2-label">${now.getMonth()+1}月の節約${state.name?"・"+esc(state.name)+"さん":""}<span class="spk"></span></div>
-        <div class="h2-total">${yen(sum(month))}</div>
-        <div class="h2-stats">
-          <div class="st st-today"><span>今日</span><b>+${yen(sum(today))}</b></div>
-          <div class="st st-last"><span>先月</span><b>${yen(sum(inMonth(mkey(new Date(now.getFullYear(),now.getMonth()-1,1)))))}</b></div>
+        ${(()=>{const ms=sum(month),g=goalOf(),pc=Math.min(100,Math.round(ms/g*100)),R=40,C=2*Math.PI*R;
+        return `<div class="hx-row">
+          <div class="hx-main">
+            <div class="h2-label">今月の節約</div>
+            <div class="h2-total">${yen(ms)}</div>
+          </div>
+          <button class="ring" data-go="settings" aria-label="今月の目標 ${yen(g)} の${pc}%（目標を変更）">
+            <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="${R}" class="ring-bg"/><circle cx="50" cy="50" r="${R}" class="ring-fg" stroke-dasharray="${(C*pc/100).toFixed(1)} ${C.toFixed(1)}"/></svg>
+            <span class="ring-t"><b>${pc}<small>%</small></b><em>目標</em></span>
+          </button>
         </div>
-        <button class="h2-goal${sum(month)>=goalOf()?" done":""}" data-go="settings" aria-label="今月の目標を変更">
-          <span class="h2-goal-top"><span>今月の目標 <b>${yen(goalOf())}</b></span><span>${sum(month)>=goalOf()?"達成！🎉":"あと "+yen(goalOf()-sum(month))}</span></span>
-          <span class="h2-goal-bar"><i style="width:${Math.min(100,Math.round(sum(month)/goalOf()*100))}%"></i></span>
-        </button>
+        <div class="goal-line"><span>目標 ${yen(g)}</span><b>${ms>=g?"達成！🎉":"あと "+yen(g-ms)}</b></div>`;})()}
+        ${(()=>{const days=[];for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(now.getDate()-i);days.push(d);}
+          const vals=days.map(d=>sum(state.records.filter(r=>new Date(r.at).toDateString()===d.toDateString())));
+          const mx=Math.max(1,...vals);
+          return `<div class="week">
+            <div class="week-top"><span>直近7日</span><span>今日 <b>+${yen(sum(today))}</b></span></div>
+            <div class="week-bars">${days.map((d,i)=>`<div class="wb${i===6?" today":""}"><i style="height:${vals[i]?Math.max(8,Math.round(vals[i]/mx*100)):4}%"></i><span>${i===6?"今日":"日月火水木金土"[d.getDay()]}</span></div>`).join("")}</div>
+          </div>`;})()}
       </div>
       <div class="h2-band">
         <div class="tk-row">
@@ -873,16 +922,6 @@ function renderSettings(){
     <div class="card stack">
       <div class="field"><label for="nameIn">ニックネーム</label><input id="nameIn" maxlength="20" placeholder="例：小ちゃん" value="${esc(state.name)}"></div>
       <div class="field"><label for="goalIn">今月の目標（円）</label><input id="goalIn" inputmode="numeric" maxlength="7" value="${goalOf()}"></div>
-      <div class="profile-picker">
-        <div class="profile-preview" id="profilePreview" aria-hidden="true">ぴ</div>
-        <div class="profile-controls">
-          <strong>プロフィール画像</strong>
-          <p class="note">選んだ写真を右上に表示します</p>
-          <label class="photo-pick" for="avatarFile">写真を選ぶ<input id="avatarFile" type="file" accept="image/*" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden"></label>
-          ${state.profileImage?'<button class="remove-photo" id="removeProfile">写真を削除</button>':''}
-        </div>
-      </div>
-      <div class="err" id="profileErr" aria-live="polite"></div>
     </div>
     <div class="sec-head"><h2>「どうやって？」を編集</h2></div>
     <div class="card stack">
@@ -911,7 +950,14 @@ function renderSettings(){
 
 function render(){
   const activeTab=tab;
-  $("#pageTitle").textContent={home:"ホーム",history:"履歴",zukan:"仲間たち",settings:"マイページ"}[tab]||"";
+  if(tab==="home"){
+    const d=new Date();
+    $("#pageTitle").innerHTML=`<span class="greet-date">${d.getFullYear()}</span><span class="greet">${d.getMonth()+1}<small>月</small></span>`;
+    $("#pageTitle").classList.add("is-greet");
+  }else{
+    $("#pageTitle").textContent={history:"履歴",zukan:"仲間たち",settings:"マイページ"}[tab]||"";
+    $("#pageTitle").classList.remove("is-greet");
+  }
   document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===activeTab?"page":"false"));
   if(tab==="home") renderHome(); else if(tab==="history") renderHistory(); else if(tab==="zukan") renderZukan(); else renderSettings();
   applyProfile();
