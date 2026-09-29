@@ -326,7 +326,7 @@ button.friend{border:0;background:none;padding:0;cursor:pointer}
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.09.30-2";
+const APP_VERSION="2026.09.30-3";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -578,7 +578,7 @@ function renderSettings(){
     </div>
     <div class="sec-head"><h2>リセット</h2></div>
     <div class="card stack">
-      <button class="btn danger" id="resetBtn">${confirmDel==="__all"?"もう一度押すと全記録を削除します":"すべての記録を削除"}</button>
+      <button class="btn danger" id="resetBtn">${confirmDel==="__all"?"もう一度押すと記録・なかま・チケットをすべて削除します":"すべてリセット"}</button>
     </div>
   `;
 }
@@ -805,7 +805,7 @@ document.addEventListener("click",e=>{
     }catch(err){msg.style.color="var(--danger)";msg.textContent="読み込めませんでした。「データをコピー」で出した文字列をそのまま貼り付けてください";}
     return;}
   if(t.closest("#resetBtn")){
-    if(confirmDel==="__all"){state.records=[];confirmDel=null;save();render();toast("すべて削除しました");}
+    if(confirmDel==="__all"){state.records=[];state.owned=[];state.ticketsUsed=0;confirmDel=null;save();render();toast("すべて削除しました");}
     else{confirmDel="__all";render();}
     return;}
   if((confirmDel||openId) && !t.closest(".sheet")){confirmDel=null;openId=null;render();}
