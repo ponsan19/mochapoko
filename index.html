@@ -386,6 +386,8 @@ button.friend{border:0;background:none;padding:0;cursor:pointer}
 }
 .tix-bar{display:block;width:120px;height:6px;border-radius:99px;background:var(--hue-soft);overflow:hidden;margin:4px 0 2px}
 .tix-bar i{display:block;height:100%;background:var(--hue-deep);border-radius:99px}
+header.top{justify-content:flex-end;padding-block:14px 10px}
+html,body{overflow-x:hidden}
 @media(max-width:360px){.app{padding-inline:15px}.logo{font-size:19px}.hero{padding-inline:18px}.stat{padding-inline:9px}}
 </style>
 </head>
@@ -394,7 +396,6 @@ button.friend{border:0;background:none;padding:0;cursor:pointer}
 <div class="statusbar-cover" aria-hidden="true"></div>
 <div class="app">
   <header class="top">
-    <div class="logo">ぴっちゃかお得帳</div>
     <button class="avatar" id="avatarBtn" aria-label="設定を開く">ぴ</button>
   </header>
   <main id="view"></main>
@@ -413,7 +414,7 @@ button.friend{border:0;background:none;padding:0;cursor:pointer}
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.09.30-8";
+const APP_VERSION="2026.09.30-9";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -830,9 +831,9 @@ function celebrate(from,to,n){
   const box=document.createElement("div");box.className="cheer";box.setAttribute("role","status");
   const ch=pickChar();
   const gotTicket=Math.floor(realTotal()/TICKET_YEN)>Math.floor((realTotal()-n)/TICKET_YEN);
-  const sub=gotTicket?"🎟 チケットゲット！":hit?"目標たっせい！":"記録しました";
+  const sub=gotTicket?" 🎟 チケットゲット！":hit?" 目標たっせい！":"";
   SFX.cheer(gotTicket||hit);
-  box.innerHTML=`<div class="cheer-card"><div class="cheer-bubble">${ch?ch.line:"+"+yen(n)+" 記録しました"}<small>${ch?"+"+yen(n)+" "+sub:(gotTicket?"🎟 チケットゲット！":ticketsLeft()?"ガチャで仲間を呼ぼう":"")}</small></div>
+  box.innerHTML=`<div class="cheer-card"><div class="cheer-bubble">${ch?ch.line:"+"+yen(n)}<small>${ch?"+"+yen(n)+sub:(gotTicket?"🎟 チケットゲット！":ticketsLeft()?"ガチャで仲間を呼ぼう":"")}</small></div>
     ${ch?`<img class="cheer-face" src="${ch.img}" alt="">`:""}<span class="cheer-close">タップでとじる</span></div>`;
   document.body.appendChild(box);
   if(!reduce){
