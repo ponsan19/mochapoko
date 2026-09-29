@@ -388,6 +388,29 @@ button.friend{border:0;background:none;padding:0;cursor:pointer}
 .tix-bar i{display:block;height:100%;background:var(--hue-deep);border-radius:99px}
 header.top{justify-content:flex-end;padding-block:14px 10px}
 html,body{overflow-x:hidden}
+header.top{justify-content:space-between;align-items:center}
+.page-title{margin:0;font-family:var(--display);font-weight:900;font-size:24px;color:var(--fg);letter-spacing:.02em}
+.count-big{font-family:var(--display);font-weight:900;font-size:22px;color:var(--hue-deep)}
+.count-big small{font-size:13px;color:var(--muted)}
+.h-total{border-radius:24px;padding:18px 20px;background:linear-gradient(145deg,var(--hue-soft),var(--hue));color:#23475b;display:flex;flex-direction:column;box-shadow:0 12px 26px rgba(47,111,143,.14)}
+.h-total span{font-size:13px;font-weight:700;opacity:.85}
+.h-total b{font-family:var(--display);font-weight:900;font-size:40px;line-height:1.15;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.h-month{display:flex;align-items:center;justify-content:space-between;margin:20px 0 10px}
+.h-month button{border:1px solid var(--line);background:var(--surface);border-radius:14px;width:42px;height:40px;box-shadow:var(--shadow);font-size:18px;color:var(--fg)}
+.h-month button:disabled{opacity:.3;box-shadow:none}
+.h-month-mid{display:flex;flex-direction:column;align-items:center;line-height:1.25}
+.h-month-mid span{font-size:13px;font-weight:700;color:var(--muted)}
+.h-month-mid b{font-family:var(--display);font-weight:900;font-size:24px;color:var(--hue-deep);font-variant-numeric:tabular-nums}
+.h-cats{margin-top:12px;padding:16px}
+.h-stack{display:flex;height:12px;border-radius:99px;overflow:hidden;gap:2px;background:var(--hue-soft)}
+.h-stack i{display:block;height:100%}
+.h-cats ul{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+.h-cats li{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700}
+.h-cats li b{margin-left:auto;font-family:var(--display);font-variant-numeric:tabular-nums}
+.h-cats li small{width:38px;text-align:right;color:var(--muted);font-weight:700}
+.h-cats .dot{width:10px;height:10px;border-radius:50%;flex:none}
+.day-head{display:flex;justify-content:space-between;align-items:baseline;margin:22px 4px 8px;font-size:14px;font-weight:700;color:var(--muted)}
+.day-head b{font-family:var(--display);font-size:15px;color:var(--hue-deep)}
 @media(max-width:360px){.app{padding-inline:15px}.logo{font-size:19px}.hero{padding-inline:18px}.stat{padding-inline:9px}}
 </style>
 </head>
@@ -396,6 +419,7 @@ html,body{overflow-x:hidden}
 <div class="statusbar-cover" aria-hidden="true"></div>
 <div class="app">
   <header class="top">
+    <h1 class="page-title" id="pageTitle"></h1>
     <button class="avatar" id="avatarBtn" aria-label="設定を開く">ぴ</button>
   </header>
   <main id="view"></main>
@@ -414,7 +438,7 @@ html,body{overflow-x:hidden}
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.09.30-9";
+const APP_VERSION="2026.09.30-10";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -483,6 +507,13 @@ const $=s=>document.querySelector(s);
 const yen=n=>"¥"+Math.round(n).toLocaleString("ja-JP");
 const mkey=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmtTime=iso=>{const d=new Date(iso);return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");};
+const WD="日月火水木金土";
+function fmtDay(d){const n=new Date(),y=new Date();y.setDate(n.getDate()-1);
+  const base=(d.getMonth()+1)+"月"+d.getDate()+"日（"+WD[d.getDay()]+"）";
+  if(d.toDateString()===n.toDateString()) return "今日 · "+base;
+  if(d.toDateString()===y.toDateString()) return "昨日 · "+base;
+  return base;}
 function fmtDate(iso){
   const d=new Date(iso),n=new Date();
   const hm=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
@@ -521,7 +552,7 @@ function toast(msg){
 // ---------- views ----------
 let tab="home", histMonth=null, confirmDel=null, openId=null;
 
-function itemHTML(r){
+function itemHTML(r,timeOnly){
   const c=catOf(r.cat);
   const armed=confirmDel===r.id;
   return `<div class="item${openId===r.id||armed?" open":""}" data-item="${r.id}">
@@ -529,7 +560,7 @@ function itemHTML(r){
     <div style="min-width:0">
       <strong class="t">${esc(r.title)}</strong>
       ${r.memo?`<div class="m">${esc(r.memo)}</div>`:""}
-      <div class="d">${fmtDate(r.at)}</div>
+      <div class="d">${timeOnly?fmtTime(r.at):fmtDate(r.at)}</div>
     </div>
     <div><div class="amt">+${yen(r.amount)}</div>
       <button class="del" data-del="${r.id}" ${armed?'style="color:var(--danger);font-weight:700"':''}>${armed?"本当に消す":"削除"}</button></div>
@@ -551,7 +582,7 @@ function renderZukan(){
       :`<div class="zk unknown"><div class="q">？</div><span class="no">No.${i+1}</span><b>？？？</b></div>`);
   }
   $("#view").innerHTML=`
-    <div class="sec-head" style="margin-top:8px"><h2>森の仲間たち <small class="count">${state.owned.length}／${SLOTS()}</small></h2><button class="link" data-go="home">‹ ホーム</button></div>
+    <div class="sec-head" style="margin-top:0"><span class="count-big">${state.owned.length}<small>／${SLOTS()}</small></span><button class="link" data-go="home">‹ ホーム</button></div>
     <div class="zukan">${cells.join("")}</div>
   `;
 }
@@ -598,45 +629,54 @@ function renderHome(){
   `;
 }
 
+const CAT_COLORS=["#28799b","#4fa3c4","#86c9e2","#b9e0f0","#5b8fa8","#9fb8c6"];
 function renderHistory(){
   const now=new Date();
   if(!histMonth) histMonth=mkey(now);
-  // last 6 months bars
-  const months=[];for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push(mkey(d));}
+  // グラフ：記録を付け始めた月から（最大6か月・最低3か月）
+  const firstAt=state.records.length?new Date(state.records.reduce((m,r)=>r.at<m?r.at:m,state.records[0].at)):now;
+  const diff=(now.getFullYear()-firstAt.getFullYear())*12+now.getMonth()-firstAt.getMonth();
+  const span=Math.min(6,Math.max(3,diff+1));
+  const months=[];for(let i=span-1;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push(mkey(d));}
   const vals=months.map(m=>sum(inMonth(m)));
   const max=Math.max(1,...vals);
-  const W=320,H=150,top=22,bottom=24,bw=30,gap=(W-bw*6)/6;
+  const W=320,H=104,top=18,bottom=22,bw=Math.min(40,W/span*.5),gap=(W-bw*span)/span;
   const bars=months.map((m,i)=>{
-    const h=Math.round((H-top-bottom)*vals[i]/max), x=gap/2+i*(bw+gap), y=H-bottom-h;
+    const h=Math.round((H-top-bottom)*vals[i]/max), x=gap/2+i*(bw+gap), yy=H-bottom-h;
     const sel=m===histMonth;
     return `<g>
-      <rect x="${x}" y="${y}" width="${bw}" height="${Math.max(h,2)}" rx="6" fill="${sel?"var(--hue-deep)":"var(--hue)"}"/>
-      ${vals[i]?`<text x="${x+bw/2}" y="${y-6}" text-anchor="middle" font-size="10" fill="var(--muted)" style="font-variant-numeric:tabular-nums">${vals[i]>=10000?(vals[i]/10000).toFixed(1)+"万":vals[i].toLocaleString()}</text>`:""}
-      <text x="${x+bw/2}" y="${H-6}" text-anchor="middle" font-size="11" fill="${sel?"var(--fg)":"var(--muted)"}" font-weight="${sel?700:400}">${Number(m.slice(5))}月</text>
+      <rect x="${x}" y="${yy}" width="${bw}" height="${Math.max(h,2)}" rx="6" fill="${sel?"var(--hue-deep)":"var(--hue)"}"/>
+      ${vals[i]?`<text x="${x+bw/2}" y="${yy-5}" text-anchor="middle" font-size="10" fill="var(--muted)" style="font-variant-numeric:tabular-nums">${vals[i]>=10000?(vals[i]/10000).toFixed(1)+"万":vals[i].toLocaleString()}</text>`:""}
+      <text x="${x+bw/2}" y="${H-5}" text-anchor="middle" font-size="11" fill="${sel?"var(--fg)":"var(--muted)"}" font-weight="${sel?700:400}">${Number(m.slice(5))}月</text>
       <rect x="${x-gap/2}" y="0" width="${bw+gap}" height="${H}" fill="transparent" data-month="${m}" style="cursor:pointer"/>
     </g>`;}).join("");
   const [y,mo]=histMonth.split("-").map(Number);
   const list=inMonth(histMonth).sort((a,b)=>b.at.localeCompare(a.at));
-  const catTotals=[...new Set(list.map(r=>r.cat))].map(id=>({c:catOf(id),v:sum(list.filter(r=>r.cat===id))})).sort((a,b)=>b.v-a.v);
+  const mTotal=sum(list);
+  const cats=[...new Set(list.map(r=>r.cat))].map(id=>({c:catOf(id),v:sum(list.filter(r=>r.cat===id))})).sort((a,b)=>b.v-a.v).map((x,i)=>({...x,color:CAT_COLORS[i%CAT_COLORS.length]}));
+  // 日ごとにまとめる
+  const days=[];for(const r of list){const k=new Date(r.at).toDateString();let g=days.find(d=>d.k===k);if(!g){g={k,d:new Date(r.at),rs:[]};days.push(g);}g.rs.push(r);}
   $("#view").innerHTML=`
-    <div class="sec-head" style="margin-top:8px"><h2>この半年</h2></div>
-    <div class="bars"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="直近6か月の節約額">${bars}</svg></div>
-    <div class="pager">
+    <section class="h-total">
+      <span>これまでの合計</span>
+      <b>${yen(sum(state.records))}</b>
+    </section>
+    <div class="h-month">
       <button id="prevM" aria-label="前の月">‹</button>
-      <div><div class="mt" style="text-align:center">${y}年${mo}月 <span style="color:var(--plus)">${yen(sum(list))}</span></div>
-</div>
-      <button id="nextM" aria-label="次の月" ${histMonth>=mkey(now)?"disabled style='opacity:.35'":""}>›</button>
+      <div class="h-month-mid"><span>${y}年${mo}月</span><b>${yen(mTotal)}</b></div>
+      <button id="nextM" aria-label="次の月" ${histMonth>=mkey(now)?"disabled":""}>›</button>
     </div>
-    ${catTotals.length?`<div class="chips" style="margin-top:12px">${catTotals.map(x=>`<span class="chip">${catIcon(x.c.id)}${esc(x.c.label)} <b style="font-variant-numeric:tabular-nums">${yen(x.v)}</b></span>`).join("")}</div>`:""}
-    <div class="list" style="margin-top:12px">${list.length?list.map(itemHTML).join(""):`<div class="empty">この月の記録はありません</div>`}</div>
-    <div class="sec-head"><h2>ぜんぶの合計</h2></div>
-    <div class="card" style="display:flex;justify-content:space-between;align-items:baseline"><span>これまでに節約した金額</span><b style="font-family:var(--display);font-size:22px;color:var(--plus);font-variant-numeric:tabular-nums">${yen(sum(state.records))}</b></div>
+    <div class="bars"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="月ごとの節約額">${bars}</svg></div>
+    ${cats.length?`<div class="card h-cats">
+      <div class="h-stack">${cats.map(x=>`<i style="width:${(x.v/mTotal*100).toFixed(2)}%;background:${x.color}"></i>`).join("")}</div>
+      <ul>${cats.map(x=>`<li><span class="dot" style="background:${x.color}"></span>${esc(x.c.label)}<b>${yen(x.v)}</b><small>${Math.round(x.v/mTotal*100)}%</small></li>`).join("")}</ul>
+    </div>`:""}
+    ${days.length?days.map(g=>`<div class="day-head"><span>${fmtDay(g.d)}</span><b>+${yen(sum(g.rs))}</b></div>
+      <div class="list">${g.rs.map(r=>itemHTML(r,true)).join("")}</div>`).join(""):`<div class="list" style="margin-top:14px"><div class="empty">この月の記録はありません</div></div>`}
   `;
 }
-
 function renderSettings(){
   $("#view").innerHTML=`
-    <div class="sec-head" style="margin-top:8px"><h2>マイページ</h2></div>
     <div class="card stack">
       <div class="field"><label for="nameIn">ニックネーム</label><input id="nameIn" maxlength="20" placeholder="例：小ちゃん" value="${esc(state.name)}"></div>
       <div class="field"><label for="goalIn">今月の目標（円）</label><input id="goalIn" inputmode="numeric" maxlength="7" value="${goalOf()}"></div>
@@ -678,6 +718,7 @@ function renderSettings(){
 
 function render(){
   const activeTab=tab==="zukan"?"home":tab;
+  $("#pageTitle").textContent={history:"履歴",zukan:"森の仲間たち",settings:"マイページ"}[tab]||"";
   document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===activeTab?"page":"false"));
   if(tab==="home") renderHome(); else if(tab==="history") renderHistory(); else if(tab==="zukan") renderZukan(); else renderSettings();
   applyProfile();
