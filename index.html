@@ -634,6 +634,8 @@ header.top{padding-block:14px 14px!important}
 .greet small{font-size:20px;margin-left:2px}
 
 .h2-band.in-friends{width:auto!important;margin:14px 0 0!important;padding:14px 0 0!important;border-radius:0!important;border-top:1px solid var(--line)!important;background:none!important;box-shadow:none!important}
+.empty.quiet{padding:22px 8px!important}
+.empty.quiet::before{content:none!important}
 </style>
 </head>
 <body>
@@ -663,7 +665,7 @@ header.top{padding-block:14px 14px!important}
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.10.01-21";
+const APP_VERSION="2026.10.01-22";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -704,7 +706,8 @@ function sampleRecords(){
   mk(62,13,"セールで買った","定価との差額",1200,"waribiki");
   return r;
 }
-let state=load()||{name:"",records:sampleRecords(),v:1};
+let state=load()||{name:"",records:[],v:1};
+state.records=(state.records||[]).filter(r=>!r.sample);
 if(!Array.isArray(state.categories)) state.categories=DEFAULT_CATS.map(c=>({...c}));
 if(!state.categoryArchive||typeof state.categoryArchive!=="object") state.categoryArchive={};
 if(!state.categoryIconMap||typeof state.categoryIconMap!=="object") state.categoryIconMap={};
@@ -838,7 +841,7 @@ function renderHome(){
             <div class="h2-total">${yen(ms)}</div>
           </div>
           <button class="ring" data-go="settings" aria-label="今月の目標 ${yen(g)} の${pc}%（目標を変更）">
-            <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="${R}" class="ring-bg"/><circle cx="50" cy="50" r="${R}" class="ring-fg" stroke-dasharray="${(C*pc/100).toFixed(1)} ${C.toFixed(1)}"/></svg>
+            <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="${R}" class="ring-bg"/>${pc?`<circle cx="50" cy="50" r="${R}" class="ring-fg" stroke-dasharray="${(C*pc/100).toFixed(1)} ${C.toFixed(1)}"/>`:""}</svg>
             <span class="ring-t"><b>${pc}<small>%</small></b><em>目標</em></span>
           </button>
         </div>
@@ -857,7 +860,7 @@ function renderHome(){
     <section class="gacha-card">
       <div class="new3">${(()=>{const own=state.owned.slice(-3).reverse().map(charById).filter(Boolean);
         const cells=own.map(c=>`<button class="nf" data-char="${c.id}"><span class="nf-img"><img src="${c.img}" alt=""><em>NEW</em></span><b>${esc(c.name)}</b></button>`);
-        while(cells.length<3) cells.push(`<div class="nf empty"><span class="nf-img"><span class="q">？</span></span><b>${cells.length===0?"ガチャで会おう":"？？？"}</b></div>`);
+        while(cells.length<3) cells.push(`<div class="nf empty"><span class="nf-img"><span class="q">？</span></span><b>？？？</b></div>`);
         return cells.join("");})()}</div>
       <div class="h2-band in-friends">
         <div class="tk-row">
@@ -868,8 +871,8 @@ function renderHome(){
         <button class="h2-go" id="gachaBtn" ${ticketsLeft()?"":"disabled"}>ガチャを引く ›</button>
       </div>
     </section>
-    <div class="sec-head"><h2>最近の記録</h2><button class="link" data-go="history">月別の履歴 ›</button></div>
-    <div class="list">${recent.length?recent.map(itemHTML).join(""):`<div class="empty">まだ記録がありません。<br>下の「＋ 記録する」から、我慢できたことや割引で浮いた金額を記録しましょう。</div>`}</div>
+    <div class="sec-head"><h2>最近の記録</h2></div>
+    <div class="list">${recent.length?recent.map(itemHTML).join(""):`<div class="empty quiet">まだ記録はありません</div>`}</div>
   `;
 }
 
