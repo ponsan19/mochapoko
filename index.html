@@ -632,6 +632,8 @@ header.top{padding-block:14px 14px!important}
 .greet-date{font-family:var(--display)!important;font-size:14px!important;letter-spacing:.08em!important}
 .greet{font-size:40px!important;line-height:1!important;letter-spacing:-.01em!important}
 .greet small{font-size:20px;margin-left:2px}
+
+.h2-band.in-friends{width:auto!important;margin:14px 0 0!important;padding:14px 0 0!important;border-radius:0!important;border-top:1px solid var(--line)!important;background:none!important;box-shadow:none!important}
 </style>
 </head>
 <body>
@@ -661,7 +663,7 @@ header.top{padding-block:14px 14px!important}
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.10.01-20";
+const APP_VERSION="2026.10.01-21";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -849,14 +851,6 @@ function renderHome(){
             <div class="week-bars">${days.map((d,i)=>`<div class="wb${i===6?" today":""}"><i style="height:${vals[i]?Math.max(8,Math.round(vals[i]/mx*100)):4}%"></i><span>${i===6?"今日":"日月火水木金土"[d.getDay()]}</span></div>`).join("")}</div>
           </div>`;})()}
       </div>
-      <div class="h2-band">
-        <div class="tk-row">
-          <span class="tk-count"><svg width="26" height="20" viewBox="0 0 50 38" aria-hidden="true"><path d="M5 4h40a3 3 0 0 1 3 3v7a5 5 0 0 0 0 10v7a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3v-7a5 5 0 0 0 0-10V7a3 3 0 0 1 3-3z" fill="var(--pink)"/><line x1="17" y1="9" x2="17" y2="29" stroke="#fff" stroke-width="2.4" stroke-dasharray="3 3"/></svg>チケット <b>${ticketsLeft()}</b>枚</span>
-          <span class="tk-next">あと<b>${yen(toNextTicket())}</b>で+1枚</span>
-        </div>
-        <span class="h2-bar"><i style="width:${Math.round((TICKET_YEN-toNextTicket())/TICKET_YEN*100)}%"></i></span>
-        <button class="h2-go" id="gachaBtn" ${ticketsLeft()?"":"disabled"}>ガチャを引く ›</button>
-      </div>
     </section>
     ${hasSample()?`<div class="sample"><span>いま表示しているのはサンプルです。最初の記録を追加すると自動で消えます。</span><button id="clearSample">今すぐ消す</button></div>`:""}
     <div class="sec-head"><h2>新しい仲間</h2></div>
@@ -865,6 +859,14 @@ function renderHome(){
         const cells=own.map(c=>`<button class="nf" data-char="${c.id}"><span class="nf-img"><img src="${c.img}" alt=""><em>NEW</em></span><b>${esc(c.name)}</b></button>`);
         while(cells.length<3) cells.push(`<div class="nf empty"><span class="nf-img"><span class="q">？</span></span><b>${cells.length===0?"ガチャで会おう":"？？？"}</b></div>`);
         return cells.join("");})()}</div>
+      <div class="h2-band in-friends">
+        <div class="tk-row">
+          <span class="tk-count"><svg width="26" height="20" viewBox="0 0 50 38" aria-hidden="true"><path d="M5 4h40a3 3 0 0 1 3 3v7a5 5 0 0 0 0 10v7a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3v-7a5 5 0 0 0 0-10V7a3 3 0 0 1 3-3z" fill="var(--pink)"/><line x1="17" y1="9" x2="17" y2="29" stroke="#fff" stroke-width="2.4" stroke-dasharray="3 3"/></svg>チケット <b>${ticketsLeft()}</b>枚</span>
+          <span class="tk-next">あと<b>${yen(toNextTicket())}</b>で+1枚</span>
+        </div>
+        <span class="h2-bar"><i style="width:${Math.round((TICKET_YEN-toNextTicket())/TICKET_YEN*100)}%"></i></span>
+        <button class="h2-go" id="gachaBtn" ${ticketsLeft()?"":"disabled"}>ガチャを引く ›</button>
+      </div>
     </section>
     <div class="sec-head"><h2>最近の記録</h2><button class="link" data-go="history">月別の履歴 ›</button></div>
     <div class="list">${recent.length?recent.map(itemHTML).join(""):`<div class="empty">まだ記録がありません。<br>下の「＋ 記録する」から、我慢できたことや割引で浮いた金額を記録しましょう。</div>`}</div>
