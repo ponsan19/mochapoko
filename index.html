@@ -430,6 +430,14 @@ header.top{justify-content:space-between;align-items:center}
 .h2-bar i{display:block;height:100%;background:var(--hue);border-radius:99px}
 .h2-scale{display:flex;justify-content:space-between;margin-top:4px;font-size:12px;font-weight:700}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .h2-today b{color:var(--plus)}}
+
+/* ホームカードの調整 */
+.h2-band{background:linear-gradient(120deg,#3fa3d4,#2b8cc4)!important}
+.h2-today{display:inline-flex!important;gap:12px!important;padding:6px 16px!important}
+.h2-go{display:block;margin-top:10px;background:#fff;color:#1d6f9c;border:2px solid var(--fg);border-radius:999px;text-align:center;font-family:var(--display);font-weight:900;font-size:18px;padding:9px 0;box-shadow:0 4px 0 rgba(0,0,0,.18)}
+@media (prefers-reduced-motion:no-preference){.h2-go{animation:goPulse 1.6s ease-in-out infinite}@keyframes goPulse{0%,100%{transform:none}50%{transform:scale(1.03)}}}
+header.top{padding-block:8px 10px!important}
+.h2-bar i{background:#1d6f9c!important}
 </style>
 </head>
 <body>
@@ -456,7 +464,7 @@ header.top{justify-content:space-between;align-items:center}
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.10.01-5";
+const APP_VERSION="2026.10.01-7";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -631,12 +639,12 @@ function renderHome(){
       <button class="h2-band" id="${ticketsLeft()?"gachaBtn":"bandInfo"}">
         <span class="h2-band-top"><span>${ticketsLeft()?`チケット <b>${ticketsLeft()}</b>枚！ガチャを引こう`:`あと <b>${yen(toNextTicket())}</b> でガチャ！`}</span>
           <svg width="30" height="30" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="15" fill="#fff" stroke="#21394a" stroke-width="2.4"/><path d="M5 20a15 15 0 0 1 30 0z" fill="#a9daf0" stroke="#21394a" stroke-width="2.4"/><path d="M11 13a9 9 0 0 1 7-4" stroke="#fff" stroke-width="2.4" stroke-linecap="round" fill="none"/></svg></span>
-        <span class="h2-bar"><i style="width:${ticketsLeft()?100:Math.round((TICKET_YEN-toNextTicket())/TICKET_YEN*100)}%"></i></span>
+        ${ticketsLeft()?`<span class="h2-go">ガチャを引く ›</span>`:`<span class="h2-bar"><i style="width:${Math.round((TICKET_YEN-toNextTicket())/TICKET_YEN*100)}%"></i></span>`}
         ${ticketsLeft()?"":`<span class="h2-scale"><span>${yen(realTotal())}</span><span>${yen(realTotal()+toNextTicket())}</span></span>`}
       </button>
     </section>
     ${hasSample()?`<div class="sample"><span>いま表示しているのはサンプルです。最初の記録を追加すると自動で消えます。</span><button id="clearSample">今すぐ消す</button></div>`:""}
-    <div class="sec-head"><h2>森の仲間たち <small class="count">${state.owned.length}／${SLOTS()}</small></h2><button class="link" data-go="zukan">一覧を見る ›</button></div>
+    <div class="sec-head"><h2>仲間たち <small class="count">${state.owned.length}／${SLOTS()}</small></h2><button class="link" data-go="zukan">一覧を見る ›</button></div>
     <section class="gacha-card">
       <div class="friends">${state.owned.length
         ?state.owned.slice(-3).reverse().map(charById).filter(Boolean).map(c=>`<button class="friend" data-char="${c.id}"><img src="${c.img}" alt=""><span>${esc(c.name)}</span></button>`).join("")
@@ -697,7 +705,6 @@ function renderSettings(){
   $("#view").innerHTML=`
     <div class="card stack">
       <div class="field"><label for="nameIn">ニックネーム</label><input id="nameIn" maxlength="20" placeholder="例：小ちゃん" value="${esc(state.name)}"></div>
-      <div class="field"><label for="goalIn">今月の目標（円）</label><input id="goalIn" inputmode="numeric" maxlength="7" value="${goalOf()}"></div>
       <div class="profile-picker">
         <div class="profile-preview" id="profilePreview" aria-hidden="true">ぴ</div>
         <div class="profile-controls">
@@ -736,7 +743,7 @@ function renderSettings(){
 
 function render(){
   const activeTab=tab==="zukan"?"home":tab;
-  $("#pageTitle").textContent={history:"履歴",zukan:"森の仲間たち",settings:"マイページ"}[tab]||"";
+  $("#pageTitle").textContent={home:"ホーム",history:"履歴",zukan:"仲間たち",settings:"マイページ"}[tab]||"";
   document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===activeTab?"page":"false"));
   if(tab==="home") renderHome(); else if(tab==="history") renderHistory(); else if(tab==="zukan") renderZukan(); else renderSettings();
   applyProfile();
