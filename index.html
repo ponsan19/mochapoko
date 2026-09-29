@@ -20,8 +20,8 @@
   --hue-bg:#eef4f7; --hue:#7fb3cf; --hue-deep:#2f6f8f; --hue-soft:#d7e8f1;
   --bg:#f6f8f9; --surface:#ffffff; --fg:#23313a; --muted:#6f7f89; --line:#e2e8ec;
   --plus:#d9722b; --danger:#c2453b;
-  --display:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Noto Sans JP",sans-serif;
-  --body:"Noto Sans JP","Hiragino Sans",system-ui,sans-serif;
+  --display:"Zen Maru Gothic","Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+  --body:"Noto Sans JP","Hiragino Sans","Hiragino Kaku Gothic ProN",system-ui,sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#141a1e; --surface:#1d252a; --fg:#e6edf1; --muted:#95a5ae; --line:#2c373e;
@@ -255,6 +255,8 @@ nav.tabs .in{padding:9px 10px;grid-template-columns:1fr 1.45fr 1fr;border:1px so
   @keyframes bump{40%{transform:scale(1.06)}}
 }
 @media (prefers-reduced-motion:reduce){.confetti{display:none}.cheer.out{opacity:0;transition:opacity .3s}}
+body{font-weight:500}
+.note,.item .m,.item .d,.stat,.chip,.empty,.pager .ms,.field input,.field textarea{font-weight:500}
 @media(max-width:360px){.app{padding-inline:15px}.logo{font-size:19px}.hero{padding-inline:18px}.stat{padding-inline:9px}}
 </style>
 </head>
@@ -271,7 +273,7 @@ nav.tabs .in{padding:9px 10px;grid-template-columns:1fr 1.45fr 1fr;border:1px so
 <nav class="tabs"><div class="in">
   <button class="tab" data-tab="home" aria-current="page">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>ホーム</button>
-  <button class="addbtn" id="addBtn">＋ 節約！</button>
+  <button class="addbtn" id="addBtn">＋ 記録する</button>
   <button class="tab" data-tab="history">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>履歴</button>
 </div></nav>
@@ -286,7 +288,7 @@ const DEFAULT_CATS=[
   {id:"gaman",label:"がまんした",iconIndex:0},
   {id:"waribiki",label:"割引・クーポン",iconIndex:1},
   {id:"jisui",label:"自炊した",iconIndex:2},
-  {id:"aruki",label:"歩いた・自転車",iconIndex:3},
+  {id:"aruki",label:"歩いた",iconIndex:3},
   {id:"mizu",label:"水筒・持参",iconIndex:4},
   {id:"other",label:"その他",iconIndex:5}
 ];
@@ -334,7 +336,8 @@ state.categories=state.categories.map(c=>{
 for(const c of state.categories.slice(MAX_CATS)){state.categoryArchive[c.id]=c.label;state.categoryIconMap[c.id]=c.iconIndex;}
 state.categories=state.categories.slice(0,MAX_CATS);
 if(!state.categories.length) state.categories=[{...DEFAULT_CATS[5]}];
-for(const c of state.categories) state.categoryIconMap[c.id]=c.iconIndex;
+for(const c of state.categories){state.categoryIconMap[c.id]=c.iconIndex;if(c.id==="aruki"&&c.label==="歩いた・自転車")c.label="歩いた";}
+if(state.categoryArchive.aruki==="歩いた・自転車")state.categoryArchive.aruki="歩いた";
 for(const c of DEFAULT_CATS) if(state.categoryIconMap[c.id]===undefined) state.categoryIconMap[c.id]=c.iconIndex;
 save();
 
@@ -401,7 +404,7 @@ function renderHome(){
     <section class="hero" aria-label="今月の合計">
       <div class="label">${now.getMonth()+1}月${state.name?"・"+esc(state.name)+"さん":""}</div>
       <div class="total">${yen(sum(month))}</div>
-      <div class="sub">節約！</div>
+      <div class="sub">節約したよ！</div>
       <button class="goal${sum(month)>=goalOf()?" done":""}" data-go="settings" aria-label="今月の目標を変更">
         <div class="goal-top"><span>今月の目標 ${yen(goalOf())}</span><b>${sum(month)>=goalOf()?"達成！🎉":"あと "+yen(goalOf()-sum(month))}</b></div>
         <div class="goal-bar"><i style="width:${Math.min(100,Math.round(sum(month)/goalOf()*100))}%"></i></div>
@@ -412,7 +415,7 @@ function renderHome(){
     </section>
     ${hasSample()?`<div class="sample"><span>いま表示しているのはサンプルです。最初の記録を追加すると自動で消えます。</span><button id="clearSample">今すぐ消す</button></div>`:""}
     <div class="sec-head"><h2>最近の記録</h2><button class="link" data-go="history">月別の履歴 ›</button></div>
-    <div class="list">${recent.length?recent.map(itemHTML).join(""):`<div class="empty">まだ記録がありません。<br>下の「＋ 節約！」から、我慢できたことや割引で浮いた金額を記録しましょう。</div>`}</div>
+    <div class="list">${recent.length?recent.map(itemHTML).join(""):`<div class="empty">まだ記録がありません。<br>下の「＋ 記録する」から、我慢できたことや割引で浮いた金額を記録しましょう。</div>`}</div>
     ${state.records.length>8?`<p class="note" style="text-align:center">すべての記録は「履歴」から見られます</p>`:""}
   `;
 }
