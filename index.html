@@ -115,7 +115,7 @@ header.top{display:flex;align-items:center;justify-content:space-between;padding
 nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);z-index:10}
 nav.tabs .in{max-width:480px;margin:0 auto;display:grid;grid-template-columns:1fr 1.3fr 1fr;align-items:center;padding:8px 16px}
 .tab{border:0;background:none;display:flex;flex-direction:column;align-items:center;font-size:11px;color:var(--muted);gap:2px}
-.tab[aria-current="page"]{color:var(--hue-deep);font-weight:700}
+.tab[aria-current="page"]{color:var(--hue-deep);font-weight:900}
 .tab svg{width:22px;height:22px}
 .addbtn{border:0;border-radius:999px;background:var(--hue);color:#16323f;font-family:var(--display);font-weight:900;font-size:16px;padding:12px 0;box-shadow:0 4px 14px rgba(0,0,0,.12)}
 
@@ -283,9 +283,13 @@ body{font-weight:500}
 .empty-cap{font-size:64px;line-height:1.2}
 .reveal-msg{font-family:var(--display);font-weight:900;font-size:17px;color:var(--fg)}
 @media (prefers-reduced-motion:no-preference){
-  .capsule{animation:shake 1.3s ease-in-out}
+  .capsule{animation:shake 1.9s cubic-bezier(.45,0,.55,1) both}
+  .capsule::after{content:"";position:absolute;inset:0;border-radius:50%;box-shadow:0 0 0 0 rgba(169,218,240,.9);animation:glow 1.9s ease-in forwards;pointer-events:none}
+  .flash{position:fixed;inset:0;z-index:55;pointer-events:none;background:radial-gradient(circle,#fff 0%,rgba(255,255,255,.85) 35%,rgba(255,255,255,0) 70%);animation:flash .6s ease-out forwards}
+  @keyframes glow{0%{box-shadow:0 0 0 0 rgba(169,218,240,0)}80%{box-shadow:0 0 40px 18px rgba(169,218,240,.9)}100%{box-shadow:0 0 70px 30px rgba(255,255,255,1)}}
+  @keyframes flash{from{opacity:1;transform:scale(.6)}to{opacity:0;transform:scale(1.6)}}
   .reveal{animation:pop .5s cubic-bezier(.2,1.4,.4,1) both}
-  @keyframes shake{0%,100%{transform:none}10%,50%{transform:rotate(-12deg)}30%,70%{transform:rotate(12deg)}85%{transform:scale(1.12)}}
+  @keyframes shake{0%{transform:none}8%{transform:rotate(-6deg)}16%{transform:rotate(6deg)}26%{transform:rotate(-9deg)}36%{transform:rotate(9deg)}44%{transform:rotate(-12deg)}52%{transform:rotate(12deg)}58%{transform:rotate(-15deg)}64%{transform:rotate(15deg)}70%{transform:rotate(-18deg) scale(1.04)}76%{transform:rotate(18deg) scale(1.06)}82%{transform:rotate(-10deg) scale(1.1)}88%{transform:rotate(10deg) scale(1.14)}94%,100%{transform:scale(1.22)}}
 }
 .update-bar{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:70;display:flex;align-items:center;gap:12px;width:max-content;max-width:calc(100vw - 32px);background:var(--hue-deep);color:#fff;border-radius:999px;padding:8px 8px 8px 16px;font-size:14px;font-weight:700;box-shadow:0 10px 24px rgba(47,111,143,.3)}
 .update-bar button{border:0;border-radius:999px;background:#fff;color:var(--hue-deep);font-weight:900;padding:7px 14px;min-height:36px}
@@ -300,11 +304,22 @@ button.friend{border:0;background:none;padding:0;cursor:pointer}
 .zk b{font-size:13px;font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .zk.unknown b{color:var(--muted)}
 .char-line{margin-top:6px;font-family:var(--display);font-weight:900;font-size:17px;color:var(--fg);text-align:center}
+.tab{border-radius:18px;transition:background .2s}
+.tab[aria-current="page"]{background:var(--hue-soft);font-weight:900}
+.tab[aria-current="page"] svg{stroke-width:2.4}
+/* ステータスバー（時計・電池）の裏に文字が入り込まないようにする */
+.statusbar-cover{position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:25;pointer-events:none}
+.sound-row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.switch{border:0;border-radius:999px;width:56px;height:32px;background:var(--line);position:relative;flex:none}
+.switch::after{content:"";position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.15);transition:transform .2s}
+.switch[aria-checked="true"]{background:var(--hue-deep)}
+.switch[aria-checked="true"]::after{transform:translateX(24px)}
 @media(max-width:360px){.app{padding-inline:15px}.logo{font-size:19px}.hero{padding-inline:18px}.stat{padding-inline:9px}}
 </style>
 </head>
 <body>
 
+<div class="statusbar-cover" aria-hidden="true"></div>
 <div class="app">
   <header class="top">
     <div class="logo">ぴっちゃかお得帳<small>PICCHAKA</small></div>
@@ -326,7 +341,7 @@ button.friend{border:0;background:none;padding:0;cursor:pointer}
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.09.30-4";
+const APP_VERSION="2026.09.30-5";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -571,6 +586,9 @@ function renderSettings(){
       <div class="cat-edit-row"><input id="newCatName" maxlength="18" placeholder="新しい選択肢" aria-label="新しい選択肢" ${activeCats().length>=MAX_CATS?"disabled":""}><button id="addCatBtn" ${activeCats().length>=MAX_CATS?"disabled":""}>追加</button></div>
       <div class="err" id="catMsg" aria-live="polite"></div>
     </div>
+    <div class="sec-head"><h2>効果音</h2></div>
+    <div class="card sound-row"><span>記録やガチャのときに音を鳴らす<br><span class="note">マナーモード中は鳴らないことがあります</span></span>
+      <button class="switch" id="soundToggle" role="switch" aria-checked="${state.sound!==false}" aria-label="効果音"></button></div>
     <div class="sec-head"><h2>データの引っ越し</h2></div>
     <div class="card stack">
       <p class="note" style="margin:0">記録はこの端末のこのブラウザだけに保存されています。機種変更や、あとで共有版に移すときは、下のボタンでデータをコピーして、移行先に貼り付けてください。</p>
@@ -587,7 +605,8 @@ function renderSettings(){
 }
 
 function render(){
-  document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===tab?"page":"false"));
+  const activeTab=tab==="zukan"?"home":tab;
+  document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===activeTab?"page":"false"));
   if(tab==="home") renderHome(); else if(tab==="history") renderHistory(); else if(tab==="zukan") renderZukan(); else renderSettings();
   applyProfile();
 }
@@ -637,6 +656,56 @@ function openSheet(){
   });
 }
 
+// ---------- 効果音（音声ファイルなしでその場で鳴らす） ----------
+let actx=null;
+function ac(){
+  if(state.sound===false) return null;
+  try{
+    actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+    if(actx.state==="suspended") actx.resume();
+    return actx;
+  }catch(e){return null;}
+}
+function tone(c,freq,at,dur,type="triangle",vol=.18,toFreq){
+  const o=c.createOscillator(),g=c.createGain();
+  o.type=type;o.frequency.setValueAtTime(freq,at);
+  if(toFreq) o.frequency.exponentialRampToValueAtTime(toFreq,at+dur*.8);
+  g.gain.setValueAtTime(.0001,at);g.gain.exponentialRampToValueAtTime(vol,at+.012);g.gain.exponentialRampToValueAtTime(.0001,at+dur);
+  o.connect(g);g.connect(c.destination);o.start(at);o.stop(at+dur+.05);
+}
+function noise(c,at,dur,vol=.25,hp=1200){
+  const len=Math.floor(c.sampleRate*dur),buf=c.createBuffer(1,len,c.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*(1-i/len);
+  const s=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();
+  s.buffer=buf;f.type="highpass";f.frequency.value=hp;g.gain.value=vol;
+  s.connect(f);f.connect(g);g.connect(c.destination);s.start(at);
+}
+const SFX={
+  // 記録したとき：「イェーイ！」系の明るいファンファーレ
+  cheer(extra){const c=ac();if(!c)return;const t=c.currentTime+.02;
+    tone(c,392,t,.18,"square",.07,784);                       // ひゅいっ
+    [523.25,659.25,783.99,1046.5].forEach((f,i)=>tone(c,f,t+.12+i*.075,.32,"triangle",.2));
+    [1318.5,1567.98,2093].forEach((f,i)=>tone(c,f,t+.45+i*.05,.45,"sine",.1)); // キラキラ
+    noise(c,t+.12,.18,.08,5000);
+    if(extra) [1567.98,2093,2637].forEach((f,i)=>tone(c,f,t+.8+i*.09,.35,"sine",.13)); // チケットゲット
+  },
+  // ガチャ：だんだん速くなるドキドキ
+  roll(dur){const c=ac();if(!c)return;const t0=c.currentTime+.02;let at=0,gap=.2,n=0;
+    while(at<dur){tone(c,300+n*28,t0+at,.07,"square",.06);at+=gap;gap=Math.max(.05,gap*.85);n++;}
+  },
+  // カプセルが開く＋当たり
+  win(){const c=ac();if(!c)return;const t=c.currentTime+.02;
+    noise(c,t,.25,.3,800);
+    [523.25,659.25,783.99].forEach((f,i)=>tone(c,f,t+.15+i*.1,.22,"triangle",.2));
+    [1046.5,1318.5,1567.98].forEach(f=>tone(c,f,t+.5,.9,"triangle",.12));
+    [2093,2637,3136].forEach((f,i)=>tone(c,f,t+.55+i*.07,.5,"sine",.07));
+  },
+  // 空っぽ：しょんぼり
+  empty(){const c=ac();if(!c)return;const t=c.currentTime+.02;
+    [[392,370],[349,330],[311,262]].forEach(([a,b],i)=>tone(c,a,t+i*.32,i===2?.7:.3,"sawtooth",.07,b));
+  }
+};
+
 // ---------- ごほうび演出 ----------
 // 出てくるキャラ（追加したらここに1行足す → 毎回ランダムで1人出る）
 // 仲間になるキャラ（増やすときはここに1行足す。最初のガチャは必ず先頭のキャラ）
@@ -663,6 +732,7 @@ function celebrate(from,to,n){
   const ch=pickChar();
   const gotTicket=Math.floor(realTotal()/TICKET_YEN)>Math.floor((realTotal()-n)/TICKET_YEN);
   const sub=gotTicket?"🎟 チケットゲット！":hit?"目標たっせい！":"記録しました";
+  SFX.cheer(gotTicket||hit);
   box.innerHTML=`<div class="cheer-card"><div class="cheer-bubble">${ch?ch.line:"+"+yen(n)+" 記録しました"}<small>${ch?"+"+yen(n)+" "+sub:(gotTicket?"🎟 チケットゲット！":ticketsLeft()?"ガチャで仲間を呼ぼう":"")}</small></div>
     ${ch?`<img class="cheer-face" src="${ch.img}" alt="">`:""}</div>`;
   document.body.appendChild(box);
@@ -704,10 +774,14 @@ function openGacha(){
       <p class="note" style="margin:6px 0 0;text-align:center">${isNew?"これから記録すると出てきてくれるよ":"もう仲間だよ"}</p>
       <button class="btn" id="gachaClose" style="margin-top:14px">やったね</button>
     </div></div>`;
+  SFX.roll(reduce?0:1.8);
   if(!reduce){
-    setTimeout(()=>{$("#capsule")&&$("#capsule").classList.add("opened");},1300);
-    setTimeout(()=>{const r=$("#reveal");if(r){r.hidden=false;confettiBurst(isNew?50:20);}},1650);
-  }
+    setTimeout(()=>{$("#capsule")&&$("#capsule").classList.add("opened");flash();SFX.win();},1900);
+    setTimeout(()=>{const r=$("#reveal");if(r){r.hidden=false;confettiBurst(isNew?60:20);}},2150);
+  }else SFX.win();
+}
+function flash(){
+  const f=document.createElement("div");f.className="flash";document.body.appendChild(f);setTimeout(()=>f.remove(),700);
 }
 function showEmptyGacha(){
   const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -719,10 +793,11 @@ function showEmptyGacha(){
       <p class="note" style="margin:8px 0 0;text-align:center">チケットは減っていないよ</p>
       <button class="btn" id="gachaClose" style="margin-top:14px">とじる</button>
     </div></div>`;
+  SFX.roll(reduce?0:1.8);
   if(!reduce){
-    setTimeout(()=>{$("#capsule")&&$("#capsule").classList.add("opened");},1300);
-    setTimeout(()=>{const r=$("#reveal");if(r)r.hidden=false;},1650);
-  }
+    setTimeout(()=>{$("#capsule")&&$("#capsule").classList.add("opened");SFX.empty();},1900);
+    setTimeout(()=>{const r=$("#reveal");if(r)r.hidden=false;},2100);
+  }else SFX.empty();
 }
 function confettiBurst(count){
   if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -745,6 +820,7 @@ document.addEventListener("click",e=>{
   if(t.closest("#avatarBtn")){tab="settings";confirmDel=null;render();window.scrollTo(0,0);return;}
   if(t.closest("#addBtn")){openSheet();return;}
   if(t.closest("#gachaBtn")){openGacha();return;}
+  if(t.closest("#soundToggle")){state.sound=state.sound===false;save();render();if(state.sound)SFX.cheer();return;}
   if(t.closest("#gachaClose")||(t.id==="charScrim")){closeSheet();render();return;}
   const chb=t.closest("[data-char]"); if(chb){openCharDetail(chb.dataset.char);return;}
   const del=t.closest("[data-del]");
