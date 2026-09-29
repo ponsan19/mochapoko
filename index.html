@@ -287,6 +287,19 @@ body{font-weight:500}
   .reveal{animation:pop .5s cubic-bezier(.2,1.4,.4,1) both}
   @keyframes shake{0%,100%{transform:none}10%,50%{transform:rotate(-12deg)}30%,70%{transform:rotate(12deg)}85%{transform:scale(1.12)}}
 }
+.update-bar{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:70;display:flex;align-items:center;gap:12px;width:max-content;max-width:calc(100vw - 32px);background:var(--hue-deep);color:#fff;border-radius:999px;padding:8px 8px 8px 16px;font-size:14px;font-weight:700;box-shadow:0 10px 24px rgba(47,111,143,.3)}
+.update-bar button{border:0;border-radius:999px;background:#fff;color:var(--hue-deep);font-weight:900;padding:7px 14px;min-height:36px}
+.sec-head h2 .count{font-size:13px;color:var(--muted);font-weight:700;margin-left:4px;letter-spacing:0}
+button.friend{border:0;background:none;padding:0;cursor:pointer}
+.friend.unknown span{text-align:center;line-height:1.35}
+.zukan{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.zk{border:1px solid var(--line);background:var(--surface);border-radius:20px;padding:8px 8px 10px;display:flex;flex-direction:column;align-items:center;gap:2px;box-shadow:var(--shadow);min-width:0;color:var(--fg)}
+.zk img,.zk .q{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:14px}
+.zk .q{display:grid;place-items:center;border:2px dashed var(--line);background:var(--bg);font-family:var(--display);font-weight:900;font-size:30px;color:var(--muted)}
+.zk .no{font-size:10px;color:var(--muted);font-weight:700;margin-top:4px}
+.zk b{font-size:13px;font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.zk.unknown b{color:var(--muted)}
+.char-line{margin-top:6px;font-family:var(--display);font-weight:900;font-size:17px;color:var(--fg);text-align:center}
 @media(max-width:360px){.app{padding-inline:15px}.logo{font-size:19px}.hero{padding-inline:18px}.stat{padding-inline:9px}}
 </style>
 </head>
@@ -312,6 +325,8 @@ body{font-weight:500}
 
 <script>
 (function(){
+// ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
+const APP_VERSION="2026.09.30-2";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -433,6 +448,34 @@ function itemHTML(r){
   </div>`;
 }
 
+function gachaRowHTML(){
+  return `<div class="gacha-row">
+    <div class="tix"><b>🎟 ${ticketsLeft()}<small> 枚</small></b><span>次のチケットまで あと${yen(toNextTicket())}</span></div>
+    <button class="gacha-btn" id="gachaBtn" ${ticketsLeft()?"":"disabled"}>ガチャを引く</button>
+  </div>`;
+}
+function renderZukan(){
+  $("#view").innerHTML=`
+    <div class="sec-head" style="margin-top:8px"><h2>図鑑 <small class="count">${state.owned.length}／${CHARACTERS.length}</small></h2><button class="link" data-go="home">‹ ホーム</button></div>
+    <p class="note" style="margin:0 0 12px">${TICKET_YEN.toLocaleString()}円節約ごとにチケット1枚・タップで大きく見られるよ</p>
+    <div class="zukan">${CHARACTERS.map((c,i)=>state.owned.includes(c.id)
+      ?`<button class="zk" data-char="${c.id}"><img src="${c.img}" alt=""><span class="no">No.${i+1}</span><b>${esc(c.name)}</b></button>`
+      :`<div class="zk unknown"><div class="q">？</div><span class="no">No.${i+1}</span><b>？？？</b></div>`).join("")}</div>
+    <section class="gacha-card" style="margin-top:16px">${gachaRowHTML().replace('class="gacha-row"','class="gacha-row" style="margin-top:0;padding-top:0;border-top:0"')}</section>
+  `;
+}
+function openCharDetail(id){
+  const c=charById(id); if(!c||!state.owned.includes(id)) return;
+  const no=CHARACTERS.indexOf(c)+1;
+  $("#sheetRoot").innerHTML=`<div class="gacha-scrim" id="charScrim" role="dialog" aria-label="${esc(c.name)}">
+    <div class="reveal">
+      <span class="note">No.${no}</span>
+      <img src="${c.img}" alt="${esc(c.name)}">
+      <div class="reveal-name">${esc(c.name)}</div>
+      <div class="char-line">「${esc(c.line)}」</div>
+      <button class="btn" id="gachaClose" style="margin-top:16px">とじる</button>
+    </div></div>`;
+}
 function renderHome(){
   const now=new Date(), k=mkey(now);
   const month=inMonth(k);
@@ -452,15 +495,12 @@ function renderHome(){
       </div>
     </section>
     ${hasSample()?`<div class="sample"><span>いま表示しているのはサンプルです。最初の記録を追加すると自動で消えます。</span><button id="clearSample">今すぐ消す</button></div>`:""}
-    <div class="sec-head"><h2>なかま</h2><span class="note">${TICKET_YEN.toLocaleString()}円 節約ごとにチケット1枚</span></div>
+    <div class="sec-head"><h2>なかま <small class="count">${state.owned.length}／${CHARACTERS.length}</small></h2><button class="link" data-go="zukan">図鑑を見る ›</button></div>
     <section class="gacha-card">
-      <div class="friends">${CHARACTERS.map(c=>state.owned.includes(c.id)
-        ?`<div class="friend"><img src="${c.img}" alt=""><span>${esc(c.name)}</span></div>`
-        :`<div class="friend unknown"><div class="q">？</div><span>？？？</span></div>`).join("")}</div>
-      <div class="gacha-row">
-        <div class="tix"><b>🎟 ${ticketsLeft()}<small> 枚</small></b><span>次のチケットまで あと${yen(toNextTicket())}</span></div>
-        <button class="gacha-btn" id="gachaBtn" ${ticketsLeft()?"":"disabled"}>ガチャを引く</button>
-      </div>
+      <div class="friends">${state.owned.length
+        ?state.owned.slice(-3).reverse().map(charById).filter(Boolean).map(c=>`<button class="friend" data-char="${c.id}"><img src="${c.img}" alt=""><span>${esc(c.name)}</span></button>`).join("")
+        :`<div class="friend unknown"><div class="q">？</div><span>ガチャで<br>仲間を呼ぼう</span></div>`}</div>
+      ${gachaRowHTML()}
     </section>
     <div class="sec-head"><h2>最近の記録</h2><button class="link" data-go="history">月別の履歴 ›</button></div>
     <div class="list">${recent.length?recent.map(itemHTML).join(""):`<div class="empty">まだ記録がありません。<br>下の「＋ 記録する」から、我慢できたことや割引で浮いた金額を記録しましょう。</div>`}</div>
@@ -545,7 +585,7 @@ function renderSettings(){
 
 function render(){
   document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===tab?"page":"false"));
-  if(tab==="home") renderHome(); else if(tab==="history") renderHistory(); else renderSettings();
+  if(tab==="home") renderHome(); else if(tab==="history") renderHistory(); else if(tab==="zukan") renderZukan(); else renderSettings();
   applyProfile();
 }
 
@@ -701,7 +741,8 @@ document.addEventListener("click",e=>{
   if(t.closest("#avatarBtn")){tab="settings";confirmDel=null;render();window.scrollTo(0,0);return;}
   if(t.closest("#addBtn")){openSheet();return;}
   if(t.closest("#gachaBtn")){openGacha();return;}
-  if(t.closest("#gachaClose")){closeSheet();render();return;}
+  if(t.closest("#gachaClose")||(t.id==="charScrim")){closeSheet();render();return;}
+  const chb=t.closest("[data-char]"); if(chb){openCharDetail(chb.dataset.char);return;}
   const del=t.closest("[data-del]");
   if(del){const id=del.dataset.del;
     if(confirmDel===id){state.records=state.records.filter(r=>r.id!==id);confirmDel=null;openId=null;save();render();toast("削除しました");}
@@ -807,6 +848,26 @@ document.addEventListener("change",e=>{
   img.src=url;
 });
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeSheet();if(e.key==="Enter"&&e.target.id==="newCatName"){e.preventDefault();$("#addCatBtn").click();}});
+
+// ---------- 新しい版のチェック ----------
+let updateShown=false;
+async function checkUpdate(){
+  if(updateShown||location.protocol==="file:") return;
+  try{
+    const res=await fetch("./?check="+Date.now(),{cache:"no-store"});
+    if(!res.ok) return;
+    const m=(await res.text()).match(/const APP_VERSION="([^"]+)"/);
+    if(m&&m[1]!==APP_VERSION){
+      updateShown=true;
+      const bar=document.createElement("div");bar.className="update-bar";bar.setAttribute("role","status");
+      bar.innerHTML=`<span>新しいバージョンがあります</span><button id="doUpdate">更新する</button>`;
+      document.body.appendChild(bar);
+      bar.querySelector("#doUpdate").addEventListener("click",()=>location.replace("./?v="+encodeURIComponent(m[1])));
+    }
+  }catch(e){}
+}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")checkUpdate();});
+setTimeout(checkUpdate,1500);
 
 render();
 })();
