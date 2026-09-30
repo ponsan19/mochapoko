@@ -860,7 +860,7 @@ img.rar-srare{border:4px solid transparent!important;background:linear-gradient(
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.10.01-51";
+const APP_VERSION="2026.10.01-52";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -1077,7 +1077,7 @@ function renderHome(){
       </div>
     </section>
     ${hasSample()?`<div class="sample"><span>いま表示しているのはサンプルです。最初の記録を追加すると自動で消えます。</span><button id="clearSample">今すぐ消す</button></div>`:""}
-    <div class="sec-head"><h2>コイン</h2></div>
+    <div class="sec-head"><h2>所持コイン</h2></div>
     <section class="gacha-card gacha-only g-row">
       <div class="h2-band in-gacha">
         <div class="bal">${cn(state.coins)}</div>
