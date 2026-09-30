@@ -836,7 +836,7 @@ html,body{overflow-x:clip!important}
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.10.01-39";
+const APP_VERSION="2026.10.01-41";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -881,16 +881,15 @@ function sampleRecords(){
 let state=load()||{name:"",records:[],v:1,coins:0,welcomed:false};
 state.records=(state.records||[]).filter(r=>!r.sample);
 if(!Array.isArray(state.categories)) state.categories=DEFAULT_CATS.map(c=>({...c}));
-// 前の初期ジャンル（がまんした など）のままなら、新しいジャンルに入れ替える（前の記録は元の名前で残す）
-if(!state.catsV2){
+// ジャンルを新しい6つ（食費・交通費・美容・日用品・遊び・その他）に入れ替える。
+// 前のジャンルで付けた記録は、元の名前のまま残す。
+if(!state.catsV3){
   if(!state.categoryArchive||typeof state.categoryArchive!=="object") state.categoryArchive={};
   if(!state.categoryIconMap||typeof state.categoryIconMap!=="object") state.categoryIconMap={};
-  const onlyOld=state.categories.every(c=>OLD_CATS[c.id]||c.id==="other");
-  if(onlyOld){
-    for(const c of state.categories){ if(OLD_CATS[c.id]){state.categoryArchive[c.id]=c.label;state.categoryIconMap[c.id]=c.iconIndex;} }
-    state.categories=DEFAULT_CATS.map(c=>({...c}));
-  }
-  state.catsV2=true;
+  const newIds=DEFAULT_CATS.map(c=>c.id);
+  for(const c of state.categories||[]){ if(!newIds.includes(c.id)){state.categoryArchive[c.id]=c.label;state.categoryIconMap[c.id]=c.iconIndex;} }
+  state.categories=DEFAULT_CATS.map(c=>({...c}));
+  state.catsV3=true;
 }
 if(!state.categoryArchive||typeof state.categoryArchive!=="object") state.categoryArchive={};
 if(!state.categoryIconMap||typeof state.categoryIconMap!=="object") state.categoryIconMap={};
@@ -1624,25 +1623,34 @@ document.addEventListener("change",e=>{
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeSheet();if(e.key==="Enter"&&e.target.id==="newCatName"){e.preventDefault();$("#addCatBtn").click();}});
 
 // ---------- 新しい版のチェック ----------
+// 版の番号を数字として比べて、今より「新しい」ときだけ知らせる。
+// 更新ボタンを押しても古い版が出てきたとき（配信側の一時保存）に、同じ知らせを何度も出さない。
+const verNum=v=>String(v).split(/[.\-]/).map(x=>parseInt(x,10)||0);
+const isNewer=(a,b)=>{const x=verNum(a),y=verNum(b);for(let i=0;i<Math.max(x.length,y.length);i++){if((x[i]||0)!==(y[i]||0))return (x[i]||0)>(y[i]||0);}return false;};
+const UPD_KEY="uitacho.updTried";
 let updateShown=false;
 async function checkUpdate(){
   if(updateShown||location.protocol==="file:") return;
   try{
-    const res=await fetch("./?check="+Date.now(),{cache:"no-store"});
+    const res=await fetch("./index.html?check="+Date.now(),{cache:"no-store"});
     if(!res.ok) return;
     const m=(await res.text()).match(/const APP_VERSION="([^"]+)"/);
-    if(m&&m[1]!==APP_VERSION){
-      updateShown=true;
-      const bar=document.createElement("div");bar.className="update-bar";bar.setAttribute("role","status");
-      bar.innerHTML=`<span>新しいバージョンがあります</span><button id="doUpdate">更新する</button>`;
-      document.body.appendChild(bar);
-      bar.querySelector("#doUpdate").addEventListener("click",()=>location.replace("./?v="+encodeURIComponent(m[1])));
-    }
+    if(!m||!isNewer(m[1],APP_VERSION)) return;
+    let tried=null;try{tried=JSON.parse(localStorage.getItem(UPD_KEY)||"null");}catch(e){}
+    // 同じ版への更新をついさっき試したばかりなら、しばらく出さない（10分）
+    if(tried&&tried.v===m[1]&&Date.now()-tried.at<10*60*1000) return;
+    updateShown=true;
+    const bar=document.createElement("div");bar.className="update-bar";bar.setAttribute("role","status");
+    bar.innerHTML=`<span>新しいバージョンがあります</span><button id="doUpdate">更新する</button>`;
+    document.body.appendChild(bar);
+    bar.querySelector("#doUpdate").addEventListener("click",()=>{
+      try{localStorage.setItem(UPD_KEY,JSON.stringify({v:m[1],at:Date.now()}));}catch(e){}
+      location.replace("./?v="+encodeURIComponent(m[1])+"&t="+Date.now());
+    });
   }catch(e){}
 }
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")checkUpdate();});
 setTimeout(checkUpdate,1500);
-
 render();
 if(!state.welcomed) setTimeout(showWelcome,500);
 })();
