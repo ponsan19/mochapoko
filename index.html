@@ -817,6 +817,8 @@ img.rar-srare{border:4px solid transparent!important;background:linear-gradient(
 .rar-t-rare{background:linear-gradient(135deg,#f5b700,#e0a200)}
 .rar-t-srare{background:linear-gradient(135deg,#ff6f91,#b9a4ec,#6cc4ec)}
 .gift-ph{width:150px;height:150px;object-fit:cover;border-radius:22px;border:4px solid #fff;margin-top:6px}
+.h2-band.in-gacha{width:auto!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important}
+.gacha-card.gacha-only .bal{padding-top:2px}
 </style>
 </head>
 <body>
@@ -846,7 +848,7 @@ img.rar-srare{border:4px solid transparent!important;background:linear-gradient(
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.10.01-47";
+const APP_VERSION="2026.10.01-48";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -1062,16 +1064,19 @@ function renderHome(){
       </div>
     </section>
     ${hasSample()?`<div class="sample"><span>いま表示しているのはサンプルです。最初の記録を追加すると自動で消えます。</span><button id="clearSample">今すぐ消す</button></div>`:""}
+    <div class="sec-head"><h2>ガチャ</h2></div>
+    <section class="gacha-card gacha-only">
+      <div class="h2-band in-gacha">
+        <div class="bal">${cn(state.coins)}</div>
+        <button class="h2-go" id="gachaBtn" ${state.coins>=TICKET_YEN?"":"disabled"}>ガチャを引く<small>（${cn(TICKET_YEN)}）</small></button>
+      </div>
+    </section>
     <div class="sec-head"><h2>新しい仲間</h2></div>
     <section class="gacha-card">
       <div class="new3">${(()=>{const own=state.owned.slice(-3).reverse().map(charById).filter(Boolean);
         const cells=own.map(c=>`<button class="nf" data-char="${c.id}"><span class="nf-img"><img class="${rarCls(c).trim()}" src="${c.img}" alt=""><em>NEW</em></span><b>${esc(c.name)}</b></button>`);
         while(cells.length<3) cells.push(`<div class="nf empty"><span class="nf-img"><span class="q">？</span></span><b>？？？</b></div>`);
         return cells.join("");})()}</div>
-      <div class="h2-band in-friends">
-        <div class="bal">${cn(state.coins)}</div>
-        <button class="h2-go" id="gachaBtn" ${state.coins>=TICKET_YEN?"":"disabled"}>ガチャを引く<small>（${cn(TICKET_YEN)}）</small></button>
-      </div>
     </section>
     <div class="sec-head"><h2>${COIN_SVG.replace('class="coin-svg"','class="coin-svg h-ico"')}獲得履歴</h2></div>
     <div class="list gain">${(()=>{const gs=sorted().filter(r=>typeof r.coins==="number").slice(0,5);
