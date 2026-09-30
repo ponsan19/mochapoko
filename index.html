@@ -836,7 +836,7 @@ html,body{overflow-x:clip!important}
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.10.01-37";
+const APP_VERSION="2026.10.01-38";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -1115,7 +1115,7 @@ function renderSettings(){
       <div class="field"><label for="nameIn">ニックネーム</label><input id="nameIn" maxlength="20" placeholder="例：小ちゃん" value="${esc(state.name)}"></div>
       <div class="field"><label for="goalIn">今月の目標（円）</label><input id="goalIn" inputmode="numeric" maxlength="7" value="${goalOf()}"></div>
     </div>
-    <div class="sec-head"><h2>「どうやって？」を編集</h2></div>
+    <div class="sec-head"><h2>「ジャンル」を編集</h2></div>
     <div class="card stack">
       <p class="note" style="margin:0">最大6個。名前の変更は過去の記録にも反映されます。</p>
       ${activeCats().map(c=>`<div class="cat-edit-row">${catIcon(c.id)}<input data-cat-name="${esc(c.id)}" aria-label="${esc(c.label)}の名前" maxlength="18" value="${esc(c.label)}"><button class="remove" data-cat-remove="${esc(c.id)}" aria-label="${esc(c.label)}を削除">削除</button></div>`).join("")}
@@ -1159,13 +1159,13 @@ function render(){
 function openSheet(){
   let cat=activeCats()[0].id;
   $("#sheetRoot").innerHTML=`<div class="scrim" id="scrim"><form class="sheet stack" id="addForm" novalidate>
-    <h3>いくら節約した？</h3>
+    <h3>今回の節約</h3>
     <div class="amount-in"><input id="amtIn" inputmode="numeric" pattern="[0-9]*" placeholder="0" autocomplete="off" aria-label="金額"><span>円</span></div>
     <div class="chips">${[20,50,100,300,500,1000].map(v=>`<button type="button" class="chip" data-quick="${v}">+${v}</button>`).join("")}</div>
-    <div class="field"><label>どうやって？</label><div class="chips" id="catChips">${activeCats().map(c=>`<button type="button" class="chip" data-cat="${esc(c.id)}" aria-pressed="${c.id===cat}">${catIcon(c.id)}${esc(c.label)}</button>`).join("")}${activeCats().length<MAX_CATS?'<button type="button" class="chip" data-cat="__custom" aria-pressed="false">＋ 自分で入力</button>':""}</div>
-      <input id="customCatIn" maxlength="18" placeholder="例：ポイントを使った" aria-label="どうやって節約したかを入力" hidden style="margin-top:9px"></div>
-    <div class="field"><label for="titleIn">なにをした？</label><input id="titleIn" maxlength="40" placeholder="例：自販機で水を買うのを我慢した"></div>
-    <div class="field"><label for="memoIn">ひとこと（任意）</label><input id="memoIn" maxlength="60" placeholder="例：水筒を持ってきてよかった"></div>
+    <div class="field"><label>ジャンル</label><div class="chips" id="catChips">${activeCats().map(c=>`<button type="button" class="chip" data-cat="${esc(c.id)}" aria-pressed="${c.id===cat}">${catIcon(c.id)}${esc(c.label)}</button>`).join("")}${activeCats().length<MAX_CATS?'<button type="button" class="chip" data-cat="__custom" aria-pressed="false">＋ 自分で入力</button>':""}</div>
+      <input id="customCatIn" maxlength="18" aria-label="ジャンルを入力" hidden style="margin-top:9px"></div>
+    <div class="field"><label for="titleIn">なにをした？（任意）</label><input id="titleIn" maxlength="40"></div>
+    <div class="field"><label for="memoIn">ひとこと（任意）</label><input id="memoIn" maxlength="60"></div>
     <div class="err" id="formErr"></div>
     <button class="btn" type="submit">記録する</button>
     <button class="btn ghost" type="button" id="cancelBtn">やめる</button>
@@ -1184,7 +1184,7 @@ function openSheet(){
     if(!n||n<1){$("#formErr").textContent="金額を1円以上で入力してください";amt.focus();return;}
     if(cat==="__custom"){
       const label=$("#customCatIn").value.trim();
-      if(!label){$("#formErr").textContent="「どうやって？」を入力してください";$("#customCatIn").focus();return;}
+      if(!label){$("#formErr").textContent="「ジャンル」を入力してください";$("#customCatIn").focus();return;}
       const existing=activeCats().find(c=>c.label===label);
       if(existing) cat=existing.id;
       else{
