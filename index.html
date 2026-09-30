@@ -636,6 +636,40 @@ header.top{padding-block:14px 14px!important}
 .h2-band.in-friends{width:auto!important;margin:14px 0 0!important;padding:14px 0 0!important;border-radius:0!important;border-top:1px solid var(--line)!important;background:none!important;box-shadow:none!important}
 .empty.quiet{padding:22px 8px!important}
 .empty.quiet::before{content:none!important}
+
+/* ===== 記録したときの演出（強化） ===== */
+.cheer-photo{position:relative;display:inline-block}
+.get-stamp{position:relative;margin-bottom:14px;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-width:128px;padding:12px 16px 10px;border-radius:22px;background:var(--pink,#ff6f91);color:#fff;border:4px solid #fff;
+  box-shadow:0 12px 26px rgba(255,111,145,.45)}
+.get-stamp b{font-family:var(--display);font-weight:900;font-size:38px;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.get-stamp span{font-family:var(--display);font-weight:900;font-size:20px;letter-spacing:.12em;margin-top:2px;color:#fff3a8}
+.cheer-card.solo .get-stamp{position:relative;left:0;top:0}
+.cheer-card.solo .get-stamp b{font-size:54px}
+.cheer-bubble small{color:var(--pink,#ff6f91)!important}
+.coins{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:1}
+.coin{position:absolute;top:-50px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-family:var(--display);font-weight:900;font-size:17px;color:#b8860b;
+  background:radial-gradient(circle at 35% 30%,#fff6b0 0 18%,#ffd23f 45%,#f0a800 100%);border:2px solid #e39b00;box-shadow:0 4px 8px rgba(0,0,0,.15)}
+.cheer-card{position:relative;z-index:2}
+@media (prefers-reduced-motion:no-preference){
+  .get-stamp{animation:stampIn .55s cubic-bezier(.2,1.5,.35,1) both}
+  .cheer-card.solo .get-stamp{animation:stampIn .55s cubic-bezier(.2,1.5,.35,1) both}
+  @keyframes stampIn{0%{transform:scale(3.2);opacity:0}60%{transform:scale(.88);opacity:1}80%{transform:scale(1.08)}100%{transform:scale(1)}}
+  .cheer-card .cheer-face{animation:popUp .6s .35s cubic-bezier(.2,1.5,.4,1) both,bob 2.4s 1.2s ease-in-out infinite!important}
+  @keyframes popUp{0%{transform:translateY(80px) scale(.5);opacity:0}100%{transform:none;opacity:1}}
+  .cheer-card .cheer-bubble{animation:bubbleIn .45s .7s cubic-bezier(.2,1.4,.4,1) both}
+  @keyframes bubbleIn{0%{transform:scale(.3) translateY(20px);opacity:0}100%{transform:none;opacity:1}}
+  .cheer-card{animation:shakeIn .4s .1s ease-out}
+  @keyframes shakeIn{0%,100%{translate:0 0}20%{translate:-8px 4px}40%{translate:7px -4px}60%{translate:-5px 2px}80%{translate:3px -1px}}
+  .cheer-close{animation:fadeUp .4s 1.3s both}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}}
+  .coin{animation:coinFall var(--d) var(--delay) cubic-bezier(.4,.1,.6,1) forwards}
+  @keyframes coinFall{0%{transform:translateY(0) rotate(0) rotateY(0)}100%{transform:translateY(110vh) rotate(var(--r)) rotateY(720deg)}}
+}
+
+.cheer-card .cheer-face{width:190px!important;height:190px!important;aspect-ratio:1!important;object-fit:cover}
+.cheer-card{gap:16px!important}
+.cheer-close{margin-top:26px}
 </style>
 </head>
 <body>
@@ -665,7 +699,7 @@ header.top{padding-block:14px 14px!important}
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.10.01-23";
+const APP_VERSION="2026.10.01-27";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -732,7 +766,7 @@ save();
 
 // ---------- helpers ----------
 const $=s=>document.querySelector(s);
-const yen=n=>"¥"+Math.round(n).toLocaleString("ja-JP");
+const yen=n=>Math.round(n).toLocaleString("ja-JP")+"円";
 const mkey=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmtTime=iso=>{const d=new Date(iso);return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");};
@@ -790,7 +824,7 @@ function itemHTML(r,timeOnly){
       ${r.memo?`<div class="m">${esc(r.memo)}</div>`:""}
       <div class="d">${timeOnly?fmtTime(r.at):fmtDate(r.at)}</div>
     </div>
-    <div><div class="amt">+${yen(r.amount)}</div>
+    <div><div class="amt">${yen(r.amount)}</div>
       <button class="del" data-del="${r.id}" ${armed?'style="color:var(--danger);font-weight:700"':''}>${armed?"本当に消す":"削除"}</button></div>
   </div>`;
 }
@@ -850,7 +884,7 @@ function renderHome(){
           const vals=days.map(d=>sum(state.records.filter(r=>new Date(r.at).toDateString()===d.toDateString())));
           const mx=Math.max(1,...vals);
           return `<div class="week">
-            <div class="week-top"><span>直近7日</span><span>今日 <b>+${yen(sum(today))}</b></span></div>
+            <div class="week-top"><span>直近7日</span><span>今日 <b>${yen(sum(today))}</b></span></div>
             <div class="week-bars">${days.map((d,i)=>`<div class="wb${i===6?" today":""}"><i style="height:${vals[i]?Math.max(8,Math.round(vals[i]/mx*100)):4}%"></i><span>${i===6?"今日":"日月火水木金土"[d.getDay()]}</span></div>`).join("")}</div>
           </div>`;})()}
       </div>
@@ -918,7 +952,7 @@ function renderHistory(){
       <div class="h-stack">${cats.map(x=>`<i style="width:${(x.v/mTotal*100).toFixed(2)}%;background:${x.color}"></i>`).join("")}</div>
       <ul>${cats.map(x=>`<li><span class="dot" style="background:${x.color}"></span>${esc(x.c.label)}<b>${yen(x.v)}</b><small>${Math.round(x.v/mTotal*100)}%</small></li>`).join("")}</ul>
     </div>`:""}
-    ${days.length?days.map(g=>`<div class="day-head"><span>${fmtDay(g.d)}</span><b>+${yen(sum(g.rs))}</b></div>
+    ${days.length?days.map(g=>`<div class="day-head"><span>${fmtDay(g.d)}</span><b>${yen(sum(g.rs))}</b></div>
       <div class="list">${g.rs.map(r=>itemHTML(r,true)).join("")}</div>`).join(""):`<div class="list" style="margin-top:14px"><div class="empty">この月の記録はありません</div></div>`}
   `;
 }
@@ -973,7 +1007,7 @@ function openSheet(){
   let cat=activeCats()[0].id;
   $("#sheetRoot").innerHTML=`<div class="scrim" id="scrim"><form class="sheet stack" id="addForm" novalidate>
     <h3>いくら節約した？</h3>
-    <div class="amount-in"><span>¥</span><input id="amtIn" inputmode="numeric" pattern="[0-9]*" placeholder="0" autocomplete="off" aria-label="金額"></div>
+    <div class="amount-in"><input id="amtIn" inputmode="numeric" pattern="[0-9]*" placeholder="0" autocomplete="off" aria-label="金額"><span>円</span></div>
     <div class="chips">${[20,50,100,300,500,1000].map(v=>`<button type="button" class="chip" data-quick="${v}">+${v}</button>`).join("")}</div>
     <div class="field"><label>どうやって？</label><div class="chips" id="catChips">${activeCats().map(c=>`<button type="button" class="chip" data-cat="${esc(c.id)}" aria-pressed="${c.id===cat}">${catIcon(c.id)}${esc(c.label)}</button>`).join("")}${activeCats().length<MAX_CATS?'<button type="button" class="chip" data-cat="__custom" aria-pressed="false">＋ 自分で入力</button>':""}</div>
       <input id="customCatIn" maxlength="18" placeholder="例：ポイントを使った" aria-label="どうやって節約したかを入力" hidden style="margin-top:9px"></div>
@@ -1118,8 +1152,12 @@ function celebrate(from,to,n){
   const gotTicket=Math.floor(realTotal()/TICKET_YEN)>Math.floor((realTotal()-n)/TICKET_YEN);
   const sub=hit?" 目標たっせい！":"";
   SFX.cheer(gotTicket||hit);
-  box.innerHTML=`<div class="cheer-card"><div class="cheer-bubble">${ch?ch.line:"+"+yen(n)}<small>${ch?"+"+yen(n)+sub:(ticketsLeft()&&!gotTicket?"ガチャで仲間を呼ぼう":"")}</small></div>
-    ${ch?`<img class="cheer-face" src="${ch.img}" alt="">`:""}<span class="cheer-close">タップでとじる</span></div>`;
+  let coins="";for(let i=0;i<16;i++) coins+=`<i class="coin" style="left:${(4+Math.random()*92).toFixed(0)}%;--d:${(1.1+Math.random()*.9).toFixed(2)}s;--delay:${(Math.random()*.5).toFixed(2)}s;--r:${(Math.random()*720-360).toFixed(0)}deg">¥</i>`;
+  box.innerHTML=`<div class="coins">${coins}</div><div class="cheer-card${ch?"":" solo"}">
+    <div class="get-stamp"><b>${yen(n)}</b><span>GET!</span></div>
+    ${ch?`<div class="cheer-bubble">${esc(ch.line)}${sub?`<small>${sub.trim()}</small>`:""}</div>`:""}
+    ${ch?`<img class="cheer-face" src="${ch.img}" alt="">`:""}
+    <span class="cheer-close">タップでとじる</span></div>`;
   document.body.appendChild(box);
   if(!reduce){
     const colors=["#ff8fa8","#8fd0f2","#ffd36e","#ffffff","#2a92d0","#ffc2d1"];
