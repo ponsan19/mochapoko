@@ -831,6 +831,24 @@ img.rar-srare{border:4px solid transparent!important;background:linear-gradient(
 .tab.has-dot::after{content:"";position:absolute;top:4px;left:calc(50% + 8px);width:9px;height:9px;border-radius:50%;background:var(--pink,#ff6f91);border:2px solid #fff}
 .zk-new{position:absolute;top:4px;right:4px;z-index:2;font-style:normal;font-family:var(--display);font-weight:900;font-size:10px;letter-spacing:.04em;color:#fff;background:var(--pink,#ff6f91);border-radius:999px;padding:2px 7px;box-shadow:0 2px 6px rgba(255,111,145,.35)}
 .g-row{margin-top:0!important}
+
+/* ===== レビュー反映 ===== */
+.statusbar-cover{background:#c3e8fa!important}
+.sec-head h2{font-size:15px!important;color:#5d7f92!important;letter-spacing:.06em}
+.page-title{font-size:22px!important}
+.list:not(.gain) .item .ico{display:none!important}
+.list:not(.gain) .item{grid-template-columns:minmax(0,1fr) auto!important}
+.item .amt,.day-head b,.h-month-mid b{color:var(--pink)!important}
+.bars rect[fill="var(--hue-deep)"]{fill:var(--pink)}
+.g-row .bal{font-size:32px!important}
+.gi-d{font-size:11px!important}
+.ring-t em{font-size:10px!important}
+.zukan{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px!important}
+.zk{padding:3px 3px 3px!important;border-radius:14px!important;gap:0!important}
+.zk img,.zk .q{border-radius:11px!important}
+.zk .q{font-size:20px!important}
+.zk b{font-size:9.3px!important;margin-top:3px!important;line-height:1.25!important;letter-spacing:-.05em;text-overflow:clip!important}
+.zk-new{font-size:8px!important;padding:1px 5px!important;top:3px!important;right:3px!important}
 </style>
 </head>
 <body>
@@ -860,7 +878,7 @@ img.rar-srare{border:4px solid transparent!important;background:linear-gradient(
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.10.01-52";
+const APP_VERSION="2026.10.01-54";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -1145,7 +1163,7 @@ function renderSettings(){
       <div class="field"><label for="nameIn">ニックネーム</label><input id="nameIn" maxlength="20" placeholder="例：小ちゃん" value="${esc(state.name)}"></div>
       <div class="field"><label for="goalIn">今月の目標（円）</label><input id="goalIn" inputmode="numeric" maxlength="7" value="${goalOf()}"></div>
     </div>
-    <div class="sec-head"><h2>「ジャンル」を編集</h2></div>
+    <div class="sec-head"><h2>ジャンルを編集</h2></div>
     <div class="card stack">
       <p class="note" style="margin:0">最大6個。名前の変更は過去の記録にも反映されます。</p>
       ${activeCats().map(c=>`<div class="cat-edit-row">${catIcon(c.id)}<input data-cat-name="${esc(c.id)}" aria-label="${esc(c.label)}の名前" maxlength="18" value="${esc(c.label)}"><button class="remove" data-cat-remove="${esc(c.id)}" aria-label="${esc(c.label)}を削除">削除</button></div>`).join("")}
