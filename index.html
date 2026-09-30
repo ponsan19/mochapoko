@@ -670,6 +670,60 @@ header.top{padding-block:14px 14px!important}
 .cheer-card .cheer-face{width:190px!important;height:190px!important;aspect-ratio:1!important;object-fit:cover}
 .cheer-card{gap:16px!important}
 .cheer-close{margin-top:26px}
+
+/* ===== 記録後の画面（仕上げ） ===== */
+.cheer{background:radial-gradient(ellipse at 50% 35%,rgba(40,90,120,.45),rgba(16,36,52,.72))!important}
+.cx{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:18px;width:min(320px,calc(100vw - 48px))}
+.cx-amt{display:flex;align-items:baseline;gap:10px;color:#fff;text-shadow:0 4px 24px rgba(255,111,145,.55),0 2px 0 rgba(0,0,0,.08)}
+.cx-amt b{font-family:var(--display);font-weight:900;font-size:clamp(52px,17vw,72px);line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.cx-amt span{font-family:var(--display);font-weight:900;font-size:18px;letter-spacing:.14em;color:#fff;background:var(--pink,#ff6f91);border-radius:999px;padding:5px 12px 4px 14px;text-shadow:none;box-shadow:0 6px 16px rgba(255,111,145,.45);transform:translateY(-8px)}
+.cx-card{width:100%;background:#fff;border-radius:28px;padding:14px 14px 18px;display:flex;flex-direction:column;align-items:center;box-shadow:0 24px 50px rgba(0,0,0,.28)}
+.cx-photo{width:100%;aspect-ratio:1;object-fit:cover;border-radius:20px;display:block}
+.cx-name{margin-top:12px;font-size:12px;font-weight:700;letter-spacing:.1em;color:#9aaab4}
+.cx-line{margin-top:4px;padding:0 6px;text-align:center;font-family:var(--display);font-weight:900;font-size:21px;line-height:1.4;color:#2c4a5d}
+.cx-line::before{content:"“";color:var(--pink,#ff6f91);margin-right:2px}
+.cx-line::after{content:"”";color:var(--pink,#ff6f91);margin-left:2px}
+.cx-sub{margin-top:8px;font-size:13px;font-weight:900;color:var(--pink,#ff6f91)}
+.cx-close{font-size:12px;font-weight:700;color:rgba(255,255,255,.85);letter-spacing:.08em;border:1px solid rgba(255,255,255,.4);border-radius:999px;padding:6px 16px}
+.cx.solo .cx-amt b{font-size:clamp(60px,20vw,84px)}
+.coin{width:var(--sz)!important;height:var(--sz)!important;font-size:calc(var(--sz)*.5)!important}
+@media (prefers-reduced-motion:no-preference){
+  .cx-amt{animation:amtIn .8s cubic-bezier(.2,1.4,.35,1) both}
+  @keyframes amtIn{0%{transform:scale(2.6);opacity:0;filter:blur(6px)}55%{transform:scale(.92);opacity:1;filter:none}75%{transform:scale(1.05)}100%{transform:none}}
+  .cx-amt span{animation:getPop .5s .6s cubic-bezier(.2,1.6,.4,1) both}
+  @keyframes getPop{0%{transform:translateY(-8px) scale(0)}100%{transform:translateY(-8px) scale(1)}}
+  .cx-card{animation:cardUp .75s .9s cubic-bezier(.2,1.25,.4,1) both}
+  @keyframes cardUp{0%{transform:translateY(120px) scale(.85);opacity:0}100%{transform:none;opacity:1}}
+  .cx-photo{animation:photoBob 3s 2s ease-in-out infinite}
+  @keyframes photoBob{0%,100%{transform:none}50%{transform:translateY(-4px)}}
+  .cx-line{animation:lineIn .5s 1.5s ease-out both}
+  @keyframes lineIn{from{opacity:0;transform:translateY(8px)}}
+  .cx-close{animation:fadeUp .5s 2.4s both}
+  .coin{animation:coinFall var(--d) var(--delay) cubic-bezier(.35,.05,.6,1) forwards!important}
+}
+
+/* ===== 記録後の画面：コイン付き白ラベル ===== */
+.cheer{background:rgba(20,44,60,.55)!important}
+.cy{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:16px}
+.cy-amt{display:flex;align-items:center;gap:12px;background:#fff;border-radius:999px;padding:10px 26px 10px 10px;box-shadow:0 12px 30px rgba(0,0,0,.25);margin-bottom:4px}
+.cy-amt i{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-family:var(--display);font-weight:900;font-size:24px;color:#b8860b;background:radial-gradient(circle at 35% 30%,#fff6b0 0 18%,#ffd23f 45%,#f0a800 100%);border:3px solid #e39b00;flex:none}
+.cy-amt b{font-family:var(--display);font-weight:900;font-size:clamp(38px,11.5vw,46px);line-height:1;color:#2c4a5d;font-variant-numeric:tabular-nums;white-space:nowrap}
+.cy-amt span{font-family:var(--display);font-weight:900;font-size:15px;color:var(--pink,#ff6f91);letter-spacing:.1em;align-self:flex-end;margin-bottom:6px}
+.cy-bub{position:relative;background:#fff;border-radius:20px;padding:12px 20px;font-family:var(--display);font-weight:900;font-size:20px;color:#2c4a5d;text-align:center;box-shadow:0 10px 24px rgba(0,0,0,.18);max-width:calc(100vw - 40px)}
+.cy-bub small{display:block;font-size:12px;color:var(--pink,#ff6f91);margin-top:2px}
+.cy-bub::after{content:"";position:absolute;left:50%;bottom:-9px;margin-left:-9px;border:9px solid transparent;border-bottom:0;border-top-color:#fff}
+.cy-photo{width:190px;height:190px;object-fit:cover;border-radius:22px;border:5px solid #fff;box-shadow:0 14px 30px rgba(0,0,0,.3)}
+.cy-close{margin-top:12px;font-size:12px;font-weight:700;color:rgba(255,255,255,.85);letter-spacing:.06em}
+@media (prefers-reduced-motion:no-preference){
+  .cy-amt{animation:amtIn .8s cubic-bezier(.2,1.4,.35,1) both}
+  .cy-amt i{animation:coinSpin 1s .2s ease-out both}
+  @keyframes coinSpin{0%{transform:rotateY(0) scale(.4)}100%{transform:rotateY(720deg) scale(1)}}
+  .cy-amt span{animation:getPop2 .5s .7s cubic-bezier(.2,1.6,.4,1) both}
+  @keyframes getPop2{0%{transform:scale(0)}100%{transform:scale(1)}}
+  .cy-photo{animation:cardUp .75s .9s cubic-bezier(.2,1.25,.4,1) both,photoBob 3s 2.2s ease-in-out infinite}
+  .cy-bub{animation:bubbleIn .5s 1.4s cubic-bezier(.2,1.4,.4,1) both}
+  .cy-close{animation:fadeUp .5s 2.4s both}
+}
 </style>
 </head>
 <body>
@@ -699,7 +753,7 @@ header.top{padding-block:14px 14px!important}
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.10.01-27";
+const APP_VERSION="2026.10.01-29";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -1152,12 +1206,12 @@ function celebrate(from,to,n){
   const gotTicket=Math.floor(realTotal()/TICKET_YEN)>Math.floor((realTotal()-n)/TICKET_YEN);
   const sub=hit?" 目標たっせい！":"";
   SFX.cheer(gotTicket||hit);
-  let coins="";for(let i=0;i<16;i++) coins+=`<i class="coin" style="left:${(4+Math.random()*92).toFixed(0)}%;--d:${(1.1+Math.random()*.9).toFixed(2)}s;--delay:${(Math.random()*.5).toFixed(2)}s;--r:${(Math.random()*720-360).toFixed(0)}deg">¥</i>`;
-  box.innerHTML=`<div class="coins">${coins}</div><div class="cheer-card${ch?"":" solo"}">
-    <div class="get-stamp"><b>${yen(n)}</b><span>GET!</span></div>
-    ${ch?`<div class="cheer-bubble">${esc(ch.line)}${sub?`<small>${sub.trim()}</small>`:""}</div>`:""}
-    ${ch?`<img class="cheer-face" src="${ch.img}" alt="">`:""}
-    <span class="cheer-close">タップでとじる</span></div>`;
+  let coins="";for(let i=0;i<42;i++) coins+=`<i class="coin" style="left:${(Math.random()*96).toFixed(1)}%;--d:${(1.6+Math.random()*1.4).toFixed(2)}s;--delay:${(Math.random()*2.2).toFixed(2)}s;--r:${(Math.random()*720-360).toFixed(0)}deg;--sz:${(26+Math.random()*16).toFixed(0)}px">¥</i>`;
+  box.innerHTML=`<div class="coins">${coins}</div><div class="cy${ch?"":" solo"}">
+    <div class="cy-amt"><i>¥</i><b>${yen(n)}</b><span>GET!</span></div>
+    ${ch?`<div class="cy-bub">${esc(ch.line)}${sub?`<small>${sub.trim()}</small>`:""}</div>
+    <img class="cy-photo" src="${ch.img}" alt="">`:""}
+    <span class="cy-close">タップでとじる</span></div>`;
   document.body.appendChild(box);
   if(!reduce){
     const colors=["#ff8fa8","#8fd0f2","#ffd36e","#ffffff","#2a92d0","#ffc2d1"];
