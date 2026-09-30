@@ -836,17 +836,18 @@ html,body{overflow-x:clip!important}
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.10.01-38";
+const APP_VERSION="2026.10.01-39";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
-  {id:"gaman",label:"がまんした",iconIndex:0},
-  {id:"waribiki",label:"割引・クーポン",iconIndex:1},
-  {id:"jisui",label:"自炊した",iconIndex:2},
-  {id:"aruki",label:"歩いた",iconIndex:3},
-  {id:"mizu",label:"水筒・持参",iconIndex:4},
+  {id:"food",label:"食費",iconIndex:2},
+  {id:"transit",label:"交通費",iconIndex:3},
+  {id:"beauty",label:"美容",iconIndex:4},
+  {id:"daily",label:"日用品",iconIndex:1},
+  {id:"fun",label:"遊び",iconIndex:0},
   {id:"other",label:"その他",iconIndex:5}
 ];
+const OLD_CATS={gaman:"がまんした",waribiki:"割引・クーポン",jisui:"自炊した",aruki:"歩いた",mizu:"水筒・持参"};
 const activeCats=()=>state.categories;
 const catOf=id=>activeCats().find(c=>c.id===id)||{id,label:state.categoryArchive[id]||DEFAULT_CATS.find(c=>c.id===id)?.label||"以前の種類",iconIndex:state.categoryIconMap[id]};
 const catIcon=id=>`<span class="cat-art art-${catOf(id).iconIndex??5}" aria-hidden="true"></span>`;
@@ -880,6 +881,17 @@ function sampleRecords(){
 let state=load()||{name:"",records:[],v:1,coins:0,welcomed:false};
 state.records=(state.records||[]).filter(r=>!r.sample);
 if(!Array.isArray(state.categories)) state.categories=DEFAULT_CATS.map(c=>({...c}));
+// 前の初期ジャンル（がまんした など）のままなら、新しいジャンルに入れ替える（前の記録は元の名前で残す）
+if(!state.catsV2){
+  if(!state.categoryArchive||typeof state.categoryArchive!=="object") state.categoryArchive={};
+  if(!state.categoryIconMap||typeof state.categoryIconMap!=="object") state.categoryIconMap={};
+  const onlyOld=state.categories.every(c=>OLD_CATS[c.id]||c.id==="other");
+  if(onlyOld){
+    for(const c of state.categories){ if(OLD_CATS[c.id]){state.categoryArchive[c.id]=c.label;state.categoryIconMap[c.id]=c.iconIndex;} }
+    state.categories=DEFAULT_CATS.map(c=>({...c}));
+  }
+  state.catsV2=true;
+}
 if(!state.categoryArchive||typeof state.categoryArchive!=="object") state.categoryArchive={};
 if(!state.categoryIconMap||typeof state.categoryIconMap!=="object") state.categoryIconMap={};
 const usedIcons=new Set();
