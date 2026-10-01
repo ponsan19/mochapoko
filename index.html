@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="color-scheme" content="light only">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#c3e8fa">
+<meta name="theme-color" content="#7cc4e8">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="みんなで節約">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest?v=4">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
 <link rel="icon" type="image/png" href="icon-192.png?v=3">
@@ -1012,6 +1012,12 @@ html{background:#c3e8fa}
 .reveal .reveal-name{color:var(--pink,#ff6f91)!important}
 .pk-close{background:var(--pink,#ff6f91)!important;color:#fff!important;box-shadow:0 6px 14px rgba(255,111,145,.3)!important}
 .pk-close::after{border-color:rgba(255,255,255,.8)!important}
+
+/* ===== v77 ===== */
+.btn:not(.ghost)::after,.tk-go::after,.h2-go::after,.r2-close::after,.pk-close::after,.gacha-btn::after,.zk-gacha::after{display:none!important;content:none!important}
+.ub-pill:not(.sm) .ub-ic svg{width:22px!important;height:22px!important}
+.statusbar-cover{background:#7cc4e8!important;height:env(safe-area-inset-top,0px)!important}
+html{background:#7cc4e8}
 </style>
 </head>
 <body>
@@ -1042,7 +1048,7 @@ html{background:#c3e8fa}
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.10.01-76";
+const APP_VERSION="2026.10.01-77";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -1620,7 +1626,7 @@ function celebrate(from,to,n,ch,earned,mul,gotTicket){
         <div class="r2-amt"><span class="r2-coin">${COIN_SVG}</span><b id="r2Earn">0</b><em>GET!</em></div>
         ${ch?`<div class="r2-ch"><img class="${rarCls(ch).trim()}" src="${ch.img}" alt=""><div><b>${esc(ch.name)}が応援したよ</b><span>${esc(ch.line)}</span></div></div>`:""}
         <div class="r2-hr"></div>
-        <div class="r2-bal"><span>貯まったどんぐり</span><b id="r2Bal">${cn(before)}</b></div>
+        <div class="r2-bal"><span>貯まったどんぐり</span><b id="r2Bal">${fmtN(before)}</b></div>
         <div class="r2-bar"><i id="r2Fill" style="width:${pctOf(before)}%"></i></div>
         <div class="r2-left" id="r2Left">${before>=TICKET_YEN?"ガチャが引けるよ！":`ガチャまで あと${fmtN(TICKET_YEN-before)}`}</div>
         <button class="btn tk-go r2-close" id="resClose">閉じる</button>
