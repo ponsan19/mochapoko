@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="color-scheme" content="light only">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#7cc4e8">
+<meta name="theme-color" content="#c3e8fa">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="みんなで節約">
@@ -1018,6 +1018,14 @@ html{background:#c3e8fa}
 .ub-pill:not(.sm) .ub-ic svg{width:22px!important;height:22px!important}
 .statusbar-cover{background:#7cc4e8!important;height:env(safe-area-inset-top,0px)!important}
 html{background:#7cc4e8}
+
+/* ===== v78 ===== */
+html{background:#c3e8fa}
+.statusbar-cover{background:#c3e8fa!important}
+.ubar{background:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+.top-deco{background:linear-gradient(180deg,#c3e8fa 0%,#d4effb 45%,#eaf7fd 75%,rgba(246,252,255,0) 100%)!important;height:320px!important}
+.reveal .reveal-name{color:var(--fg)!important}
+.g-front .nm-row+.g-msg{margin-top:10px!important}
 </style>
 </head>
 <body>
@@ -1048,7 +1056,7 @@ html{background:#7cc4e8}
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.10.01-77";
+const APP_VERSION="2026.10.01-78";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -1267,7 +1275,7 @@ function renderHome(){
       </div>
     </section>
     ${hasSample()?`<div class="sample"><span>いま表示しているのはサンプルです。最初の記録を追加すると自動で消えます。</span><button id="clearSample">今すぐ消す</button></div>`:""}
-    <div class="sec-head"><h2>${esc(state.name||"あなた")}のどんぐり</h2></div>
+    <div class="sec-head"><h2>${esc(state.name||"〇〇")}のどんぐり</h2></div>
     <section class="gacha-card gacha-only g-row">
       <div class="h2-band in-gacha">
         <div class="bal">${cn(state.coins)}</div>
