@@ -1026,6 +1026,9 @@ header.top{display:none!important}
 .ub-pill b small{font-size:10px!important}
 .ub-plus{width:28px!important;height:28px!important;font-size:16px!important;border-width:2px!important}
 .zk-box>.zk-gacha{margin-top:0!important}
+
+/* ===== v67：上の3つも一緒にスクロール／間をあける ===== */
+.ubar{position:relative!important;top:auto!important;background:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;margin-bottom:18px!important;padding-top:14px!important}
 </style>
 </head>
 <body>
@@ -1056,7 +1059,7 @@ header.top{display:none!important}
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.10.01-66";
+const APP_VERSION="2026.10.01-67";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -1275,6 +1278,10 @@ function renderHome(){
       </div>
     </section>
     ${hasSample()?`<div class="sample"><span>いま表示しているのはサンプルです。最初の記録を追加すると自動で消えます。</span><button id="clearSample">今すぐ消す</button></div>`:""}
+    ${(()=>{const rs=sorted().slice(0,6);if(!rs.length)return "";
+      const days=[];for(const r of rs){const k=new Date(r.at).toDateString();let g=days.find(d=>d.k===k);if(!g){g={k,d:new Date(r.at),rs:[]};days.push(g);}g.rs.push(r);}
+      return days.map(g=>`<div class="day-head"><span>${fmtDay(g.d)}</span><b>${yen(sum(g.rs))}</b></div>
+      <div class="list">${g.rs.map(r=>itemHTML(r,true)).join("")}</div>`).join("");})()}
     <div class="sec-head"><h2>コイン履歴</h2></div>
     <div class="list gain">${(()=>{const gs=sorted().filter(r=>typeof r.coins==="number").slice(0,5);
       return gs.length?gs.map(r=>{const c=r.by?charById(r.by):null,b=c&&c.bonus?c.bonus:1;
