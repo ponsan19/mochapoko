@@ -1026,6 +1026,11 @@ html{background:#c3e8fa}
 .top-deco{background:linear-gradient(180deg,#c3e8fa 0%,#d4effb 45%,#eaf7fd 75%,rgba(246,252,255,0) 100%)!important;height:320px!important}
 .reveal .reveal-name{color:var(--fg)!important}
 .g-front .nm-row+.g-msg{margin-top:10px!important}
+
+/* ===== v79：背景をしっかり水色に ===== */
+html,body{background:#c3e8fa!important}
+body{background:radial-gradient(circle at 12% 18%,rgba(255,255,255,.35),transparent 30%),radial-gradient(circle at 92% 55%,rgba(255,255,255,.28),transparent 32%),linear-gradient(180deg,#c3e8fa 0%,#cdecfb 50%,#c6e9fa 100%)!important;background-attachment:fixed!important}
+.top-deco{display:none!important}
 </style>
 </head>
 <body>
@@ -1056,7 +1061,7 @@ html{background:#c3e8fa}
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.10.01-78";
+const APP_VERSION="2026.10.01-79";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
