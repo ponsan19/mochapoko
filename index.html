@@ -1009,6 +1009,23 @@ header.top{display:none!important}
 .ub-plus{display:grid!important;place-items:center;width:34px!important;height:34px!important;padding:0!important;border-radius:50%!important;background:var(--pink,#ff6f91)!important;color:#fff!important;font-size:19px!important;font-weight:700!important;line-height:1!important;border:3px solid #fff!important;box-shadow:0 3px 9px rgba(255,111,145,.35)!important;font-family:inherit}
 .ub-plus:active{transform:scale(.94)}
 .ub-ic.fr svg{width:28px!important;height:31px!important;fill:#f4a6b8!important}
+
+/* ===== v66：上の3つを控えめに ===== */
+.ubar{padding-top:8px!important;padding-bottom:8px!important;gap:9px!important}
+.ub-mon{width:50px!important;height:50px!important}
+.ub-mon::after{inset:3px!important;border-width:1.5px!important}
+.ub-mon small{font-size:9px!important}
+.ub-mon b{font-size:19px!important;margin-top:0!important}
+.ub-mon b em{font-size:10px!important}
+.ub-pill{height:34px!important;border-width:2px!important;gap:4px!important}
+.ub-pill::after{inset:-5px!important;border-width:1.5px!important}
+.ub-ic{width:24px!important;height:24px!important}
+.ub-ic svg{width:24px!important;height:24px!important}
+.ub-ic.fr svg{width:21px!important;height:23px!important}
+.ub-pill b{font-size:15px!important}
+.ub-pill b small{font-size:10px!important}
+.ub-plus{width:28px!important;height:28px!important;font-size:16px!important;border-width:2px!important}
+.zk-box>.zk-gacha{margin-top:0!important}
 </style>
 </head>
 <body>
@@ -1039,7 +1056,7 @@ header.top{display:none!important}
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.10.01-65";
+const APP_VERSION="2026.10.01-66";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -1209,9 +1226,10 @@ function renderZukan(){
   const cells=own.map(c=>`<button class="zk" data-char="${c.id}">${isNew(c)?'<em class="zk-new">NEW</em>':''}<img class="${rarCls(c).trim()}" src="${c.img}" alt=""><b>${esc(c.name)}</b></button>`);
   for(let i=own.length;i<SLOTS();i++) cells.push(`<div class="zk unknown"><div class="q">？</div><b>？？？</b></div>`);
   $("#view").innerHTML=`
-    <div class="sec-head" style="margin-top:0"><span class="count-big">${own.length}<small>／${SLOTS()}</small></span></div>
+    <div class="zk-box">
     <button class="h2-go zk-gacha" id="gachaBtn" ${state.coins>=TICKET_YEN?"":"disabled"}>ガチャを引く<small>（${cn(TICKET_YEN)}）</small></button>
     <div class="zukan">${cells.join("")}</div>
+    </div>
   `;
 }
 
@@ -1346,7 +1364,7 @@ function renderSettings(){
 // 上に常に出すバー（何月か・所持コイン・仲間の数）
 function renderUbar(){
   const el=$("#ubar"); if(!el) return; const d=new Date();
-  el.innerHTML=`<div class="ub-emb" aria-hidden="true">みんなと節約</div><div class="ub-mon" aria-label="${d.getFullYear()}年${d.getMonth()+1}月"><small>${d.getFullYear()}</small><b>${d.getMonth()+1}<em>月</em></b></div>
+  el.innerHTML=`<div class="ub-mon" aria-label="${d.getFullYear()}年${d.getMonth()+1}月"><small>${d.getFullYear()}</small><b>${d.getMonth()+1}<em>月</em></b></div>
     <div class="ub-pill"><span class="ub-ic">${COIN_SVG}</span><b>${fmtN(state.coins)}</b><button class="ub-plus" data-add aria-label="記録する">＋</button></div>
     <button class="ub-pill sm" data-tab="zukan" aria-label="仲間たち"><span class="ub-ic fr"><svg viewBox="0 0 64 70"><path d="M20 2c-5.5 0-7.6 6-7.6 14.5 0 6 1.4 12 3.4 16.6C7.3 37.6 2 45.5 2 53.5 2 64 14 69 32 69s30-5 30-15.5c0-8-5.3-15.9-13.8-20.4 2-4.6 3.4-10.6 3.4-16.6C51.6 8 49.5 2 44 2c-5.8 0-8.2 7.8-8.2 14.8 0 4.3.6 8.5 1.6 11.6-1.8-.3-3.6-.4-5.4-.4s-3.6.1-5.4.4c1-3.1 1.6-7.3 1.6-11.6C28.2 9.8 25.8 2 20 2z"/></svg></span><b>${state.owned.length}<small>/${SLOTS()}</small></b></button>`;
 }
