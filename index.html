@@ -1001,67 +1001,6 @@ header.top{display:none!important}
 .ub-plus::after{display:none!important}
 .ub-ic.fr svg{width:22px!important;height:24px!important;fill:#f4a6b8!important}
 .coin-svg{overflow:visible}
-
-/* ===== v72：キャラ登場の演出 ===== */
-.cy-stage{position:relative;width:200px;height:200px;display:grid;place-items:center}
-.cy-stage>*{grid-area:1/1}
-.cy-rays{position:absolute;left:50%;top:50%;width:520px;height:520px;margin:-260px 0 0 -260px;border-radius:50%;
-  background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.55) 0 7deg,rgba(255,255,255,0) 7deg 20deg);
-  -webkit-mask:radial-gradient(circle,#000 18%,transparent 62%);mask:radial-gradient(circle,#000 18%,transparent 62%);opacity:0}
-.cy-halo{position:absolute;left:50%;top:50%;width:300px;height:300px;margin:-150px 0 0 -150px;border-radius:50%;background:radial-gradient(circle,rgba(255,240,180,.85),rgba(255,200,220,.35) 45%,transparent 70%);opacity:0}
-.cy-ring{position:absolute;left:50%;top:50%;width:200px;height:200px;margin:-100px 0 0 -100px;border-radius:50%;border:5px solid #fff;opacity:0}
-.cy-sp{position:absolute;left:50%;top:50%;font-size:var(--s);color:#fff;text-shadow:0 0 8px #ffe680,0 0 2px #ffd23f;transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(0);font-style:normal}
-.cy-sp:nth-of-type(3n){color:#ffd23f}.cy-sp:nth-of-type(4n){color:#ffb3c7}
-.cy-poof{position:absolute;left:50%;top:50%;width:60px;height:60px;margin:-30px 0 0 -30px;border-radius:50%;background:radial-gradient(circle,#fff 30%,rgba(255,255,255,0) 70%);opacity:0}
-.cy-float{position:absolute;left:-30px;right:-30px;top:-40px;bottom:-10px;pointer-events:none}
-.cy-float i{position:absolute;bottom:10%;font-style:normal;font-size:var(--s);opacity:0;text-shadow:0 1px 3px rgba(0,0,0,.15)}
-.cy-stage .cy-photo{position:relative;z-index:3}
-@media (prefers-reduced-motion:no-preference){
-  #cyP1 .cy-photo{animation:cyPop .75s .25s cubic-bezier(.2,1.5,.4,1) both,cyJelly .5s 1s ease-in-out,photoBob 2.6s 1.6s ease-in-out infinite!important}
-  .cy-poof{animation:cyPoof .5s .1s ease-out both}
-  .cy-halo{animation:cyHalo .6s .3s ease-out forwards,cyBreath 2s 1s ease-in-out infinite}
-  .cy-rays{animation:cyRaysIn .6s .35s ease-out forwards,cySpin 14s linear infinite}
-  .cy-ring{animation:cyRing .9s .35s ease-out forwards}
-  .cy-ring.r2{animation:cyRing 1s .55s ease-out forwards}
-  .cy-sp{animation:cySp 1.6s var(--dl) ease-in-out infinite}
-  .cy-float i{animation:cyFloat var(--d) var(--dl) ease-out infinite}
-  #cyP1 .cy-bub{animation:bubbleIn .5s 1s cubic-bezier(.2,1.6,.4,1) both!important}
-  @keyframes cyPop{0%{transform:scale(0) rotate(-12deg);opacity:0}60%{transform:scale(1.12,.92) rotate(3deg);opacity:1}80%{transform:scale(.95,1.06) rotate(-1deg)}100%{transform:none}}
-  @keyframes cyJelly{30%{transform:scale(1.06,.94)}60%{transform:scale(.97,1.03)}}
-  @keyframes cyPoof{0%{opacity:0;transform:scale(.2)}40%{opacity:1}100%{opacity:0;transform:scale(5)}}
-  @keyframes cyHalo{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}
-  @keyframes cyBreath{50%{transform:scale(1.08)}}
-  @keyframes cyRaysIn{to{opacity:1}}
-  @keyframes cySpin{to{rotate:360deg}}
-  @keyframes cyRing{0%{opacity:.9;transform:scale(.6)}100%{opacity:0;transform:scale(1.9)}}
-  @keyframes cySp{0%,100%{transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(0) rotate(0)}40%{transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(1.2) rotate(45deg)}60%{transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(.9) rotate(70deg)}}
-  @keyframes cyFloat{0%{opacity:0;transform:translate(0,0) scale(.5)}20%{opacity:1}100%{opacity:0;transform:translate(var(--x),-170px) scale(1.15)}}
-}
-.cheer[data-phase="2"] .coin-cv{z-index:6!important;pointer-events:none}
-/* ===== v72：記録シートをかわいく ===== */
-.sheet{background:linear-gradient(180deg,#fff6f9 0%,#f6fbff 40%,#eef8fd 100%)!important;position:relative}
-.sheet::after{content:"";position:absolute;inset:8px 8px 0;border:2.5px dotted #ffc6d4;border-bottom:0;border-radius:24px 24px 0 0;pointer-events:none}
-.sheet::before{background:#ffc6d4!important}
-.rs-ttl{display:flex;align-items:center;gap:8px;font-size:21px!important;color:#2c4a5d}
-.rs-ac{width:30px;height:30px;display:inline-block;animation:rsWob 2.4s ease-in-out infinite}
-.rs-ac svg{width:100%;height:100%}
-@keyframes rsWob{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg) translateY(-2px)}}
-.sheet .amount-in{background:#fff!important;border:3px dotted #ffb3c7!important;border-radius:24px!important;box-shadow:0 4px 0 #ffe0e8,0 8px 18px rgba(255,111,145,.12)!important;padding:10px 18px!important}
-.sheet .amount-in input{color:#2c4a5d;font-size:36px!important}
-.sheet .amount-in span{color:#ff6f91!important;font-family:var(--display);font-weight:900;font-size:22px}
-.sheet .chips .chip[data-quick]{background:#fff3c4!important;border:0!important;color:#8a6510!important;font-family:var(--display);font-weight:900;box-shadow:0 3px 0 #f1d27a!important}
-.sheet .chips .chip[data-quick]:nth-child(2n){background:#e1f4ff!important;color:#2a6f96!important;box-shadow:0 3px 0 #b5dff3!important}
-.sheet .chips .chip[data-quick]:nth-child(3n){background:#ffe6ee!important;color:#c84b72!important;box-shadow:0 3px 0 #ffc2d1!important}
-.sheet .chips .chip[data-quick]:active{transform:translateY(2px);box-shadow:none!important}
-.sheet #catChips .chip{background:#fff!important;border:2px solid #d5ebf6!important;box-shadow:0 3px 0 #d5ebf6!important;color:#3d6681!important;font-weight:700}
-.sheet #catChips .chip[aria-pressed="true"]{background:#ffeef3!important;border-color:#ff8fab!important;color:#e0557c!important;box-shadow:0 3px 0 #ffc2d1!important}
-.sheet .field label{color:#4f7488!important;font-family:var(--display);font-weight:900}
-.sheet input:not(#amtIn){background:#fff!important;border:2px solid #dcedf6!important;border-radius:16px!important}
-.sheet input:not(#amtIn):focus{border-color:#ff8fab!important;outline:none}
-.sheet .btn:not(.ghost){background:linear-gradient(180deg,#ff94ad,#ff6f91)!important;color:#fff!important;border:0!important;border-radius:999px!important;box-shadow:0 5px 0 #e0557c,0 10px 18px rgba(255,111,145,.28)!important;font-family:var(--display);font-weight:900;font-size:17px}
-.sheet .btn:not(.ghost):active{transform:translateY(3px);box-shadow:0 2px 0 #e0557c!important}
-.sheet .btn.ghost{background:transparent!important;border:0!important;color:#8aa3b3!important;box-shadow:none!important}
-.sheet .btn.ghost::after{display:none!important}
 </style>
 </head>
 <body>
@@ -1092,7 +1031,7 @@ header.top{display:none!important}
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.10.01-72";
+const APP_VERSION="2026.10.01-71";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -1309,7 +1248,7 @@ function renderHome(){
       </div>
     </section>
     ${hasSample()?`<div class="sample"><span>いま表示しているのはサンプルです。最初の記録を追加すると自動で消えます。</span><button id="clearSample">今すぐ消す</button></div>`:""}
-    <div class="sec-head"><h2>${esc(state.name||"〇〇")}のどんぐり</h2></div>
+    <div class="sec-head"><h2>${esc(state.name||"あなた")}のどんぐり</h2></div>
     <section class="gacha-card gacha-only g-row">
       <div class="h2-band in-gacha">
         <div class="bal">${cn(state.coins)}</div>
@@ -1444,7 +1383,7 @@ function render(){
 function openSheet(){
   let cat=activeCats()[0].id;
   $("#sheetRoot").innerHTML=`<div class="scrim" id="scrim"><form class="sheet stack" id="addForm" novalidate>
-    <h3 class="rs-ttl"><span class="rs-ac">${COIN_SVG}</span>今回の節約</h3>
+    <h3>今回の節約</h3>
     <div class="amount-in"><input id="amtIn" inputmode="numeric" pattern="[0-9]*" placeholder="0" autocomplete="off" aria-label="金額"><span>円</span></div>
     <div class="chips">${[20,50,100,300,500,1000].map(v=>`<button type="button" class="chip" data-quick="${v}">+${v}</button>`).join("")}</div>
     <div class="field"><label>ジャンル</label><div class="chips" id="catChips">${activeCats().map(c=>`<button type="button" class="chip" data-cat="${esc(c.id)}" aria-pressed="${c.id===cat}">${catIcon(c.id)}${esc(c.label)}</button>`).join("")}${activeCats().length<MAX_CATS?'<button type="button" class="chip" data-cat="__custom" aria-pressed="false">＋ 自分で入力</button>':""}</div>
@@ -1660,15 +1599,9 @@ function celebrate(from,to,n,ch,earned,mul,gotTicket){
   const box=document.createElement("div");box.className="cheer";box.setAttribute("role","status");
   const audio=play(gotTicket||hit?"rec2":"rec"); buzz(15);
   const coinCount=Math.max(1,Math.min(COIN_MAX,Math.round(earned)));
-  const sp=[[-128,-70,22,.95],[118,-96,16,1.05],[-150,58,14,1.15],[142,40,24,1.0],[-60,-150,12,1.25],[70,150,15,1.1],[-110,140,18,1.3],[150,-20,11,1.2],[0,-170,14,1.35],[-170,-10,12,1.4]];
-  const hearts=Array.from({length:9},(_,i)=>`<i style="left:${(i/8*80+10).toFixed(0)}%;--d:${(1.3+Math.random()*.9).toFixed(2)}s;--dl:${(1.1+Math.random()*1.2).toFixed(2)}s;--s:${(12+Math.random()*10).toFixed(0)}px;--x:${(Math.random()*40-20).toFixed(0)}px;color:${["#ff8fab","#ffd23f","#8fd0f2","#ffb3c7","#b9e6a8"][i%5]}">${i%3===1?"✦":"♥"}</i>`).join("");
-  box.innerHTML=`<div class="cy${ch?"":" solo"}" id="cyP1">
+  box.innerHTML=`<canvas class="coin-cv"></canvas><div class="cy${ch?"":" solo"}" id="cyP1">
     ${ch?`<div class="cy-bub">${esc(ch.line)}</div>
-    <div class="cy-stage"><span class="cy-rays"></span><span class="cy-halo"></span><span class="cy-ring"></span><span class="cy-ring r2"></span>
-      ${sp.map(([x,y,s,d])=>`<b class="cy-sp" style="--x:${x}px;--y:${y}px;--s:${s}px;--dl:${d}s">✦</b>`).join("")}
-      <span class="cy-poof"></span>
-      <img class="${rarCls(ch).trim()} cy-photo" src="${ch.img}" alt="">
-      <span class="cy-float">${hearts}</span></div>`:""}</div>`;
+    <img class="${rarCls(ch).trim()} cy-photo" src="${ch.img}" alt="">`:""}</div>`;
   const showResult=(skipped)=>{
     if(box.dataset.phase==="2") return; box.dataset.phase="2"; box.dataset.lock="1"; setTimeout(()=>{box.dataset.lock="";},1800);
     if(skipped){stopAudio(audio);play("recDone");}
@@ -1688,7 +1621,7 @@ function celebrate(from,to,n,ch,earned,mul,gotTicket){
     const paint=k=>{const e=1-Math.pow(1-k,3),cur=Math.round(before+earned*e);eE.textContent=fmtN(Math.round(earned*e));eB.textContent=fmtN(cur);eF.style.width=pctOf(cur)+"%";
       eL.textContent=cur>=TICKET_YEN?"ガチャが引けるよ！":`ガチャまで あと${fmtN(TICKET_YEN-cur)}`;eL.classList.toggle("ok",cur>=TICKET_YEN);};
     const settle=()=>{paint(1);box.classList.add("settled");buzz(after>=TICKET_YEN&&before<TICKET_YEN?[25,60,35]:20);
-      coinBurst(box.querySelector(".coin-cv"),Math.max(12,Math.min(500,Math.round(earned))));
+      coinBurst(box.querySelector(".coin-cv"),gotTicket?70:40);
       if(typeof confettiBurst==="function"&&!reduce) confettiBurst(gotTicket||hit?60:30);};
     if(reduce){settle();return;}
     paint(0);
@@ -1697,6 +1630,7 @@ function celebrate(from,to,n,ch,earned,mul,gotTicket){
   box.dataset.phase="1";
   setTimeout(()=>showResult(false),reduce?0:3000);
   document.body.appendChild(box);
+  coinRain(box.querySelector(".coin-cv"),coinCount);
   // 「閉じる」かカードの外をタップで閉じる（出てから少しの間は閉じない）
   box.addEventListener("click",()=>{if(box.dataset.phase!=="2"){showResult(true);return;}if(box.dataset.lock)return;if(box.classList.contains("out"))return;box.classList.add("out");setTimeout(()=>{box.remove();if(gotTicket)showTicketGet();},320);});
 }
@@ -1705,11 +1639,11 @@ function coinBurst(cv,count){
   if(!cv||matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const W=innerWidth,H=innerHeight,dpr=Math.min(2,devicePixelRatio||1);cv.width=W*dpr;cv.height=H*dpr;
   const x=cv.getContext("2d");x.scale(dpr,dpr);coinSprite=coinSprite||makeCoinSprite();
-  const cx=W/2,cy=H*.36,ps=Array.from({length:count},(_,i)=>{const a=Math.PI*2*i/count+Math.random()*.3,v=150+Math.random()*230;return{vx:Math.cos(a)*v*.75,vy:Math.sin(a)*v*.75-140,r:(count>200?22:count>60?28:34)+Math.random()*14,sp:4+Math.random()*8,d:Math.random()*(count>100?.5:.15)};});
+  const cx=W/2,cy=H*.42,ps=Array.from({length:count},(_,i)=>{const a=Math.PI*2*i/count+Math.random()*.3,v=150+Math.random()*230;return{vx:Math.cos(a)*v*.75,vy:Math.sin(a)*v*.75-140,r:28+Math.random()*16,sp:4+Math.random()*8,d:Math.random()*.12};});
   const t0=performance.now();
   const fr=now=>{if(!cv.isConnected)return;const el=(now-t0)/1000;x.clearRect(0,0,W,H);
-    for(const p of ps){const t=el-p.d;if(t<0||t>2.2)continue;x.save();x.globalAlpha=Math.min(1,(2.2-t)*1.8);x.translate(cx+p.vx*t,cy+p.vy*t+180*t*t);x.rotate(Math.sin(t*p.sp*.5)*.4);x.drawImage(coinSprite,-p.r/2,-p.r/2,p.r,p.r);x.restore();}
-    if(el<2.9)requestAnimationFrame(fr);else x.clearRect(0,0,W,H);};
+    for(const p of ps){const t=el-p.d;if(t<0||t>1.9)continue;x.save();x.globalAlpha=Math.min(1,(1.9-t)*1.8);x.translate(cx+p.vx*t,cy+p.vy*t+180*t*t);x.rotate(Math.sin(t*p.sp*.5)*.4);x.drawImage(coinSprite,-p.r/2,-p.r/2,p.r,p.r);x.restore();}
+    if(el<2.1)requestAnimationFrame(fr);else x.clearRect(0,0,W,H);};
   requestAnimationFrame(fr);
 }
 // 運営からのプレゼント（上から順に1回ずつ配る）
