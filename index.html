@@ -1031,6 +1031,26 @@ html{background:#c3e8fa}
 html,body{background:#c3e8fa!important}
 body{background:radial-gradient(circle at 12% 18%,rgba(255,255,255,.35),transparent 30%),radial-gradient(circle at 92% 55%,rgba(255,255,255,.28),transparent 32%),linear-gradient(180deg,#c3e8fa 0%,#cdecfb 50%,#c6e9fa 100%)!important;background-attachment:fixed!important}
 .top-deco{display:none!important}
+body{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='420'%3E%3Cg fill='%23fff' opacity='.75'%3E%3Cpath d='M40 90a22 22 0 0 1 34-18 30 30 0 0 1 56 6 20 20 0 0 1 8 38H48a20 20 0 0 1-8-26z'/%3E%3Cpath d='M230 250a18 18 0 0 1 28-15 26 26 0 0 1 48 5 17 17 0 0 1 6 32h-74a17 17 0 0 1-8-22z'/%3E%3C/g%3E%3Cg fill='%23fff' opacity='.45'%3E%3Cpath d='M250 60a12 12 0 0 1 19-8 16 16 0 0 1 30 3 11 11 0 0 1 4 21h-48a11 11 0 0 1-5-16z'/%3E%3Cpath d='M30 340a14 14 0 0 1 22-10 20 20 0 0 1 36 4 13 13 0 0 1 5 24h-58a13 13 0 0 1-5-18z'/%3E%3C/g%3E%3C/svg%3E") 0 0/360px 420px,radial-gradient(ellipse at 50% 0%,#b6e2f8 0%,transparent 60%),linear-gradient(180deg,#b9e3f8 0%,#cdeefb 55%,#dff4fd 100%)!important}
+body{background-attachment:fixed!important}
+
+/* ===== v80 ===== */
+.cheer>*:not(.confetti):not(.crk):not(.crk-cone):not(.coin-cv){position:relative;z-index:5}
+.cheer .tk-card,.cheer .res2,.cheer .cy{z-index:5!important}
+#gStage .g-card{z-index:10}
+#gStage .g-cap,#gStage .g-hint{z-index:6}
+.crk{position:fixed;bottom:4vh;width:10px;height:10px;z-index:1;pointer-events:none;opacity:0}
+.crk-cone{position:fixed;bottom:2vh;left:2vw;width:64px;height:64px;z-index:2;pointer-events:none}
+.crk-cone.r{left:auto;right:2vw;transform:scaleX(-1)}
+.crk-cone svg{width:100%;height:100%}
+@media (prefers-reduced-motion:no-preference){
+  .crk{animation:crk var(--d) cubic-bezier(.15,.7,.35,1) forwards}
+  @keyframes crk{0%{opacity:1;transform:translate(0,0) rotate(0)}40%{opacity:1;transform:translate(var(--dx),var(--dy)) rotate(calc(var(--r)*.5))}100%{opacity:0;transform:translate(calc(var(--dx)*1.25),calc(var(--dy) + 55vh)) rotate(var(--r))}}
+  .crk-cone{animation:crkCone 1.4s ease-out forwards}
+  .crk-cone.r{animation-name:crkConeR}
+  @keyframes crkCone{0%{transform:scale(.4) rotate(10deg);opacity:0}15%{transform:scale(1.25) rotate(-12deg);opacity:1}30%{transform:scale(1) rotate(0)}80%{opacity:1}100%{opacity:0;transform:translateY(20px)}}
+  @keyframes crkConeR{0%{transform:scaleX(-1) scale(.4) rotate(10deg);opacity:0}15%{transform:scaleX(-1) scale(1.25) rotate(-12deg);opacity:1}30%{transform:scaleX(-1) scale(1)}80%{opacity:1}100%{opacity:0;transform:scaleX(-1) translateY(20px)}}
+}
 </style>
 </head>
 <body>
@@ -1061,7 +1081,7 @@ body{background:radial-gradient(circle at 12% 18%,rgba(255,255,255,.35),transpar
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.10.01-79";
+const APP_VERSION="2026.10.01-80";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -1648,8 +1668,7 @@ function celebrate(from,to,n,ch,earned,mul,gotTicket){
     const paint=k=>{const e=1-Math.pow(1-k,3),cur=Math.round(before+earned*e);eE.textContent=fmtN(Math.round(earned*e));eB.textContent=fmtN(cur);eF.style.width=pctOf(cur)+"%";
       eL.textContent=cur>=TICKET_YEN?"ガチャが引けるよ！":`ガチャまで あと${fmtN(TICKET_YEN-cur)}`;eL.classList.toggle("ok",cur>=TICKET_YEN);};
     const settle=()=>{paint(1);box.classList.add("settled");buzz(after>=TICKET_YEN&&before<TICKET_YEN?[25,60,35]:20);
-      coinBurst(box.querySelector(".coin-cv"),gotTicket?70:40);
-      if(typeof confettiBurst==="function"&&!reduce) confettiBurst(gotTicket||hit?60:30);};
+      if(!reduce){crackerBurst();setTimeout(()=>confettiBurst(gotTicket||hit?70:45),250);}};
     if(reduce){settle();return;}
     paint(0);
     setTimeout(()=>{const t0=performance.now(),dur=1050;const step=t=>{if(!box.isConnected)return;const k=Math.min(1,(t-t0)/dur);paint(k);if(k<1)requestAnimationFrame(step);else settle();};requestAnimationFrame(step);},150);
@@ -1817,12 +1836,37 @@ function confettiBurst(count){
   if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const colors=["#ff8fa8","#8fd0f2","#ffd36e","#ffffff","#2a92d0","#ffc2d1"];
   for(let i=0;i<count;i++){
-    const c=document.createElement("i");c.className="confetti";c.style.zIndex=60;
+    const c=document.createElement("i");c.className="confetti";c.style.zIndex=1;
     c.style.left=Math.random()*100+"vw";c.style.background=colors[i%colors.length];
     c.style.setProperty("--x",(Math.random()*120-60)+"px");c.style.setProperty("--r",(Math.random()*720+180)+"deg");
     c.style.setProperty("--d",(1.3+Math.random()*1.1)+"s");c.style.setProperty("--delay",(Math.random()*.25)+"s");
     if(Math.random()<.4){c.style.borderRadius="50%";c.style.width=c.style.height="9px";}
-    document.body.appendChild(c);setTimeout(()=>c.remove(),3000);
+    confettiHost().appendChild(c);setTimeout(()=>c.remove(),3000);
+  }
+}
+function confettiHost(){const h=[...document.querySelectorAll(".cheer:not(.out),#gStage")];return h.length?h[h.length-1]:document.body;}
+// クラッカー：左下と右下からポン！
+function crackerBurst(){
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const host=confettiHost();
+  const colors=["#ff8fab","#ffd36e","#8fd0f2","#b9e6a8","#c9a8ff","#ffffff","#ffb3c7"];
+  for(const side of [-1,1]){
+    const cone=document.createElement("i");cone.className="crk-cone"+(side>0?" r":"");
+    cone.innerHTML='<svg viewBox="0 0 60 60"><path d="M6 56L22 14 46 38Z" fill="#ffd36e" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><path d="M12 40l14 10M16 30l18 14M20 21l14 11" stroke="#ff8fab" stroke-width="4" stroke-linecap="round"/></svg>';
+    host.appendChild(cone);setTimeout(()=>cone.remove(),1600);
+    for(let i=0;i<40;i++){
+      const p=document.createElement("i");p.className="crk";
+      const ang=(Math.PI/180)*(68+Math.random()*20),sp=.7+Math.random()*.4;
+            p.style.setProperty("--dx",(-side*Math.cos(ang)*sp*60)+"vw");
+      p.style.setProperty("--dy",(-Math.sin(ang)*sp*85)+"vh");
+      p.style.setProperty("--r",(Math.random()*900-450)+"deg");
+      p.style.setProperty("--d",(2.2+Math.random()*1)+"s");
+      p.style.background=colors[i%colors.length];
+      if(i%3===0){p.style.width="5px";p.style.height="18px";p.style.borderRadius="3px";}
+      else if(i%3===1){p.style.width=p.style.height="9px";p.style.borderRadius="50%";}
+      p.style.left=side<0?"6vw":"94vw";
+      host.appendChild(p);setTimeout(()=>p.remove(),3400);
+    }
   }
 }
 function closeSheet(){$("#sheetRoot").innerHTML="";}
