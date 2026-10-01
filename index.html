@@ -1051,6 +1051,17 @@ body{background-attachment:fixed!important}
   @keyframes crkCone{0%{transform:scale(.4) rotate(10deg);opacity:0}15%{transform:scale(1.25) rotate(-12deg);opacity:1}30%{transform:scale(1) rotate(0)}80%{opacity:1}100%{opacity:0;transform:translateY(20px)}}
   @keyframes crkConeR{0%{transform:scaleX(-1) scale(.4) rotate(10deg);opacity:0}15%{transform:scaleX(-1) scale(1.25) rotate(-12deg);opacity:1}30%{transform:scaleX(-1) scale(1)}80%{opacity:1}100%{opacity:0;transform:scaleX(-1) translateY(20px)}}
 }
+
+/* ===== v82 ===== */
+.cheer>.crk-flash{position:fixed!important;z-index:1!important}
+.r2-lab{display:inline-flex;align-items:center;gap:3px}
+.r2-ac{display:inline-block;width:20px;height:20px;font-style:normal}
+.r2-ac svg{width:100%;height:100%;display:block}
+.list .item .amt{color:#2c4a5d!important}
+.crk-cone{width:76px!important;height:76px!important}
+.crk-flash{position:fixed;left:2vw;width:110px;height:110px;margin:-20px 0 0 -10px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.95),rgba(255,220,120,.6) 35%,transparent 70%);z-index:1;pointer-events:none;opacity:0}
+.crk-flash.r{left:auto;right:2vw}
+@media (prefers-reduced-motion:no-preference){.crk-flash{animation:crkFlash .6s ease-out forwards}@keyframes crkFlash{0%{opacity:0;transform:scale(.3)}30%{opacity:1}100%{opacity:0;transform:scale(1.8)}}}
 </style>
 </head>
 <body>
@@ -1081,7 +1092,7 @@ body{background-attachment:fixed!important}
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.10.01-81";
+const APP_VERSION="2026.10.01-82";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -1166,7 +1177,7 @@ const fmtTime=iso=>{const d=new Date(iso);return String(d.getHours()).padStart(2
 const WD="日月火水木金土";
 function fmtDay(d){const n=new Date(),y=new Date();y.setDate(n.getDate()-1);
   const base=(d.getMonth()+1)+"月"+d.getDate()+"日（"+WD[d.getDay()]+"）";
-  if(d.toDateString()===n.toDateString()) return "今日 · "+base;
+  if(d.toDateString()===n.toDateString()) return "今日";
   if(d.toDateString()===y.toDateString()) return "昨日 · "+base;
   return base;}
 function fmtDate(iso){
@@ -1597,7 +1608,7 @@ const ownedChars=()=>state.owned.map(charById).filter(Boolean);
 const pickChar=()=>{const o=ownedChars();return o.length?o[Math.floor(Math.random()*o.length)]:null;};
 
 // ---------- コインの雨（節約した金額と同じ枚数。多くても軽く動くようにcanvasで描く） ----------
-const COIN_MAX=1000;
+const COIN_MAX=400;
 let coinSprite=null;
 function makeCoinSprite(){
   const sz=96,c=document.createElement("canvas");c.width=c.height=sz;const x=c.getContext("2d");
@@ -1645,7 +1656,7 @@ function celebrate(from,to,n,ch,earned,mul,gotTicket){
   const after=state.coins, before=Math.max(0,after-earned);
   const box=document.createElement("div");box.className="cheer";box.setAttribute("role","status");
   const audio=play(gotTicket||hit?"rec2":"rec"); buzz(15);
-  const coinCount=Math.max(1,Math.min(COIN_MAX,Math.round(earned)));
+  const coinCount=Math.max(1,Math.min(COIN_MAX,Math.round(earned*0.4)));
   box.innerHTML=`<canvas class="coin-cv"></canvas><div class="cy${ch?"":" solo"}" id="cyP1">
     ${ch?`<div class="cy-bub">${esc(ch.line)}</div>
     <img class="${rarCls(ch).trim()} cy-photo" src="${ch.img}" alt="">`:""}</div>`;
@@ -1659,7 +1670,7 @@ function celebrate(from,to,n,ch,earned,mul,gotTicket){
         <div class="r2-amt"><span class="r2-coin">${COIN_SVG}</span><b id="r2Earn">0</b><em>GET!</em></div>
         ${ch?`<div class="r2-ch"><img class="${rarCls(ch).trim()}" src="${ch.img}" alt=""><div><b>${esc(ch.name)}が応援したよ</b><span>${esc(ch.line)}</span></div></div>`:""}
         <div class="r2-hr"></div>
-        <div class="r2-bal"><span>貯まったどんぐり</span><b id="r2Bal">${fmtN(before)}</b></div>
+        <div class="r2-bal"><span class="r2-lab">貯まった<i class="r2-ac">${COIN_SVG}</i></span><b id="r2Bal">${fmtN(before)}</b></div>
         <div class="r2-bar"><i id="r2Fill" style="width:${pctOf(before)}%"></i></div>
         <div class="r2-left" id="r2Left">${before>=TICKET_YEN?"ガチャが引けるよ！":`ガチャまで あと${fmtN(TICKET_YEN-before)}`}</div>
         <button class="btn tk-go r2-close" id="resClose">閉じる</button>
@@ -1668,7 +1679,7 @@ function celebrate(from,to,n,ch,earned,mul,gotTicket){
     const paint=k=>{const e=1-Math.pow(1-k,3),cur=Math.round(before+earned*e);eE.textContent=fmtN(Math.round(earned*e));eB.textContent=fmtN(cur);eF.style.width=pctOf(cur)+"%";
       eL.textContent=cur>=TICKET_YEN?"ガチャが引けるよ！":`ガチャまで あと${fmtN(TICKET_YEN-cur)}`;eL.classList.toggle("ok",cur>=TICKET_YEN);};
     const settle=()=>{paint(1);box.classList.add("settled");buzz(after>=TICKET_YEN&&before<TICKET_YEN?[25,60,35]:20);
-      if(!reduce){crackerBurst();setTimeout(()=>confettiBurst(gotTicket||hit?70:45),250);}};
+      if(!reduce){crackerBurst();setTimeout(()=>confettiBurst(110),250);setTimeout(()=>confettiBurst(70),1100);}};
     if(reduce){settle();return;}
     paint(0);
     setTimeout(()=>{const t0=performance.now(),dur=1050;const step=t=>{if(!box.isConnected)return;const k=Math.min(1,(t-t0)/dur);paint(k);if(k<1)requestAnimationFrame(step);else settle();};requestAnimationFrame(step);},150);
@@ -1849,25 +1860,32 @@ function confettiHost(){const h=[...document.querySelectorAll(".cheer:not(.out),
 function crackerBurst(){
   if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const host=confettiHost();
-  const colors=["#ff8fab","#ffd36e","#8fd0f2","#b9e6a8","#c9a8ff","#ffffff","#ffb3c7"];
-  for(const side of [-1,1]){
-    const cone=document.createElement("i");cone.className="crk-cone"+(side>0?" r":"");
-    cone.innerHTML='<svg viewBox="0 0 60 60"><path d="M6 56L22 14 46 38Z" fill="#ffd36e" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><path d="M12 40l14 10M16 30l18 14M20 21l14 11" stroke="#ff8fab" stroke-width="4" stroke-linecap="round"/></svg>';
-    host.appendChild(cone);setTimeout(()=>cone.remove(),1600);
-    for(let i=0;i<40;i++){
+  const colors=["#ff8fab","#ffd36e","#8fd0f2","#b9e6a8","#c9a8ff","#ffffff","#ffb3c7","#ffa45c"];
+  const pop=(side,delay,bottom)=>setTimeout(()=>{
+    const cone=document.createElement("i");cone.className="crk-cone"+(side>0?" r":"");cone.style.bottom=bottom;
+    cone.innerHTML='<svg viewBox="0 0 60 60"><path d="M6 56L22 14 46 38Z" fill="#ffd36e" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><path d="M12 40l14 10M16 30l18 14M20 21l14 11" stroke="#ff8fab" stroke-width="4" stroke-linecap="round"/><circle cx="38" cy="18" r="4" fill="#fff"/><circle cx="48" cy="26" r="3" fill="#fff"/></svg>';
+    host.appendChild(cone);setTimeout(()=>cone.remove(),1700);
+    const flash=document.createElement("i");flash.className="crk-flash"+(side>0?" r":"");flash.style.bottom=bottom;host.appendChild(flash);setTimeout(()=>flash.remove(),700);
+    for(let i=0;i<70;i++){
       const p=document.createElement("i");p.className="crk";
-      const ang=(Math.PI/180)*(68+Math.random()*20),sp=.7+Math.random()*.4;
-            p.style.setProperty("--dx",(-side*Math.cos(ang)*sp*60)+"vw");
-      p.style.setProperty("--dy",(-Math.sin(ang)*sp*85)+"vh");
-      p.style.setProperty("--r",(Math.random()*900-450)+"deg");
-      p.style.setProperty("--d",(2.2+Math.random()*1)+"s");
+      const ang=(Math.PI/180)*(55+Math.random()*33),sp=.6+Math.random()*.55;
+      p.style.setProperty("--dx",(-side*Math.cos(ang)*sp*70)+"vw");
+      p.style.setProperty("--dy",(-Math.sin(ang)*sp*90)+"vh");
+      p.style.setProperty("--r",(Math.random()*1080-540)+"deg");
+      p.style.setProperty("--d",(2.3+Math.random()*1.3)+"s");
       p.style.background=colors[i%colors.length];
-      if(i%3===0){p.style.width="5px";p.style.height="18px";p.style.borderRadius="3px";}
-      else if(i%3===1){p.style.width=p.style.height="9px";p.style.borderRadius="50%";}
-      p.style.left=side<0?"6vw":"94vw";
-      host.appendChild(p);setTimeout(()=>p.remove(),3400);
+      const t=i%5;
+      if(t===0){p.style.width="5px";p.style.height="24px";p.style.borderRadius="3px";}
+      else if(t===1){p.style.width=p.style.height="10px";p.style.borderRadius="50%";}
+      else if(t===2){p.style.width=p.style.height="14px";p.style.clipPath="polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)";}
+      else if(t===3){p.style.width="12px";p.style.height="8px";p.style.borderRadius="2px";}
+      else {p.style.width="4px";p.style.height="38px";p.style.borderRadius="4px";p.style.opacity=".9";}
+      p.style.left=side<0?"7vw":"93vw";p.style.bottom=bottom;
+      host.appendChild(p);setTimeout(()=>p.remove(),4000);
     }
-  }
+  },delay);
+  pop(-1,0,"3vh");pop(1,0,"3vh");
+  pop(-1,450,"22vh");pop(1,450,"22vh");
 }
 function closeSheet(){$("#sheetRoot").innerHTML="";}
 
