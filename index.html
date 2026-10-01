@@ -1092,7 +1092,7 @@ body{background-attachment:fixed!important}
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.10.01-82";
+const APP_VERSION="2026.10.01-83";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -1391,10 +1391,10 @@ function renderSettings(){
       <button class="switch" id="soundToggle" role="switch" aria-checked="${state.sound!==false}" aria-label="効果音"></button></div>
     <div class="sec-head"><h2>データの引っ越し</h2></div>
     <div class="card stack">
-      <p class="note" style="margin:0">記録はこの端末のこのブラウザだけに保存されています。機種変更や、あとで共有版に移すときは、下のボタンでデータをコピーして、移行先に貼り付けてください。</p>
+      <p class="note" style="margin:0">データはこのアプリの中だけに保存されています。ホーム画面に追加し直す前や機種変更の前に「データをコピー」して、メモ帳やLINEに貼って保管してください。新しいアプリでは、下に貼り付けて「読み込む」を押すと、どんぐり・仲間・記録がそのまま戻ります。</p>
       <button class="btn ghost" id="exportBtn">データをコピー</button>
       <div class="field"><label for="importIn">データを貼り付けて読み込む</label><textarea id="importIn" rows="3" placeholder="コピーしたデータをここに貼り付け"></textarea></div>
-      <button class="btn ghost" id="importBtn">読み込む（今のデータに追加）</button>
+      <button class="btn ghost" id="importBtn">読み込む（今のデータと置きかえ）</button>
       <div class="err" id="ioMsg"></div>
     </div>
     <div class="sec-head"><h2>リセット</h2></div>
@@ -1929,7 +1929,7 @@ document.addEventListener("click",e=>{
     state.categories=activeCats().filter(x=>x.id!==c.id);
     save();render();toast("選択肢を削除しました");return;}
   if(t.closest("#exportBtn")){
-    const data=JSON.stringify({app:"uitacho",v:1,name:state.name,records:state.records.filter(r=>!r.sample),owned:state.owned,coins:state.coins,categories:state.categories,categoryArchive:state.categoryArchive,categoryIconMap:state.categoryIconMap});
+    const data=JSON.stringify({app:"uitacho",v:2,state:Object.assign({},state,{records:state.records.filter(r=>!r.sample)})});
     const done=()=>{$("#ioMsg").style.color="var(--hue-deep)";$("#ioMsg").textContent="コピーしました。メモ帳などに貼って保管してください";};
     if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(data).then(done).catch(()=>fallbackCopy(data));}
     else fallbackCopy(data);
@@ -1937,14 +1937,26 @@ document.addEventListener("click",e=>{
   if(t.closest("#importBtn")){
     const msg=$("#ioMsg");
     try{
-      const d=JSON.parse($("#importIn").value.trim());
+      const raw=$("#importIn").value.trim();
+      const d=JSON.parse(raw.slice(raw.indexOf("{"),raw.lastIndexOf("}")+1));
+      if(d.app==="uitacho"&&d.v===2&&d.state&&Array.isArray(d.state.records)){
+        if(!confirm("今のデータを、貼り付けたデータに置きかえます。よろしいですか？")) return;
+        const keepSound=state.sound;
+        state=Object.assign({},d.state);state.records=(state.records||[]).filter(r=>r&&r.id);
+        if(!Array.isArray(state.owned)) state.owned=[];
+        if(!Array.isArray(state.gifts)) state.gifts=GIFTS.map(g=>g.key);
+        state.welcomed=true; if(state.sound===undefined) state.sound=keepSound;
+        save();tab="home";render();msg.textContent="";toast("データを読み込みました");return;
+      }
       if(d.app!=="uitacho"||!Array.isArray(d.records)) throw 0;
+      if(!confirm("今のデータを、貼り付けたデータに置きかえます。よろしいですか？")) return;
+      state.records=[];state.owned=[];state.gifts=GIFTS.map(g=>g.key);state.welcomed=true;
       const ids=new Set(state.records.map(r=>r.id));
       const add=d.records.filter(r=>r&&r.id&&!ids.has(r.id)&&Number(r.amount)>0);
       state.records=state.records.filter(r=>!r.sample).concat(add);
       if(!state.name&&d.name) state.name=d.name;
       if(Array.isArray(d.owned)) for(const id of d.owned) if(charById(id)&&!state.owned.includes(id)) state.owned.push(id);
-      if(typeof d.coins==="number"&&d.coins>state.coins) state.coins=d.coins;
+      if(typeof d.coins==="number") state.coins=d.coins;
       if(Array.isArray(d.categories)) for(const c of d.categories){
         if(c&&/^[a-z0-9_-]{1,40}$/.test(c.id)&&typeof c.label==="string"&&c.label.trim()&&c.label.length<=18&&!activeCats().some(x=>x.id===c.id)){
           if(activeCats().length<MAX_CATS){const iconIndex=nextIconIndex();state.categories.push({id:c.id,label:c.label.trim(),iconIndex});state.categoryIconMap[c.id]=iconIndex;}
