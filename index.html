@@ -1141,6 +1141,7 @@ body{background-attachment:fixed!important}
 .pf-txt b{flex:0 0 100%;font-size:13px;font-weight:700}
 .pf-btn{display:inline-block;background:#ff6f91;color:#fff;border-radius:999px;padding:7px 14px;font-weight:900;font-size:13px;cursor:pointer}
 .pf-del{border:0;background:none;color:#8aa3b3;font-weight:700;font-size:13px}
+.gm-nm{max-width:9em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .gm-bar .kimg.me .gst{right:auto;left:-5px}
 </style>
 </head>
@@ -1172,7 +1173,7 @@ body{background-attachment:fixed!important}
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.10.02-87";
+const APP_VERSION="2026.10.02-88";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -2196,7 +2197,7 @@ function gmBoard(mood){
   const stars=[[3,3],[3,9],[6,6],[9,3],[9,9]].map(([r,c])=>`<i style="left:${c/(GM_N-1)*100}%;top:${r/(GM_N-1)*100}%"></i>`).join("");
   gmRoot().innerHTML=`<div class="gm-scr"><button class="gm-hb" data-gm="quit">⌂ ホームに戻る</button>
     <div class="gm-mid"><div class="gm-grp">
-      <div class="gm-bar"><span class="who${g.turn===1&&!g.over?" on":""}">${hasPf()?`<span class="kimg me"><img src="${state.profileImage}" alt=""><span class="gst w"></span></span>`:'<span class="gst w"></span>'}あなた${g.turn===1&&!g.over?'<em>の番</em>':""}</span>
+      <div class="gm-bar"><span class="who${g.turn===1&&!g.over?" on":""}">${hasPf()?`<span class="kimg me"><img src="${state.profileImage}" alt=""><span class="gst w"></span></span>`:'<span class="gst w"></span>'}<span class="gm-nm">${esc(state.name||"あなた")}</span>${g.turn===1&&!g.over?'<em>の番</em>':""}</span>
         <span class="who kc"><span class="kimg"><img src="${KAICHO_IMG}" alt=""><span class="gst b"></span></span>会長</span></div>
       <div class="gm-bub${line?"":" off"}">${esc(line)||"&nbsp;"}</div>
       <div class="gm-board"><div class="gm-grid">${stars}</div><div class="gm-cells">${cells}</div></div>
