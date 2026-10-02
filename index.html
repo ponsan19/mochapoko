@@ -1173,7 +1173,7 @@ body{background-attachment:fixed!important}
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.10.02-90";
+const APP_VERSION="2026.10.02-91";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -2183,9 +2183,10 @@ function gmBoard(mood){
   let line="";
   if(mood==="start"){line=GM_LINES.start[Math.floor(Math.random()*3)];g.spoke=g.moves;g.mood="normal";}
   else if(mood!=="keep"){
-    const changed=mood!=="normal"&&mood!==g.mood&&g.moves-(g.spoke??-99)>=8;
-    const chat=mood==="normal"&&g.moves-(g.spoke??-99)>=10&&Math.random()<.2;
-    if(changed||chat){line=GM_LINES[mood][Math.floor(Math.random()*GM_LINES[mood].length)];g.spoke=g.moves;}
+    const gap=g.moves-(g.spoke??-99);
+    const changed=mood!=="normal"&&mood!==g.mood&&gap>=4;
+    const chat=gap>=6&&Math.random()<.4;
+    if(changed||chat){const L=GM_LINES[mood].filter(x=>x!==g.said);line=L[Math.floor(Math.random()*L.length)];g.spoke=g.moves;g.said=line;}
     g.mood=mood;
   }
   let cells="";
