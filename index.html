@@ -1173,7 +1173,7 @@ body{background-attachment:fixed!important}
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.10.02-88";
+const APP_VERSION="2026.10.02-89";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -2164,7 +2164,7 @@ function gmLevel(){
   const rows=[1,2,3,4,5].map(l=>`<button class="gm-lv${l===gmLv?" on":""}" data-lv="${l}"><b>Lv.${l}</b><span class="dots"><i>${"●".repeat(l)}</i>${"●".repeat(5-l)}</span><span class="rw">${COIN_SVG}+${l*50}</span></button>`).join("");
   gmRoot().innerHTML=`<div class="gm-scr"><button class="gm-hb" data-gm="back-select">‹ もどる</button>
     <div class="gm-mid"><div class="gm-grp">
-      <div class="gm-rule"><span class="gst w"></span>白を先に5つ並べたら YOU WIN！</div>
+      <div class="gm-rule"><span class="gst w"></span>白を先に5つならべたら勝ちだよ！</div>
       <div class="gm-lvs">${rows}</div>
       <div class="gm-fee"><span>参加料 ${COIN_SVG} ${GM_FEE}</span><span>今日あと ${left}回</span></div>
       <button class="gm-go" data-gm="start" ${can?"":"disabled"}>${left<=0?"今日はもう遊べないよ":state.coins<GM_FEE?"どんぐりが足りないよ":`Lv.${gmLv} ではじめる`}</button>
