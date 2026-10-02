@@ -1173,7 +1173,7 @@ body{background-attachment:fixed!important}
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.10.02-89";
+const APP_VERSION="2026.10.02-90";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -2145,7 +2145,7 @@ const GM_LINES={
 };
 function hasPf(){return typeof state.profileImage==="string"&&/^data:image\/jpeg;base64,/.test(state.profileImage);}
 function gmToday(){const d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();}
-function gmLeft(){if(!state.gm||state.gm.day!==gmToday())return GM_DAILY;return Math.max(0,GM_DAILY-(state.gm.n||0));}
+function gmLeft(){return Infinity;} // 回数制限なし
 function gmUse(){if(!state.gm||state.gm.day!==gmToday())state.gm={day:gmToday(),n:0};state.gm.n++;}
 let GM=null; // 今の対局
 function gmRoot(){let r=document.getElementById("gmRoot");if(!r){r=document.createElement("div");r.id="gmRoot";document.body.appendChild(r);}return r;}
@@ -2166,8 +2166,8 @@ function gmLevel(){
     <div class="gm-mid"><div class="gm-grp">
       <div class="gm-rule"><span class="gst w"></span>白を先に5つならべたら勝ちだよ！</div>
       <div class="gm-lvs">${rows}</div>
-      <div class="gm-fee"><span>参加料 ${COIN_SVG} ${GM_FEE}</span><span>今日あと ${left}回</span></div>
-      <button class="gm-go" data-gm="start" ${can?"":"disabled"}>${left<=0?"今日はもう遊べないよ":state.coins<GM_FEE?"どんぐりが足りないよ":`Lv.${gmLv} ではじめる`}</button>
+      <div class="gm-fee"><span>参加料 ${COIN_SVG} ${GM_FEE}</span></div>
+      <button class="gm-go" data-gm="start" ${can?"":"disabled"}>${state.coins<GM_FEE?"どんぐりが足りないよ":`Lv.${gmLv} ではじめる`}</button>
     </div></div></div>`;
 }
 function gmStart(){
