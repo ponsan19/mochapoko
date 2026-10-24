@@ -1,0 +1,35 @@
+name: toikatsu timetable
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: toikatsu
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 toikatsu/update.py
+      - name: commit if the timetable changed
+        run: |
+          git diff --quiet -- toikatsu/data.json && exit 0
+          # ignore a change that is only the timestamp
+          if [ "$(git diff -U0 -- toikatsu/data.json | grep -c '^[-+][^-+]')" -le 2 ] && python3 - <<'PY'
+          import json, subprocess
+          old = json.loads(subprocess.check_output(["git", "show", "HEAD:toikatsu/data.json"]))
+          new = json.load(open("toikatsu/data.json"))
+          old.pop("updated", None); new.pop("updated", None)
+          raise SystemExit(0 if old == new else 1)
+          PY
+          then
+            # refresh the timestamp at most every 6 hours so the page shows it was checked
+            last=$(git log -1 --format=%ct -- toikatsu/data.json); now=$(date +%s)
+            [ $((now-last)) -lt 21600 ] && exit 0
+          fi
+          git config user.name "toikatsu-bot"
+          git config user.email "toikatsu-bot@users.noreply.github.com"
+          git add toikatsu/data.json
+          git commit -m "トイカツの時間割を更新"
+          git push
