@@ -1173,7 +1173,7 @@ body{background-attachment:fixed!important}
 <script>
 (function(){
 // ↓ htmlを差し替えるたびに数字を上げる（ホーム画面アプリが新しい版に気づく目印）
-const APP_VERSION="2026.10.23-1";
+const APP_VERSION="2026.10.24-1";
 const KEY="uitacho.v1";
 const MAX_CATS=6;
 const DEFAULT_CATS=[
@@ -1568,12 +1568,16 @@ function openSheet(){
     if(hasSample()) state.records=state.records.filter(r=>!r.sample);
     const before=sum(inMonth(mkey(new Date())));
     let ch=null;
-    if(state.nextChar&&state.owned.includes(state.nextChar)){ch=charById(state.nextChar);}
+    delete state.foreseen; // 旧版の予言（ガチャ用）は使わない
+    if(state.prophecy&&state.owned.includes(state.prophecy)){ch=charById(state.prophecy);state.prophecy=null;} // 占い師が予言した子が応援する
+    else{
+      if(state.nextChar&&state.owned.includes(state.nextChar)){ch=charById(state.nextChar);}
+      state.nextChar=null;
+    }
     if(!ch) ch=pickChar();
-    state.nextChar=null;
-    if(ch&&ch.fortune){ // 占い師：次のガチャで出る子をこの時に決める
-      const ny=CHARACTERS.filter(c=>!state.owned.includes(c.id));
-      if(!(state.foreseen&&ny.some(c=>c.id===state.foreseen))) state.foreseen=ny.length?ny[Math.floor(Math.random()*ny.length)].id:null;
+    if(ch&&ch.fortune){ // 占い師：次に応援する子をこの時に決める（持っている子から）
+      const os=ownedChars().filter(c=>!c.fortune),pool=os.length?os:ownedChars();
+      state.prophecy=pool.length?pool[Math.floor(Math.random()*pool.length)].id:null;
     }
     const mul=ch?(ch.rand?rollMul(ch):skillOf(ch).mul):null; // その時点の倍率を記録に残す
     const earned=earnOf(n,ch,mul);
@@ -1698,7 +1702,7 @@ const rar=c=>c&&c.rarity&&RARITY[c.rarity]?c.rarity:"normal";
 const rarCls=c=>" rar-"+rar(c);
 const rarTag=c=>c?`<span class="rar-tag rar-t-${rar(c)}">${RARITY[rar(c)]}</span>`:"";
 // 応援のセリフ（占い師は次のガチャを予言する）
-const cheerLine=c=>{if(c&&c.fortune){const f=state.foreseen&&!state.owned.includes(state.foreseen)&&charById(state.foreseen);if(f)return `次回は${f.name}…`;}return c?c.line:"";};
+const cheerLine=c=>{if(c&&c.fortune){const f=state.prophecy&&state.owned.includes(state.prophecy)&&charById(state.prophecy);if(f)return `次回は${f.name}…`;}return c?c.line:"";};
 const ownedChars=()=>state.owned.map(charById).filter(Boolean);
 const pickChar=()=>{const o=ownedChars();return o.length?o[Math.floor(Math.random()*o.length)]:null;};
 
@@ -1874,13 +1878,12 @@ function drawChar(){
   if(!state.owned.includes(CHARACTERS[0].id)) return CHARACTERS[0];
   const notYet=CHARACTERS.filter(c=>!state.owned.includes(c.id));
   const ur=notYet.find(c=>c.id==="uranai"); if(ur) return ur; // 小ちゃんの次は必ず占い師
-  const fs=state.foreseen&&notYet.find(c=>c.id===state.foreseen); if(fs) return fs; // 占い師が予言した子
   return notYet.length?notYet[Math.floor(Math.random()*notYet.length)]:null;
 }
 function openGacha(){
   if(state.coins<TICKET_YEN) return;
   const ch=drawChar();
-  if(ch){ state.coins-=TICKET_YEN; state.foreseen=null; state.owned.push(ch.id); state.nextChar=ch.id; (state.unseen=state.unseen||[]).push(ch.id); (state.gotAt=state.gotAt||{})[ch.id]=Date.now(); save(); }
+  if(ch){ state.coins-=TICKET_YEN; state.owned.push(ch.id); state.nextChar=ch.id; (state.unseen=state.unseen||[]).push(ch.id); (state.gotAt=state.gotAt||{})[ch.id]=Date.now(); save(); }
   runGacha(ch);
 }
 function flash(){
@@ -2070,7 +2073,7 @@ document.addEventListener("click",e=>{
     }catch(err){msg.style.color="var(--danger)";msg.textContent="読み込めませんでした。「データをコピー」で出した文字列をそのまま貼り付けてください";}
     return;}
   if(t.closest("#resetBtn")){
-    if(confirmDel==="__all"){state.records=[];state.owned=[];state.ticketsUsed=0;state.coins=0;state.welcomed=false;state.nextChar=null;state.foreseen=null;confirmDel=null;state.gifts=[];save();tab="home";render();toast("すべて削除しました");setTimeout(()=>showGifts(()=>setTimeout(showWelcome,300)),400);}
+    if(confirmDel==="__all"){state.records=[];state.owned=[];state.ticketsUsed=0;state.coins=0;state.welcomed=false;state.nextChar=null;state.prophecy=null;confirmDel=null;state.gifts=[];save();tab="home";render();toast("すべて削除しました");setTimeout(()=>showGifts(()=>setTimeout(showWelcome,300)),400);}
     else{confirmDel="__all";render();}
     return;}
   if((confirmDel||openId) && !t.closest(".sheet")){confirmDel=null;openId=null;render();}
