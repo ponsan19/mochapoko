@@ -116,7 +116,7 @@ select,input[type=time]{font:inherit;font-size:.9rem;padding:4px 6px;border:1px 
   <button class="ghost" id="toggleOpts" type="button" aria-expanded="false" aria-controls="opts">別の日時・条件</button>
  </div>
  <div class="opts" id="opts" hidden>
-  <label for="day">曜日 <select id="day"></select></label>
+  <label for="day">日付 <select id="day"></select></label>
   <label for="from">何時から <input type="time" id="from"></label>
   <button class="ghost" id="reset" type="button">今に戻す</button>
   <label for="free"><input type="checkbox" id="free"> 自由練習の時間も出す</label>
@@ -134,6 +134,10 @@ const DAYS=['日','月','火','水','木','金','土'];
 const NG=/中級|上級|マス|スパー|選手|プロ|不在|清掃|テクニック実践/;
 const $=id=>document.getElementById(id);
 const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+function todayYmd(){return new Date(Date.now()+9*3600e3).toISOString().slice(0,10)}
+function wd(ymd){return new Date(ymd+'T00:00:00Z').getUTCDay()}
+function addDays(ymd,k){return new Date(Date.parse(ymd+'T00:00:00Z')+k*864e5).toISOString().slice(0,10)}
+function label(ymd){return (+ymd.slice(5,7))+'/'+(+ymd.slice(8,10))+'（'+DAYS[wd(ymd)]+'）'}
 function ymdFor(day){const j=new Date(Date.now()+9*3600e3);const add=(day-j.getUTCDay()+7)%7;const t=new Date(j.getTime()+add*864e5);return t.toISOString().slice(0,10)}
 function jstNow(){const p=new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',weekday:'short',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date());const g=t=>p.find(x=>x.type===t).value;return{d:DAYS.indexOf(g('weekday')),t:g('hour')+':'+g('minute')}}
 const mins=t=>{const[a,b]=t.split(':').map(Number);return a*60+b};
@@ -149,10 +153,11 @@ function paintTabs(){document.querySelectorAll('#tabs .chip').forEach(c=>{c.setA
 document.querySelectorAll('#tabs .chip').forEach(c=>c.onclick=()=>{view=c.dataset.v;store.set('tk_view',view);paintTabs();render()});
 function toggleFav(id){id=String(id);favs=favs.includes(id)?favs.filter(x=>x!==id):[...favs,id];store.set('tk_favs',JSON.stringify(favs));paintTabs();render()}
 paintTabs();
-DAYS.forEach((d,i)=>{const o=document.createElement('option');o.value=i;o.textContent=d+'曜';$('day').appendChild(o)});
+function fillDates(){const t=todayYmd(),sel=$('day').value;$('day').innerHTML='';for(let k=0;k<40;k++){const y=addDays(t,k);const dm=Object.values(D.x||{}).map(x=>+x.month).filter(Boolean);const ok=+y.slice(5,7)===+t.slice(5,7)||dm.includes(+y.slice(5,7));if(!ok)break;const o=document.createElement('option');o.value=y;o.textContent=(k===0?'今日 ':k===1?'明日 ':'')+label(y)+(HOLI.includes(y)?' 祝':'');$('day').appendChild(o)}if(sel&&[...$('day').options].some(o=>o.value===sel))$('day').value=sel}
+fillDates();
 
-function pick(day,from){
- const free=$('free').checked;const ymd=ymdFor(day),holi=HOLI.includes(ymd);
+function pick(ymd,from){
+ const free=$('free').checked;const day=wd(ymd),holi=HOLI.includes(ymd);
  return D.c.filter(c=>{const dj=D.dojos[c[0]];return c[1]===day+1&&c[5]===1&&!NG.test(c[4])&&c[2]>=from&&(view==='all'||favs.includes(String(c[0])))&&(free||!/自由練習/.test(c[4]))&&!(holi&&c[2]>='18:00')&&!/無料体験限定/.test(c[4])})
   .sort((a,b)=>a[2]<b[2]?-1:a[2]>b[2]?1:here?km(here,D.dojos[a[0]].g)-km(here,D.dojos[b[0]].g):D.dojos[a[0]].n.localeCompare(D.dojos[b[0]].n,'ja'));
 }
@@ -180,18 +185,18 @@ function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;
 
 function render(){
  const n=jstNow();$('nowLabel').textContent='いま '+DAYS[n.d]+'曜 '+n.t;
- const day=+$('day').value,from=$('from').value||'00:00';
- const isToday=day===n.d&&!manual;
- let rows=pick(day,from);
+ const ymd=$('day').value||todayYmd(),from=$('from').value||'00:00';
+ const isToday=ymd===todayYmd()&&!manual;
+ let rows=pick(ymd,from);
  const hero=$('hero');const out=$('out');out.innerHTML='';
- if(HOLI.includes(ymdFor(day))){const h=document.createElement('div');h.className='holi';h.textContent=(+ymdFor(day).slice(5,7))+'/'+(+ymdFor(day).slice(8,10))+'は祝日なので、多くの店舗が18時までです。18時以降のクラスは外しています。';out.appendChild(h)}
+ if(HOLI.includes(ymd)){const h=document.createElement('div');h.className='holi';h.textContent=(+ymd.slice(5,7))+'/'+(+ymd.slice(8,10))+'は祝日なので、多くの店舗が18時までです。18時以降のクラスは外しています。';out.appendChild(h)}
  if(!rows.length){
   hero.hidden=false;hero.className='hero none';
   // look ahead to the next day that has classes
-  let nd=(day+1)%7,nr=pick(nd,'00:00'),k=1;while(!nr.length&&k<7){nd=(nd+1)%7;nr=pick(nd,'00:00');k++}
-  hero.innerHTML='<span class="k">'+(isToday?'今日はもう終わりました':'この時間からのクラスはありません')+'</span><span class="what">'+(nr.length?(DAYS[nd]+'曜は '+nr[0][2]+' からあります'):'条件を変えてみてください')+'</span>'+(nr.length?'<div class="acts"><a href="#" id="jump">'+DAYS[nd]+'曜を見る</a></div>':'');
+  let nd=addDays(ymd,1),nr=pick(nd,'00:00'),k=1;while(!nr.length&&k<7){nd=addDays(nd,1);nr=pick(nd,'00:00');k++}
+  hero.innerHTML='<span class="k">'+(isToday?'今日はもう終わりました':'この時間からのクラスはありません')+'</span><span class="what">'+(nr.length?(label(nd)+'は '+nr[0][2]+' からあります'):'条件を変えてみてください')+'</span>'+(nr.length?'<div class="acts"><a href="#" id="jump">'+label(nd)+'を見る</a></div>':'');
   hero.style.background='';
-  const j=$('jump');if(j)j.onclick=e=>{e.preventDefault();manual=true;$('day').value=nd;$('from').value='00:00';render()};
+  const j=$('jump');if(j)j.onclick=e=>{e.preventDefault();manual=true;if(![...$('day').options].some(o=>o.value===nd)){const o=document.createElement('option');o.value=nd;o.textContent=label(nd);$('day').appendChild(o)}$('day').value=nd;$('from').value='00:00';render()};
   out.innerHTML=(view==='fav'&&!favs.length)?'<div class="empty">まだお気に入りがありません。「すべての店舗」で、よく行く店舗の「♡ お気に入りに入れる」を押してください。<button class="ghost" type="button" id="allA">すべての店舗を見る</button></div>':'<div class="empty">'+(view==='fav'?'お気に入りの店舗には、':'')+'この時間から始まる初心者向けクラスがありません。'+(view==='fav'?'<button class="ghost" type="button" id="allA">すべての店舗で探す</button>':'')+'</div>';
   if(view==='fav'&&!favs.length)hero.hidden=true;
   const b=$('allA');if(b)b.onclick=()=>{document.querySelector('#tabs .chip').click()};
@@ -199,19 +204,19 @@ function render(){
  const first=rows[0],dj=D.dojos[first[0]],diff=mins(first[2])-mins(n.t);
  const sameT=rows.filter(r=>r[2]===first[2]).length;
  hero.hidden=true;
- if(0)hero.innerHTML='<span class="k">'+(isToday?'次に始まるクラス':DAYS[day]+'曜 最初のクラス')+'</span><span class="when">'+first[2]+(isToday?'<small>'+until(diff)+'</small>':'')+'</span><span class="what">'+esc(dj.n)+'　'+esc(first[4])+'</span><span class="where">'+esc(dj.a)+(sameT>1?'<br>同じ時間にほか'+(sameT-1)+'件あります':'')+'</span><div class="acts"><a href="'+mapUrl(dj.a)+'" target="_blank" rel="noopener">地図をひらく</a><a href="'+dj.u+'" target="_blank" rel="noopener">時間割</a></div>';
+ if(0)hero.innerHTML='<span class="k">'+(isToday?'次に始まるクラス':label(ymd)+' 最初のクラス')+'</span><span class="when">'+first[2]+(isToday?'<small>'+until(diff)+'</small>':'')+'</span><span class="what">'+esc(dj.n)+'　'+esc(first[4])+'</span><span class="where">'+esc(dj.a)+(sameT>1?'<br>同じ時間にほか'+(sameT-1)+'件あります':'')+'</span><div class="acts"><a href="'+mapUrl(dj.a)+'" target="_blank" rel="noopener">地図をひらく</a><a href="'+dj.u+'" target="_blank" rel="noopener">時間割</a></div>';
  const groups={};rows.forEach(r=>(groups[r[2]]=groups[r[2]]||[]).push(r));
  const f=document.createDocumentFragment();
  for(const t of Object.keys(groups)){
   const g=document.createElement('section');g.className='group';
   const d=mins(t)-mins(n.t);
   g.innerHTML='<div class="gh"><span class="t">'+t+'</span>'+(isToday?'<span class="in'+(d<=20?' soon':'')+'">'+until(d)+'</span>':'')+'<span class="cnt">'+groups[t].length+'件</span></div>';
-  groups[t].forEach(r=>{const c=document.createElement('article');c.className='card';c.innerHTML=cardHTML(r,ymdFor(day));if(r[8]&&r[8]===ymdFor(day))c.classList.add('is-off');g.appendChild(c)});
+  groups[t].forEach(r=>{const c=document.createElement('article');c.className='card';c.innerHTML=cardHTML(r,ymd);if(r[8]&&r[8]===ymd)c.classList.add('is-off');g.appendChild(c)});
   f.appendChild(g)}
  out.appendChild(f);out.insertBefore(Object.assign(document.createElement('div'),{className:'upd',textContent:'公式の時間割を '+(D.updated||'').slice(5).replace('-','/')+' に確認'}),out.firstChild);
  out.querySelectorAll('.fav').forEach(b=>b.onclick=()=>toggleFav(b.dataset.id));
 }
-function setNow(){const n=jstNow();$('day').value=n.d;$('from').value=n.t;manual=false;render()}
+function setNow(){const n=jstNow();fillDates();$('day').value=todayYmd();$('from').value=n.t;manual=false;render()}
 $('toggleOpts').onclick=()=>{const o=$('opts');o.hidden=!o.hidden;$('toggleOpts').setAttribute('aria-expanded',!o.hidden);barh()};
 ['day','from'].forEach(id=>$(id).addEventListener('change',()=>{manual=true;render()}));
 ['free'].forEach(id=>$(id).addEventListener('change',render));
@@ -221,7 +226,7 @@ barh();addEventListener('resize',barh);paintNear();
 setNow();
 function refresh(){fetch('data.json?'+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.c&&j.c.length){D=j;render()}}).catch(()=>{})}
 refresh();document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
-setInterval(()=>{if(!manual){const n=jstNow();$('day').value=n.d;$('from').value=n.t}render()},60000);
+setInterval(()=>{if(!manual){const n=jstNow();fillDates();$('day').value=todayYmd();$('from').value=n.t}render()},60000);
 </script>
 </body>
 </html>
