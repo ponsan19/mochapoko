@@ -620,7 +620,7 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
     const likebar = el("div", { class: "likebar" });
     if (canWrite && me && me.id && !mine) for (const k of ["ari", "nashi"]) likebar.append(el("button", { class: "like " + k, type: "button", onclick: () => vote(p, k), text: VOTE[k] }));
     const lk = el("span", { class: "chips" });
-    for (const [id, v] of vs) lk.append(el("span", { class: "chip " + v }, avatar(id), document.createTextNode(nameOf(id) + "：" + VOTE[v])));
+    for (const [id, v] of vs) lk.append(el("span", { class: "chip " + v }, avatar(id), document.createTextNode(VOTE[v])));
     likebar.append(lk);
     if (canWrite && mine) likebar.append(el("button", { class: "link", type: "button", onclick: () => vote(p, mine), text: "選び直す" }));
 
