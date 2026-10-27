@@ -382,6 +382,7 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
   const sheet = document.getElementById("sheet");
   const zoom = document.getElementById("zoom");
   const picker = document.getElementById("picker");
+  let addTo = null; // a dress id when adding pictures to it instead of making a new one
   const summary = document.getElementById("summary");
 
   let db = null, user = null, assets = null, me = null, canWrite = true;
@@ -584,7 +585,7 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
     const frag = document.createDocumentFragment();
     const ps = shopPhotos(shop.id);
     const tools = el("div", { class: "tools" });
-    if (canWrite && assets) tools.append(el("button", { class: "btn primary", type: "button", onclick: () => picker.click(), text: "＋ 1着を追加" }));
+    if (canWrite && assets) tools.append(el("button", { class: "btn primary", type: "button", onclick: () => { addTo = null; picker.click(); }, text: "＋ 1着を追加" }));
     if (canWrite) tools.append(el("button", { class: "link", type: "button", onclick: () => { view.renaming = !view.renaming; render(); }, text: "店名を編集" }));
     if (canWrite && ps.length === 0) {
       tools.append(view.confirmShop
@@ -667,6 +668,7 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
       ? el("span", { class: "tools" }, el("button", { class: "btn danger", type: "button", onclick: () => deletePhoto(p), text: "写真とコメントを削除" }), el("button", { class: "link", type: "button", onclick: () => { view.confirmPhoto = false; renderSheet(); }, text: "やめる" }))
       : view.confirmPhoto
         ? el("span", { class: "tools" },
+            assets ? el("button", { class: "link", type: "button", onclick: () => { addTo = p.id; picker.click(); }, text: "このドレスに写真を足す" }) : null,
             prevInShop(p) ? el("button", { class: "link", type: "button", onclick: () => mergeIntoPrev(p), text: "前のドレスにまとめる" }) : null,
             el("button", { class: "link", type: "button", onclick: () => { view.confirmPhoto = "ask"; renderSheet(); }, text: "この写真を削除" }))
         : el("button", { class: "link more", type: "button", "aria-label": "その他", onclick: () => { view.confirmPhoto = true; renderSheet(); }, text: "…" })) : null;
@@ -873,6 +875,8 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
   picker.addEventListener("change", async () => {
     const files = [...picker.files];
     picker.value = "";
+    const target = addTo && S.photos.find((x) => x.id === addTo);
+    addTo = null;
     const shopId = view.shop;
     if (!files.length || !shopId || !assets) return;
     // Pictures chosen together (front, back, ...) become one dress.
@@ -886,6 +890,13 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
       } catch (err) {
         failed++;
       }
+    }
+    if (ids.length && target) {
+      try { await db.doc("photos/" + target.id).update({ assets: sidesOf(target).concat(ids) }); }
+      catch (err) { failed += done; done = 0; }
+      setStatus(failed ? done + "枚を足しました、" + failed + "枚は追加できませんでした" : done + "枚を足しました");
+      setTimeout(() => setStatus(""), 4000);
+      return;
     }
     if (ids.length) {
       try { await db.collection("photos").add({ shopId, asset: ids[0], assets: ids, votes: {}, createdAt: Date.now(), createdBy: me?.id || null }); }
