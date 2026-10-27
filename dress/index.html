@@ -158,6 +158,10 @@ textarea{resize:vertical;min-height:84px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;border-radius:999px;padding:1px 9px 1px 1px;background:var(--rose-soft);color:var(--rose)}
 .chip.nashi{background:var(--line);color:var(--muted)}
+/* あり is filled and bold so it reads apart from なし at a glance. */
+.chip.ari{background:#d9577a;color:#fff}
+.chip.ari .av{box-shadow:0 0 0 1.5px #fff}
+.chip.nashi{background:#ecebee;color:#8a8790;font-weight:500}
 .chip .av{width:20px;height:20px;font-size:10px;border-width:0}
 .av{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;flex:none;font-family:var(--display);font-size:14px;color:#fff;border:2px solid var(--surface)}
 .av.pon{background:#8fb3d9}
@@ -260,6 +264,7 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
   // Any of these spellings opens the page.
   const PASS = ["オレンジ", "おれんじ", "orange"];
   const SDK = "https://www.gstatic.com/firebasejs/10.12.2/";
+  const REST = "https://firestore.googleapis.com/v1/projects/" + FIREBASE.projectId + "/databases/(default)/documents/";
   const KEY = "dress:who";
   const read = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
   const write = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} };
@@ -343,11 +348,15 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
   }
   const cache = new Map();
   window.loadAsset = (id) => {
-    if (!cache.has(id)) cache.set(id, fs().then(async ({ f, db }) => {
-      const d = await f.getDoc(f.doc(db, "images", id));
-      if (!d.exists()) throw new Error("missing");
-      return d.data().d;
-    }));
+    // A plain REST read: Safari stalls on big docs over the live channel.
+    if (!cache.has(id)) cache.set(id, fetch(REST + "images/" + encodeURIComponent(id) + "?mask.fieldPaths=d")
+      .then((r) => r.ok ? r.json() : Promise.reject(new Error("http " + r.status)))
+      .then((j) => j.fields.d.stringValue)
+      .catch(() => fs().then(async ({ f, db }) => {
+        const d = await f.getDoc(f.doc(db, "images", id));
+        if (!d.exists()) throw new Error("missing");
+        return d.data().d;
+      })));
     return cache.get(id);
   };
 
