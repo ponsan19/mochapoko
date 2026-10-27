@@ -214,7 +214,7 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
     <div class="script">Dress Diary</div>
     <h1>ドレス日記 <span class="heart">♡</span></h1>
     <form id="gateform">
-      <input type="password" id="gatepass" placeholder="合言葉" autocomplete="current-password">
+      <input type="text" id="gatepass" placeholder="合言葉" autocomplete="off" autocapitalize="off" spellcheck="false">
       <div class="gatewho">
         <button class="btn primary" type="submit" name="who" value="pon"><span class="av pon" aria-hidden="true">ぽ</span>ぽん</button>
         <button class="btn primary" type="submit" name="who" value="pi"><span class="av pi" aria-hidden="true">ぴ</span>ぴー</button>
@@ -229,7 +229,8 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
 // objects, and they keep everything in Firestore so no sign-in is needed.
 (() => {
   const FIREBASE = { projectId: "dress-diary-6fec8" };
-  const PASS = "ぽんぴー";
+  // Any of these spellings opens the page.
+  const PASS = ["オレンジ", "おれんじ", "orange"];
   const SDK = "https://www.gstatic.com/firebasejs/10.12.2/";
   const KEY = "dress:who";
   const read = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
@@ -244,7 +245,7 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
     document.getElementById("gateform").addEventListener("submit", (e) => {
       e.preventDefault();
       const pass = document.getElementById("gatepass").value.trim();
-      if (pass !== PASS) { document.getElementById("gatemsg").textContent = "合言葉がちがいます"; return; }
+      if (!PASS.includes(pass.normalize("NFKC").toLowerCase())) { document.getElementById("gatemsg").textContent = "合言葉がちがいます"; return; }
       const w = e.submitter && e.submitter.value;
       if (w !== "pon" && w !== "pi") return;
       write(KEY, w);
