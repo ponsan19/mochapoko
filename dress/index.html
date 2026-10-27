@@ -196,8 +196,8 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
 .pos{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:var(--surface);color:var(--muted);border-radius:999px;font-size:12px;padding:1px 10px;font-variant-numeric:tabular-nums}
 .hint{font-size:12px;color:var(--muted)}
 #zoom[hidden]{display:none}
-#zoom{position:fixed;inset:0;z-index:30;background:#120c10;overflow:auto;-webkit-overflow-scrolling:touch}
-#zoom img{display:block;max-width:none;cursor:zoom-out}
+#zoom{position:fixed;inset:0;z-index:30;background:#120c10;overflow:hidden;display:flex;align-items:center;justify-content:center;touch-action:none;user-select:none;-webkit-user-select:none}
+#zoom img{display:block;max-width:100%;max-height:100%;object-fit:contain;transform-origin:center center;will-change:transform;-webkit-user-drag:none}
 .empty{color:var(--muted);text-align:center;padding:28px 12px;border:1px dashed var(--line);border-radius:14px}
 </style>
 </head>
@@ -680,14 +680,57 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
   }
 
   // ---------- zoom ----------
+  // Opens fitted to the screen; pinch or double-tap to zoom, drag to move.
   function openZoom(p) {
-    const img = el("img", { src: src(p.asset), alt: "ドレスの写真（拡大）", onclick: closeZoom });
-    const w = Math.round(Math.max(window.innerWidth * 2.2, Math.min(window.innerWidth * 3, 1600)));
-    img.style.width = w + "px";
+    const img = el("img", { src: src(p.asset), alt: "ドレスの写真（拡大）", draggable: "false" });
     zoom.replaceChildren(img, el("button", { class: "x", type: "button", "aria-label": "拡大を閉じる", onclick: closeZoom, text: "×", style: "z-index:31" }));
     zoom.hidden = false;
-    const center = () => { zoom.scrollLeft = (zoom.scrollWidth - zoom.clientWidth) / 4; zoom.scrollTop = (zoom.scrollHeight - zoom.clientHeight) / 3; };
-    if (img.complete) center(); else img.addEventListener("load", center, { once: true });
+    let sc = 1, tx = 0, ty = 0;
+    const W = () => zoom.clientWidth, H = () => zoom.clientHeight;
+    const clamp = () => {
+      sc = Math.min(5, Math.max(1, sc));
+      const bw = img.offsetWidth, bh = img.offsetHeight;
+      const mx = Math.max(0, (bw * sc - W()) / 2), my = Math.max(0, (bh * sc - H()) / 2);
+      tx = Math.min(mx, Math.max(-mx, tx)); ty = Math.min(my, Math.max(-my, ty));
+    };
+    const apply = () => { clamp(); img.style.transform = "translate(" + tx + "px," + ty + "px) scale(" + sc + ")"; };
+    // Zoom so the point (x, y) on screen stays under the finger.
+    const zoomAt = (x, y, next) => {
+      const cx = x - W() / 2, cy = y - H() / 2;
+      tx = cx - (cx - tx) * next / sc; ty = cy - (cy - ty) * next / sc; sc = next; apply();
+    };
+    let pts = new Map(), start = null, lastTap = 0;
+    zoom.onpointerdown = (e) => {
+      if (e.target.closest(".x")) return;
+      zoom.setPointerCapture(e.pointerId);
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      const now = Date.now();
+      if (pts.size === 1 && now - lastTap < 300) { zoomAt(e.clientX, e.clientY, sc > 1.05 ? 1 : 2.5); lastTap = 0; start = null; return; }
+      lastTap = now;
+      const a = [...pts.values()];
+      start = { sc, tx, ty, a: a.map((q) => ({ ...q })), d: a.length > 1 ? Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y) : 0 };
+    };
+    zoom.onpointermove = (e) => {
+      if (!pts.has(e.pointerId) || !start) return;
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      const a = [...pts.values()];
+      if (a.length > 1 && start.d) {
+        const d = Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y);
+        const mx = (a[0].x + a[1].x) / 2, my = (a[0].y + a[1].y) / 2;
+        sc = start.sc; tx = start.tx; ty = start.ty;
+        zoomAt(mx, my, start.sc * d / start.d);
+      } else if (a.length === 1 && start.a.length === 1) {
+        tx = start.tx + a[0].x - start.a[0].x; ty = start.ty + a[0].y - start.a[0].y; apply();
+      }
+    };
+    const up = (e) => {
+      pts.delete(e.pointerId);
+      const a = [...pts.values()];
+      start = a.length ? { sc, tx, ty, a: a.map((q) => ({ ...q })), d: 0 } : null;
+    };
+    zoom.onpointerup = up; zoom.onpointercancel = up;
+    zoom.onwheel = (e) => { e.preventDefault(); zoomAt(e.clientX, e.clientY, sc * (e.deltaY < 0 ? 1.15 : 1 / 1.15)); };
+    apply();
   }
   function closeZoom() { zoom.hidden = true; zoom.replaceChildren(); }
 
