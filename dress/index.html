@@ -584,7 +584,7 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
     const frag = document.createDocumentFragment();
     const ps = shopPhotos(shop.id);
     const tools = el("div", { class: "tools" });
-    if (canWrite && assets) tools.append(el("button", { class: "btn primary", type: "button", onclick: () => picker.click(), text: "＋ 写真を追加" }));
+    if (canWrite && assets) tools.append(el("button", { class: "btn primary", type: "button", onclick: () => picker.click(), text: "＋ 1着を追加" }));
     if (canWrite) tools.append(el("button", { class: "link", type: "button", onclick: () => { view.renaming = !view.renaming; render(); }, text: "店名を編集" }));
     if (canWrite && ps.length === 0) {
       tools.append(view.confirmShop
@@ -666,7 +666,9 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
     const foot = canWrite ? el("div", { class: "foot" }, view.confirmPhoto === "ask"
       ? el("span", { class: "tools" }, el("button", { class: "btn danger", type: "button", onclick: () => deletePhoto(p), text: "写真とコメントを削除" }), el("button", { class: "link", type: "button", onclick: () => { view.confirmPhoto = false; renderSheet(); }, text: "やめる" }))
       : view.confirmPhoto
-        ? el("button", { class: "link", type: "button", onclick: () => { view.confirmPhoto = "ask"; renderSheet(); }, text: "この写真を削除" })
+        ? el("span", { class: "tools" },
+            prevInShop(p) ? el("button", { class: "link", type: "button", onclick: () => mergeIntoPrev(p), text: "前のドレスにまとめる" }) : null,
+            el("button", { class: "link", type: "button", onclick: () => { view.confirmPhoto = "ask"; renderSheet(); }, text: "この写真を削除" }))
         : el("button", { class: "link more", type: "button", "aria-label": "その他", onclick: () => { view.confirmPhoto = true; renderSheet(); }, text: "…" })) : null;
 
     const nl = navList();
@@ -818,6 +820,20 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
     } catch (err) { flash("削除できませんでした（" + err.code + "）"); }
   }
 
+  const prevInShop = (p) => { const ps = shopPhotos(p.shopId), i = ps.findIndex((x) => x.id === p.id); return i > 0 ? ps[i - 1] : null; };
+  // Folds this entry's pictures, votes and comments into the dress before it.
+  async function mergeIntoPrev(p) {
+    const prev = prevInShop(p);
+    if (!prev) return;
+    try {
+      const keep = sidesOf(prev).length;
+      await db.doc("photos/" + prev.id).update({ assets: sidesOf(prev).concat(sidesOf(p)), votes: { ...(p.votes || {}), ...(prev.votes || {}) } });
+      for (const c of photoComments(p.id)) await db.doc("comments/" + c.id).update({ photoId: prev.id });
+      await db.doc("photos/" + p.id).delete();
+      stepTo(prev.id, keep);
+    } catch (err) { flash("まとめられませんでした（" + err.code + "）"); }
+  }
+
   async function deleteShop() {
     const id = view.shop;
     if (!id || shopPhotos(id).length) return;
@@ -859,19 +875,23 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
     picker.value = "";
     const shopId = view.shop;
     if (!files.length || !shopId || !assets) return;
+    // Pictures chosen together (front, back, ...) become one dress.
     let done = 0, failed = 0;
+    const ids = [];
     for (const f of files) {
       setStatus("写真を追加しています… " + (done + failed + 1) + " / " + files.length);
       try {
-        const ids = [];
         for (const blob of await splitSides(f)) ids.push((await assets.upload(blob, { type: blob.type || "image/jpeg" })).id);
-        await db.collection("photos").add({ shopId, asset: ids[0], assets: ids, votes: {}, createdAt: Date.now(), createdBy: me?.id || null });
         done++;
       } catch (err) {
         failed++;
       }
     }
-    setStatus(failed ? done + "枚追加、" + failed + "枚は追加できませんでした" : done + "枚追加しました");
+    if (ids.length) {
+      try { await db.collection("photos").add({ shopId, asset: ids[0], assets: ids, votes: {}, createdAt: Date.now(), createdBy: me?.id || null }); }
+      catch (err) { failed += done; done = 0; }
+    }
+    setStatus(failed ? done + "枚を1着として追加、" + failed + "枚は追加できませんでした" : done + "枚を1着として追加しました");
     setTimeout(() => setStatus(""), 4000);
   });
 
