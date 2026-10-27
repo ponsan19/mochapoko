@@ -663,15 +663,16 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
     ta.value = draft;
     const composer = canWrite ? el("div", { class: "composer" }, ta, el("button", { class: "btn primary", type: "button", onclick: sendComment, text: "送る" })) : null;
 
-    // Deleting is rare, so it hides behind a small "…" button.
+    // Editing is rare, so its buttons show only after tapping 編集.
+    const sidesNow = sidesOf(p), shown = Math.min(view.side || 0, sidesNow.length - 1);
     const foot = canWrite ? el("div", { class: "foot" }, view.confirmPhoto === "ask"
-      ? el("span", { class: "tools" }, el("button", { class: "btn danger", type: "button", onclick: () => deletePhoto(p), text: "写真とコメントを削除" }), el("button", { class: "link", type: "button", onclick: () => { view.confirmPhoto = false; renderSheet(); }, text: "やめる" }))
+      ? el("span", { class: "tools" }, el("button", { class: "btn danger", type: "button", onclick: () => deleteSide(p, shown), text: sidesNow.length > 1 ? "この写真を削除する" : "このドレスを削除する" }), el("button", { class: "link", type: "button", onclick: () => { view.confirmPhoto = false; renderSheet(); }, text: "やめる" }))
       : view.confirmPhoto
         ? el("span", { class: "tools" },
-            assets ? el("button", { class: "link", type: "button", onclick: () => { addTo = p.id; picker.click(); }, text: "このドレスに写真を足す" }) : null,
-            prevInShop(p) ? el("button", { class: "link", type: "button", onclick: () => mergeIntoPrev(p), text: "前のドレスにまとめる" }) : null,
-            el("button", { class: "link", type: "button", onclick: () => { view.confirmPhoto = "ask"; renderSheet(); }, text: "この写真を削除" }))
-        : el("button", { class: "link more", type: "button", "aria-label": "その他", onclick: () => { view.confirmPhoto = true; renderSheet(); }, text: "…" })) : null;
+            assets ? el("button", { class: "btn", type: "button", onclick: () => { addTo = p.id; picker.click(); }, text: "写真を追加" }) : null,
+            el("button", { class: "btn", type: "button", onclick: () => { view.confirmPhoto = "ask"; renderSheet(); }, text: "写真を削除" }),
+            el("button", { class: "link", type: "button", onclick: () => { view.confirmPhoto = false; renderSheet(); }, text: "閉じる" }))
+        : el("button", { class: "btn", type: "button", onclick: () => { view.confirmPhoto = true; renderSheet(); }, text: "編集" })) : null;
 
     const nl = navList();
     const i = nl.findIndex((x) => x.id === p.id);
@@ -822,6 +823,18 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
     } catch (err) { flash("削除できませんでした（" + err.code + "）"); }
   }
 
+  // Removes the picture on screen; the last picture takes the whole dress with it.
+  async function deleteSide(p, k) {
+    const ss = sidesOf(p);
+    if (ss.length <= 1) return deletePhoto(p);
+    const rest = ss.filter((_, i) => i !== k);
+    try {
+      await db.doc("photos/" + p.id).update({ asset: rest[0], assets: rest });
+      if (assets) { try { await assets.delete(ss[k]); } catch (e) {} }
+      view.confirmPhoto = false; stepTo(p.id, Math.min(k, rest.length - 1));
+    } catch (err) { flash("削除できませんでした（" + err.code + "）"); }
+  }
+
   const prevInShop = (p) => { const ps = shopPhotos(p.shopId), i = ps.findIndex((x) => x.id === p.id); return i > 0 ? ps[i - 1] : null; };
   // Folds this entry's pictures, votes and comments into the dress before it.
   async function mergeIntoPrev(p) {
@@ -892,7 +905,8 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
       }
     }
     if (ids.length && target) {
-      try { await db.doc("photos/" + target.id).update({ assets: sidesOf(target).concat(ids) }); }
+      const had = sidesOf(target).length;
+      try { await db.doc("photos/" + target.id).update({ assets: sidesOf(target).concat(ids) }); if (view.photo === target.id) stepTo(target.id, had); }
       catch (err) { failed += done; done = 0; }
       setStatus(failed ? done + "枚を足しました、" + failed + "枚は追加できませんでした" : done + "枚を足しました");
       setTimeout(() => setStatus(""), 4000);
