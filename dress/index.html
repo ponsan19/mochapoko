@@ -920,7 +920,7 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
   }
 
   // Lets the person pinch and drag a picture into a 3:4 frame before it is saved.
-  // Resolves the cropped picture, the untouched one (元のまま), or null (やめる).
+  // Resolves the cropped picture, the whole one when left untouched, or null (やめる).
   function cropPhoto(blob, tip) {
     return new Promise(async (resolve) => {
       const ov = document.getElementById("crop");
@@ -967,6 +967,7 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
       frame.onwheel = (e) => { e.preventDefault(); start = null; const ns = Math.min(Math.max(s * Math.exp(-e.deltaY * 0.002), 1), 6); x *= ns / s; y *= ns / s; s = ns; draw(); };
       const finish = (v) => { ov.hidden = true; ov.replaceChildren(); URL.revokeObjectURL(url); resolve(v); };
       const done = async () => {
+        if (s === 1 && x === 0 && y === 0) { finish(blob); return; } // untouched: keep the whole picture
         const k = base * s, sw = fw / k, sh = fh / k;
         const sx = W / 2 - x / k - sw / 2, sy = H / 2 - y / k - sh / 2;
         const q = Math.min(1, 1600 / sh);
@@ -981,7 +982,6 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
         el("div", { class: "ctip", text: "2本指で広げると拡大、1本指で位置を動かせます" }),
         el("div", { class: "cbtns" },
           el("button", { class: "link", type: "button", onclick: () => finish(null), text: "やめる" }),
-          el("button", { class: "btn", type: "button", onclick: () => finish(blob), text: "元のまま" }),
           el("button", { class: "btn primary", type: "button", onclick: done, text: "これで載せる" })));
       ov.hidden = false;
     });
