@@ -109,6 +109,9 @@ textarea{resize:vertical;min-height:84px}
 .status{font-size:13px;color:var(--rose);margin-bottom:12px;min-height:1em}
 #sheet[hidden]{display:none}
 #summary:empty{display:none}
+.panel .sides{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);display:flex;gap:6px;background:var(--surface);border-radius:999px;padding:5px 9px}
+.panel .sides i{width:7px;height:7px;border-radius:50%;background:var(--line)}
+.panel .sides i.on{background:var(--rose)}
 .photo .no,.panel .no{font-family:var(--body) !important;font-weight:700;font-size:13px !important;color:var(--ink) !important;padding:2px 10px !important}
 .panel .no{position:absolute;top:22px;left:22px;background:var(--surface);border-radius:999px;box-shadow:0 2px 8px rgba(200,120,140,.18);font-variant-numeric:tabular-nums}
 .foot{border-top:0 !important;padding-top:0 !important;justify-content:flex-end}
@@ -396,6 +399,8 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
     const d = new Date(t);
     return (d.getMonth() + 1) + "/" + d.getDate() + " " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
   };
+  // A dress has one picture per side (front, back); older rows only have `asset`.
+  const sidesOf = (p) => (p.assets && p.assets.length ? p.assets : [p.asset]);
   const shopPhotos = (id) => S.photos.filter((p) => p.shopId === id);
   const photoComments = (id) => S.comments.filter((c) => c.photoId === id);
   const votes = (p) => Object.entries(p.votes || {}).filter(([, v]) => v === "ari" || v === "nashi");
@@ -493,7 +498,7 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
       const both = ps.filter(FILTERS[1][2]).length;
       const fresh = ps.some(hasNew);
       const glass = el("div", { class: "glass" });
-      if (ps.length) glass.append(el("img", { src: src(ps[0].asset), alt: "", loading: "lazy" }));
+      if (ps.length) glass.append(el("img", { src: src(sidesOf(ps[0])[0]), alt: "", loading: "lazy" }));
       else glass.append(el("span", { class: "initial", text: (s.name || "?").slice(0, 1) }));
       if (both) glass.append(el("span", { class: "both", text: "ふたりともあり " + both }));
       glass.append(el("span", { class: "stack", text: ps.length + "着" }));
@@ -533,7 +538,7 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
     return el("div", { class: "photo" },
       el("button", { class: "imgbtn", type: "button", "aria-label": (shop ? shop.name + " " : "") + "No." + numberOf(p) + " を開く", onclick: () => openPhoto(p.id) },
         el("span", { class: "no" }, document.createTextNode("No." + numberOf(p))),
-        el("img", { src: src(p.asset), alt: "ドレスの写真", loading: "lazy", onerror: (e) => e.target.replaceWith(el("div", { class: "ph" })) })),
+        el("img", { src: src(sidesOf(p)[0]), alt: "ドレスの写真", loading: "lazy", onerror: (e) => e.target.replaceWith(el("div", { class: "ph" })) })),
       el("div", { class: "cap" },
         showShop && shop ? el("span", { class: "shopname", text: shop.name }) : null,
         el("span", { class: "row" },
@@ -650,19 +655,22 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
     const nl = navList();
     const i = nl.findIndex((x) => x.id === p.id);
     const prev = i > 0 ? nl[i - 1] : null, next = i >= 0 && i < nl.length - 1 ? nl[i + 1] : null;
+    const sides = sidesOf(p);
+    const side = Math.min(view.side || 0, sides.length - 1);
+    const canPrev = side > 0 || !!prev, canNext = side < sides.length - 1 || !!next;
     const imgBox = el("div", { class: "img" },
-      el("div", { class: "frame" }, el("img", { src: src(p.asset), alt: "ドレスの写真（押すと拡大）", onclick: () => openZoom(p) })),
-      el("button", { class: "nav prev", type: "button", "aria-label": "前の写真", disabled: !prev, onclick: () => prev && stepTo(prev.id), text: "‹" }),
-      el("button", { class: "nav next", type: "button", "aria-label": "次の写真", disabled: !next, onclick: () => next && stepTo(next.id), text: "›" }),
+      el("div", { class: "frame" }, el("img", { src: src(sides[side]), alt: "ドレスの写真（押すと拡大）", onclick: () => openZoom(p) })),
+      el("button", { class: "nav prev", type: "button", "aria-label": "前へ", disabled: !canPrev, onclick: () => move(-1), text: "‹" }),
+      el("button", { class: "nav next", type: "button", "aria-label": "次へ", disabled: !canNext, onclick: () => move(1), text: "›" }),
       el("span", { class: "no" }, document.createTextNode("No." + numberOf(p))),
-      nl.length > 1 ? el("span", { class: "pos", text: (i + 1) + " / " + nl.length }) : null);
+      sides.length > 1 ? el("span", { class: "sides" }, ...sides.map((_, k) => el("i", { class: k === side ? "on" : "" }))) : null);
     let sx = null, sy = null;
     imgBox.addEventListener("touchstart", (e) => { if (e.touches.length === 1) { sx = e.touches[0].clientX; sy = e.touches[0].clientY; } else sx = null; }, { passive: true });
     imgBox.addEventListener("touchend", (e) => {
       if (sx == null) return;
       const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
       sx = null;
-      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) { const t = dx < 0 ? next : prev; if (t) stepTo(t.id); }
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) move(dx < 0 ? 1 : -1);
     });
 
     const shop = S.shops.find((s) => s.id === p.shopId);
@@ -682,7 +690,8 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
   // ---------- zoom ----------
   // Opens fitted to the screen; pinch or double-tap to zoom, drag to move.
   function openZoom(p) {
-    const img = el("img", { src: src(p.asset), alt: "ドレスの写真（拡大）", draggable: "false" });
+    const sides = sidesOf(p);
+    const img = el("img", { src: src(sides[Math.min(view.side || 0, sides.length - 1)]), alt: "ドレスの写真（拡大）", draggable: "false" });
     zoom.replaceChildren(img, el("button", { class: "x", type: "button", "aria-label": "拡大を閉じる", onclick: closeZoom, text: "×", style: "z-index:31" }));
     zoom.hidden = false;
     let sc = 1, tx = 0, ty = 0;
@@ -787,7 +796,7 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
     try {
       for (const c of photoComments(p.id)) await db.doc("comments/" + c.id).delete();
       await db.doc("photos/" + p.id).delete();
-      if (assets) { try { await assets.delete(p.asset); } catch (e) { /* the row is gone; the file stays if someone else uploaded it */ } }
+      if (assets) for (const a of sidesOf(p)) { try { await assets.delete(a); } catch (e) { /* the row is gone; the file stays if someone else uploaded it */ } }
       if (view.from === "all") setHash("#all"); else go(p.shopId);
     } catch (err) { flash("削除できませんでした（" + err.code + "）"); }
   }
@@ -812,6 +821,22 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
     return file;
   }
 
+  // A wide picture is a front-and-back pair side by side: cut it into two.
+  async function splitSides(file) {
+    let bmp = null;
+    try { bmp = await createImageBitmap(file); } catch (e) {}
+    if (!bmp || bmp.width < bmp.height * 1.2) return [await shrink(file)];
+    const half = Math.floor(bmp.width / 2), out = [];
+    for (const x of [0, half]) {
+      const k = Math.min(1, 1600 / Math.max(half, bmp.height));
+      const c = document.createElement("canvas");
+      c.width = Math.round(half * k); c.height = Math.round(bmp.height * k);
+      c.getContext("2d").drawImage(bmp, x, 0, half, bmp.height, 0, 0, c.width, c.height);
+      out.push(await new Promise((r) => c.toBlob(r, "image/jpeg", 0.86)));
+    }
+    return out;
+  }
+
   picker.addEventListener("change", async () => {
     const files = [...picker.files];
     picker.value = "";
@@ -821,9 +846,9 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
     for (const f of files) {
       setStatus("写真を追加しています… " + (done + failed + 1) + " / " + files.length);
       try {
-        const blob = await shrink(f);
-        const r = await assets.upload(blob, { type: blob.type || "image/jpeg" });
-        await db.collection("photos").add({ shopId, asset: r.id, votes: {}, createdAt: Date.now(), createdBy: me?.id || null });
+        const ids = [];
+        for (const blob of await splitSides(f)) ids.push((await assets.upload(blob, { type: blob.type || "image/jpeg" })).id);
+        await db.collection("photos").add({ shopId, asset: ids[0], assets: ids, votes: {}, createdAt: Date.now(), createdBy: me?.id || null });
         done++;
       } catch (err) {
         failed++;
@@ -853,7 +878,7 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
     else if (h === "all") where = "all";
     const changed = where !== view.where || shop !== view.shop;
     if (changed) { view = { where, shop, photo: null, from: null, renaming: false, confirmShop: false, confirmPhoto: false }; status = ""; }
-    if (photo !== view.photo) { view.photo = photo; view.from = photo ? (where === "all" ? "all" : "shop") : null; view.confirmPhoto = false; sheet.replaceChildren(); }
+    if (photo !== view.photo) { view.side = 0; view.photo = photo; view.from = photo ? (where === "all" ? "all" : "shop") : null; view.confirmPhoto = false; sheet.replaceChildren(); }
     if (!photo) { sheet.hidden = true; sheet.replaceChildren(); closeZoom(); }
     render();
     if (changed) window.scrollTo(0, 0);
@@ -866,10 +891,20 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
     else { view.photo = id; view.from = view.where === "all" ? "all" : "shop"; view.confirmPhoto = false; sheet.replaceChildren(); renderSheet(); }
   }
   // Paging inside the viewer replaces the entry, so "back" still returns to the list.
-  function stepTo(id) {
+  function stepTo(id, side = 0) {
     closeZoom();
+    view.side = side;
     if (okId(id) && location.hash.startsWith("#p-")) { history.replaceState(null, "", "#p-" + id); view.photo = id; view.confirmPhoto = false; renderSheet(); }
     else { view.photo = id; view.confirmPhoto = false; renderSheet(); }
+  }
+  // Swiping walks front, back, then on to the next dress.
+  function move(dir) {
+    const p = S.photos.find((x) => x.id === view.photo);
+    if (!p) return;
+    const n = sidesOf(p).length, side = Math.min(view.side || 0, n - 1);
+    if (side + dir >= 0 && side + dir < n) { view.side = side + dir; closeZoom(); renderSheet(); return; }
+    const nl = navList(), i = nl.findIndex((x) => x.id === p.id), t = nl[i + dir];
+    if (i >= 0 && t) stepTo(t.id, dir > 0 ? 0 : sidesOf(t).length - 1);
   }
   function closeSheet() {
     view.photo = null; view.confirmPhoto = false;
@@ -891,9 +926,8 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
     const t = e.target;
     if (t && (t.tagName === "TEXTAREA" || t.tagName === "INPUT" || t.tagName === "SELECT")) return;
     if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
-      const nl = navList(), i = nl.findIndex((x) => x.id === view.photo);
-      const t2 = nl[i + (e.key === "ArrowRight" ? 1 : -1)];
-      if (i >= 0 && t2) { e.preventDefault(); stepTo(t2.id); }
+      e.preventDefault();
+      move(e.key === "ArrowRight" ? 1 : -1);
     }
   });
 
