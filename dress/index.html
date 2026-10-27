@@ -1,0 +1,900 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ドレス日記</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="apple-mobile-web-app-title" content="ドレス日記">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#fcf5f6">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@400;500&family=Zen+Maru+Gothic:wght@400;500;700&family=Parisienne&display=swap">
+<style>
+/* Layout: a bridal salon scrapbook. Shops sit in arched fitting-room mirrors; each dress is a taped polaroid; a dress opens as a soft card with its memo, hearts and your two voices. */
+:root{
+  --bg:#fcf5f6; --dot:#f6e2e6; --surface:#ffffff; --paper:#ffffff; --line:#f0dce1; --ink:#4b3940; --muted:#a08891;
+  --rose:#e6879f; --rose-soft:#fbe3e9; --rose-ink:#ffffff; --gold:#c8a465; --tape:rgba(240,190,200,.72); --veil:rgba(75,45,58,.45);
+  --shadow:0 6px 20px rgba(200,120,140,.16);
+  --display:"Kiwi Maru","Hiragino Maru Gothic ProN",serif;
+  --body:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Yu Gothic",system-ui,sans-serif;
+  --script:"Parisienne","Snell Roundhand",cursive;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#231920; --dot:#2d2029; --surface:#2f222a; --paper:#352731; --line:#4a3641; --ink:#f7e9ee; --muted:#c3a7b2;
+  --rose:#f2a2b6; --rose-soft:#4a2f3b; --rose-ink:#2a1a21; --gold:#e1c48a; --tape:rgba(242,162,182,.45); --veil:rgba(10,4,8,.7);
+  --shadow:0 6px 20px rgba(0,0,0,.35); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#231920; --dot:#2d2029; --surface:#2f222a; --paper:#352731; --line:#4a3641; --ink:#f7e9ee; --muted:#c3a7b2;
+  --rose:#f2a2b6; --rose-soft:#4a2f3b; --rose-ink:#2a1a21; --gold:#e1c48a; --tape:rgba(242,162,182,.45); --veil:rgba(10,4,8,.7);
+  --shadow:0 6px 20px rgba(0,0,0,.35); color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0}
+#gate[hidden],#switchwho[hidden]{display:none}
+#gate{position:fixed;inset:0;z-index:40;background:var(--bg);display:grid;place-items:center;padding:24px}
+.gatebox{width:100%;max-width:340px;display:flex;flex-direction:column;gap:14px;text-align:center}
+.gatebox h1{margin-bottom:8px}
+#gateform{display:flex;flex-direction:column;gap:12px}
+#gatepass{width:100%;background:var(--paper);border:1.5px solid var(--line);border-radius:999px;padding:12px 18px;font:inherit;text-align:center}
+.gatewho{display:flex;gap:10px;justify-content:center}
+.gatewho .btn{padding:8px 20px 8px 8px;font-size:16px}
+.gatewho .av{width:30px;height:30px}
+.gatemsg{color:var(--rose);font-size:13px;min-height:1.2em}
+#switchwho{display:block;margin:0 auto 32px;font-size:12px}
+body{background-color:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.75}
+.wrap{max-width:1080px;margin:0 auto;padding-block:20px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{padding:6px 0 16px;margin-bottom:18px;border-bottom:1px solid var(--line)}
+.script{font-size:20px !important}
+h1 .heart{color:var(--rose);font-size:.8em}
+.script{font-family:var(--script);color:var(--rose);font-size:clamp(26px,5vw,34px);line-height:1}
+h1{font-family:var(--display);font-weight:500;font-size:clamp(22px,4.6vw,28px);letter-spacing:.1em;margin:0;line-height:1.4}
+h1 .spark{color:var(--gold);font-size:.6em;vertical-align:.35em;margin:0 .3em}
+.sub{color:var(--muted);font-size:13px;letter-spacing:.06em;font-variant-numeric:tabular-nums}
+h2{font-family:var(--display);font-weight:500;font-size:26px;margin:0;letter-spacing:.08em;text-wrap:balance;overflow-wrap:anywhere}
+button,input,textarea{font:inherit;color:inherit}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 18px;cursor:pointer;font-size:14px;font-weight:500;white-space:nowrap}
+.btn:hover{border-color:var(--rose)}
+.btn.primary{background:var(--rose);border-color:var(--rose);color:var(--rose-ink)}
+.btn.primary:hover{filter:brightness(1.04)}
+.btn.danger{color:var(--rose);border-color:var(--rose)}
+.link{background:none;border:0;padding:4px 2px;color:var(--muted);cursor:pointer;font-size:13px}
+.link:hover{color:var(--rose)}
+:focus-visible{outline:2.5px solid var(--rose);outline-offset:2px}
+input[type=text],textarea{width:100%;background:var(--paper);border:1.5px solid var(--line);border-radius:16px;padding:10px 14px}
+input[type=text]:focus,textarea:focus{border-color:var(--rose);outline:none}
+textarea{resize:vertical;min-height:84px}
+.notice{border:1px solid var(--line);border-radius:14px;padding:28px 20px;color:var(--muted);text-align:center;background:var(--paper)}
+.notice .big{display:none}
+.addshop{display:flex;gap:8px;margin:0 auto 28px;max-width:520px}
+.addshop input{flex:1;min-width:0;border-radius:999px;padding-left:18px}
+.shops{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:26px 20px}
+.shop{display:flex;flex-direction:column;align-items:flex-start;text-align:left;background:none;border:0;cursor:pointer;padding:0;gap:10px}
+.mirror{width:100%;max-width:100%;aspect-ratio:3/4}
+.mirror .glass{width:100%;height:100%;border-radius:22px;box-shadow:var(--shadow);overflow:hidden;background:var(--rose-soft);display:grid;place-items:center;position:relative}
+.mirror img{width:100%;height:100%;object-fit:cover;object-position:24% 30%;display:block}
+.mirror .initial{font-family:var(--display);font-size:52px;color:var(--rose);opacity:.55}
+.mirror .stack{position:absolute;right:8px;bottom:8px;background:var(--surface);color:var(--ink);border-radius:999px;font-size:12px;padding:1px 9px;font-variant-numeric:tabular-nums}
+.shop .name{font-family:var(--display);font-size:17px;letter-spacing:.06em;overflow-wrap:anywhere}
+.shop:hover .glass{opacity:.92}
+.shophead{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:20px}
+.shophead .left{display:flex;flex-direction:column;gap:0;min-width:0}
+.count{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.rename{display:flex;gap:8px;max-width:520px;margin-bottom:16px}
+.rename input{flex:1;min-width:0}
+.photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:28px 22px;align-items:start}
+.photo .cc{font-variant-numeric:tabular-nums;white-space:nowrap}
+.photo{position:relative;background:none;border:0;cursor:pointer;padding:0;text-align:left;display:flex;flex-direction:column}
+.photo .no{position:absolute;top:10px;left:10px;z-index:1;background:var(--surface);color:var(--rose);border-radius:999px;padding:2px 12px 2px 10px;font-family:var(--display);font-size:15px;line-height:1.5;box-shadow:0 2px 8px rgba(200,120,140,.18);font-variant-numeric:tabular-nums}
+.photo .no i{font-family:var(--script);font-style:normal;font-size:17px;margin-right:1px}
+.photo img{width:100%;max-width:100%;height:auto;display:block;background:var(--rose-soft);border-radius:18px;box-shadow:var(--shadow)}
+.photo .ph{aspect-ratio:3/4;width:100%;max-width:100%;display:block;background:var(--rose-soft);border-radius:2px}
+.photo .cap{padding:8px 2px 0;display:flex;flex-direction:column;gap:2px;min-width:0}
+.photo .row{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted)}
+.backbtn{align-self:flex-start;margin-bottom:10px;color:var(--rose);border-color:var(--rose)}
+.x{position:fixed;top:max(14px,calc(env(safe-area-inset-top,0px) + 8px));right:max(14px,calc(env(safe-area-inset-right,0px) + 8px));width:44px;height:44px;border-radius:50%;border:0;background:var(--surface);color:var(--ink);font-size:24px;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25);z-index:21}
+.x:hover{color:var(--rose)}
+.status{font-size:13px;color:var(--rose);margin-bottom:12px;min-height:1em}
+#sheet[hidden]{display:none}
+#summary:empty{display:none}
+.photo .no,.panel .no{font-family:var(--body) !important;font-weight:700;font-size:13px !important;color:var(--ink) !important;padding:2px 10px !important}
+.panel .no{position:absolute;top:22px;left:22px;background:var(--surface);border-radius:999px;box-shadow:0 2px 8px rgba(200,120,140,.18);font-variant-numeric:tabular-nums}
+.foot{border-top:0 !important;padding-top:0 !important;justify-content:flex-end}
+.link.more{font-size:20px;line-height:1;padding:2px 8px;letter-spacing:.1em}
+.h2count{font-family:var(--body);font-size:15px;color:var(--muted);letter-spacing:.04em;margin-left:10px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.photo{background:var(--surface);border:1.5px solid var(--line);border-radius:24px;padding:10px 10px 12px;box-shadow:var(--shadow)}
+.photo img{box-shadow:none !important;border-radius:16px !important}
+.photo .no{top:10px;left:10px}
+.photo .cap{padding:10px 4px 0 !important}
+.photos{gap:36px 22px !important}
+.status:empty{min-height:0;margin:0}
+#sheet{position:fixed;inset:0;background:var(--veil);z-index:20;display:flex;align-items:center;justify-content:center;padding:max(12px,env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) max(12px,env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px))}
+.panel{background:var(--surface);border-radius:28px;width:100%;max-width:980px;max-height:100%;overflow:auto;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.panel .img{background:var(--bg);display:flex;align-items:center;justify-content:center;padding:14px;min-height:240px}
+.panel .img .frame{max-width:100%}
+.panel .img img{max-height:76vh;width:auto;max-width:100%;object-fit:contain;display:block;border-radius:13px}
+.panel .side{padding:20px 22px 24px;display:flex;flex-direction:column;gap:18px;min-width:0}
+.sidehead{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.label{font-size:12px;letter-spacing:.14em;color:var(--muted);font-weight:700}
+.block{display:flex;flex-direction:column;gap:8px}
+.saved{font-size:12px;color:var(--muted);min-height:1em}
+.likebar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.like{border:1.5px solid var(--rose);background:var(--surface);color:var(--rose);border-radius:999px;padding:7px 22px;cursor:pointer;font-weight:700;font-size:15px}
+.like.on{background:var(--rose);color:var(--rose-ink)}
+.like.nashi{border-color:var(--muted);color:var(--muted)}
+.like.nashi.on{background:var(--muted);color:var(--surface)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;border-radius:999px;padding:1px 9px 1px 1px;background:var(--rose-soft);color:var(--rose)}
+.chip.nashi{background:var(--line);color:var(--muted)}
+.chip .av{width:20px;height:20px;font-size:10px;border-width:0}
+.av{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;flex:none;font-family:var(--display);font-size:14px;color:#fff;border:2px solid var(--surface)}
+.av.pon{background:#8fb3d9}
+.av.pi{background:var(--rose)}
+.comments{display:flex;flex-direction:column;gap:12px}
+.c{display:flex;gap:8px;align-items:flex-end;max-width:100%}
+.bubble{background:var(--rose-soft);border-radius:18px 18px 18px 6px;padding:8px 14px;min-width:0;max-width:85%}
+.c.mine{flex-direction:row-reverse}
+.c.mine .bubble{background:var(--paper);border:1.5px solid var(--line);border-radius:18px 18px 6px 18px}
+.bubble .who{font-size:12px;font-weight:700;color:var(--muted)}
+.bubble .when{font-weight:400;margin-left:6px;font-variant-numeric:tabular-nums}
+.bubble .txt{white-space:pre-wrap;overflow-wrap:anywhere}
+.composer{display:flex;gap:8px;align-items:flex-end}
+.composer textarea{min-height:46px;height:46px;border-radius:22px;flex:1;min-width:0}
+.foot{border-top:1.5px dashed var(--line);padding-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.foot .by{font-size:12px;color:var(--muted);margin-right:auto}
+@media (max-width:720px){
+  .panel{grid-template-columns:1fr;border-radius:24px}
+  .panel .img img{max-height:52vh}
+  .shops{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 14px}
+  .photos{grid-template-columns:minmax(0,1fr);gap:24px}
+  .shophead{align-items:flex-start}
+}
+@media (prefers-reduced-motion:no-preference){.mirror,.photo,.btn,.like{transition:transform .2s,border-color .15s,background .15s}}
+.tabs{display:inline-flex;background:var(--surface);border:1.5px solid var(--line);border-radius:999px;padding:3px;margin-bottom:18px}
+.tabs button{border:0;background:none;border-radius:999px;padding:6px 18px;cursor:pointer;font-size:14px;font-weight:500;color:var(--muted)}
+.tabs button[aria-pressed=true]{background:var(--rose);color:var(--rose-ink)}
+.bar{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.filters{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;margin-inline:-2px;padding-inline:2px}
+.filters::-webkit-scrollbar{display:none}
+.fchip{flex:none;border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;cursor:pointer;font-size:13px;white-space:nowrap;color:var(--ink)}
+.fchip b{font-weight:700;color:var(--muted);margin-left:4px;font-variant-numeric:tabular-nums}
+.fchip[aria-pressed=true]{background:var(--rose);border-color:var(--rose);color:var(--rose-ink)}
+.fchip[aria-pressed=true] b{color:var(--rose-ink)}
+.fchip.zero{opacity:.5}
+.sortrow{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.sortrow select{font:inherit;font-size:13px;color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:999px;padding:3px 10px}
+.photo .imgbtn{position:relative;display:block;width:100%;background:none;border:0;padding:0;cursor:zoom-in;text-align:left}
+.photo .imgbtn:hover img{opacity:.92}
+.photo .shopname{font-size:12px;color:var(--muted);letter-spacing:.04em}
+.vrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mini{display:inline-flex;align-items:center;gap:4px}
+.mini button{border:1.5px solid var(--rose);background:var(--surface);color:var(--rose);border-radius:999px;padding:1px 12px;cursor:pointer;font-size:13px;font-weight:700;min-height:30px}
+.mini button.nashi{border-color:var(--muted);color:var(--muted)}
+.mini button.on{background:var(--rose);color:var(--rose-ink)}
+.mini button.nashi.on{background:var(--muted);color:var(--surface)}
+button.chip.pick{border:0;cursor:pointer;font:inherit;font-size:13px;font-weight:700;padding:2px 12px 2px 2px;min-height:30px}
+button.chip.pick .av{width:24px;height:24px;font-size:11px}
+.newdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--rose);margin-left:4px;vertical-align:1px}
+.mirror .both{position:absolute;left:8px;bottom:8px;background:var(--rose);color:var(--rose-ink);border-radius:999px;font-size:12px;padding:1px 9px;font-variant-numeric:tabular-nums}
+.panel .img{position:relative;touch-action:pan-y}
+.panel .img img{cursor:zoom-in}
+.nav{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;border:0;background:var(--surface);color:var(--rose);font-size:22px;line-height:1;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.18);opacity:.92}
+.nav.prev{left:8px}.nav.next{right:8px}
+.nav[disabled]{opacity:0;pointer-events:none}
+.pos{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:var(--surface);color:var(--muted);border-radius:999px;font-size:12px;padding:1px 10px;font-variant-numeric:tabular-nums}
+.hint{font-size:12px;color:var(--muted)}
+#zoom[hidden]{display:none}
+#zoom{position:fixed;inset:0;z-index:30;background:#120c10;overflow:auto;-webkit-overflow-scrolling:touch}
+#zoom img{display:block;max-width:none;cursor:zoom-out}
+.empty{color:var(--muted);text-align:center;padding:28px 12px;border:1px dashed var(--line);border-radius:14px}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="script">Dress Diary</div>
+    <h1>ドレス日記 <span class="heart">♡</span></h1>
+    <div class="sub" id="summary"></div>
+  </header>
+  <main id="main"><div class="notice"><span class="big">loading…</span>読み込み中です</div></main>
+  <button id="switchwho" class="link" type="button" hidden></button>
+</div>
+
+<div id="sheet" hidden role="dialog" aria-modal="true" aria-label="ドレスの詳細"></div>
+<div id="zoom" hidden role="dialog" aria-label="写真の拡大"></div>
+<input type="file" id="picker" accept="image/*" multiple hidden>
+
+<div id="gate" hidden>
+  <div class="gatebox">
+    <div class="script">Dress Diary</div>
+    <h1>ドレス日記 <span class="heart">♡</span></h1>
+    <form id="gateform">
+      <input type="password" id="gatepass" placeholder="合言葉" autocomplete="current-password">
+      <div class="gatewho">
+        <button class="btn primary" type="submit" name="who" value="pon"><span class="av pon" aria-hidden="true">ぽ</span>ぽん</button>
+        <button class="btn primary" type="submit" name="who" value="pi"><span class="av pi" aria-hidden="true">ぴ</span>ぴー</button>
+      </div>
+      <div class="gatemsg" id="gatemsg" aria-live="polite"></div>
+    </form>
+  </div>
+</div>
+
+<script>
+// Stands in for the claude.ai runtime: the page code talks to these three
+// objects, and they keep everything in Firestore so no sign-in is needed.
+(() => {
+  const FIREBASE = { projectId: "dress-diary-6fec8" };
+  const PASS = "ぽんぴー";
+  const SDK = "https://www.gstatic.com/firebasejs/10.12.2/";
+  const KEY = "dress:who";
+  const read = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+  const write = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} };
+
+  const gate = document.getElementById("gate");
+  const sw = document.getElementById("switchwho");
+  const whoReady = new Promise((resolve) => {
+    const who = read(KEY);
+    if (who === "pon" || who === "pi") { resolve(who); return; }
+    gate.hidden = false;
+    document.getElementById("gateform").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const pass = document.getElementById("gatepass").value.trim();
+      if (pass !== PASS) { document.getElementById("gatemsg").textContent = "合言葉がちがいます"; return; }
+      const w = e.submitter && e.submitter.value;
+      if (w !== "pon" && w !== "pi") return;
+      write(KEY, w);
+      gate.hidden = true;
+      resolve(w);
+    });
+  });
+  whoReady.then((w) => {
+    sw.textContent = (w === "pon" ? "ぽん" : "ぴー") + "として使っています・切り替える";
+    sw.hidden = false;
+    sw.onclick = () => { write(KEY, null); location.reload(); };
+  });
+
+  let fsP = null;
+  const fs = () => fsP || (fsP = Promise.all([import(SDK + "firebase-app.js"), import(SDK + "firebase-firestore.js")]).then(([app, f]) => ({ f, db: f.getFirestore(app.initializeApp(FIREBASE)) })));
+
+  // The page names per-person docs data/users/<id>/state; they live at state/<id> here.
+  const mapPath = (p) => { const m = /^data\/users\/([^/]+)\/state$/.exec(p); return m ? "state/" + m[1] : p; };
+  const wrapDoc = (d) => ({ id: d.id, exists: d.exists(), data: () => d.data() });
+
+  function makeDb(f, fdb) {
+    const coll = (name) => {
+      let q = f.collection(fdb, name);
+      return {
+        orderBy(field) { q = f.query(q, f.orderBy(field)); return this; },
+        onSnapshot(fn, err) { return f.onSnapshot(q, (s) => fn({ docs: s.docs.map(wrapDoc) }), err); },
+        add(data) { return f.addDoc(f.collection(fdb, name), data); },
+      };
+    };
+    const doc = (path) => {
+      const ref = f.doc(fdb, mapPath(path));
+      return {
+        onSnapshot(fn, err) { return f.onSnapshot(ref, (d) => fn(wrapDoc(d)), err); },
+        set(data) { return f.setDoc(ref, data); },
+        // Nested objects merge field by field, as the page expects.
+        update(data) {
+          const pairs = [];
+          const walk = (obj, path) => {
+            for (const [k, v] of Object.entries(obj)) {
+              if (v && typeof v === "object" && !Array.isArray(v) && Object.keys(v).length) walk(v, path.concat(k));
+              else pairs.push(new f.FieldPath(...path.concat(k)), v);
+            }
+          };
+          walk(data, []);
+          return pairs.length ? f.updateDoc(ref, ...pairs) : Promise.resolve();
+        },
+        delete() { return f.deleteDoc(ref); },
+      };
+    };
+    return { collection: coll, doc };
+  }
+
+  // Photos are stored as data URLs in images/<id>, kept under Firestore's 1 MB document limit.
+  async function toDataUrl(blob) {
+    let bmp = null;
+    try { bmp = await createImageBitmap(blob); } catch (e) {}
+    if (!bmp) return await new Promise((r, j) => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.onerror = j; fr.readAsDataURL(blob); });
+    for (const [size, q] of [[1600, 0.82], [1400, 0.75], [1200, 0.7], [1000, 0.65]]) {
+      const k = Math.min(1, size / Math.max(bmp.width, bmp.height));
+      const c = document.createElement("canvas");
+      c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+      c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+      const url = c.toDataURL("image/jpeg", q);
+      if (url.length < 950000) return url;
+    }
+    throw Object.assign(new Error("too large"), { code: "too_large" });
+  }
+  const cache = new Map();
+  window.loadAsset = (id) => {
+    if (!cache.has(id)) cache.set(id, fs().then(async ({ f, db }) => {
+      const d = await f.getDoc(f.doc(db, "images", id));
+      if (!d.exists()) throw new Error("missing");
+      return d.data().d;
+    }));
+    return cache.get(id);
+  };
+
+  window.claude = {
+    async use(name) {
+      const who = await whoReady;
+      const { f, db } = await fs();
+      if (name === "db") return makeDb(f, db);
+      if (name === "user") return {
+        me: async () => ({ id: who, name: who === "pon" ? "ぽん" : "ぴー", isOwner: who === "pon" }),
+        can: async () => true,
+        profiles: async () => ({}),
+      };
+      if (name === "assets") return {
+        async upload(blob) {
+          const d = await toDataUrl(blob);
+          const ref = await f.addDoc(f.collection(db, "images"), { d, at: Date.now(), by: who });
+          cache.set(ref.id, Promise.resolve(d));
+          return { id: ref.id };
+        },
+        delete: (id) => f.deleteDoc(f.doc(db, "images", id)),
+      };
+      return null;
+    },
+  };
+})();
+</script>
+
+<script>
+(() => {
+  const main = document.getElementById("main");
+  const sheet = document.getElementById("sheet");
+  const zoom = document.getElementById("zoom");
+  const picker = document.getElementById("picker");
+  const summary = document.getElementById("summary");
+
+  let db = null, user = null, assets = null, me = null, canWrite = true;
+  const S = { shops: [], photos: [], comments: [], ready: 0 };
+  // where: "shops" (list of shops), "shop" (one shop), "all" (every photo)
+  let view = { where: "shops", shop: null, photo: null, renaming: false, confirmShop: false, confirmPhoto: false };
+  let status = "";
+  let mySeen = null, seenRef = null;
+
+  const store = { get(k, d) { try { return localStorage.getItem("dress:" + k) || d; } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem("dress:" + k, v); } catch (e) {} } };
+  let filter = store.get("filter", "all");
+  const sort = "no";
+
+  const el = (tag, attrs = {}, ...kids) => {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (k === "class") n.className = v;
+      else if (k === "text") n.textContent = v;
+      else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+      else if (k === "src" && typeof v === "string" && v.startsWith("asset:")) {
+        const id = v.slice(6);
+        n.dataset.asset = id;
+        window.loadAsset(id).then((u) => { n.src = u; }).catch(() => n.dispatchEvent(new Event("error")));
+      }
+      else if (v !== false && v != null) n.setAttribute(k, v === true ? "" : v);
+    }
+    for (const k of kids) if (k != null) n.append(k);
+    return n;
+  };
+  const src = (id) => "asset:" + id;
+  const fmt = (t) => {
+    const d = new Date(t);
+    return (d.getMonth() + 1) + "/" + d.getDate() + " " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+  };
+  const shopPhotos = (id) => S.photos.filter((p) => p.shopId === id);
+  const photoComments = (id) => S.comments.filter((c) => c.photoId === id);
+  const votes = (p) => Object.entries(p.votes || {}).filter(([, v]) => v === "ari" || v === "nashi");
+  const VOTE = { ari: "あり", nashi: "なし" };
+  const isMe = (id) => !!(me && me.id && id === me.id);
+
+  // ぽん is the page's owner; everyone else who writes here is ぴー.
+  let ownerId = null;
+  const ponId = () => ownerId || (me && me.isOwner ? me.id : null);
+  const nameOf = (id) => !id ? "だれか" : id === ponId() ? "ぽん" : "ぴー";
+  const avatar = (id, who) => { const n = who || nameOf(id); return el("span", { class: "av " + (n === "ぽん" ? "pon" : "pi"), "aria-hidden": "true", text: n.slice(0, 1) }); };
+  const ponVote = (p) => { const id = ponId(); return id ? (p.votes || {})[id] || null : null; };
+  const piVote = (p) => { const id = ponId(); const v = votes(p).find(([k]) => k !== id); return v ? v[1] : null; };
+  const piIdOf = (p) => { const id = ponId(); const v = votes(p).find(([k]) => k !== id); return v ? v[0] : (me && me.id && me.id !== id ? me.id : null); };
+  const myVote = (p) => (me && me.id ? (p.votes || {})[me.id] || null : null);
+  const ariCount = (p) => votes(p).filter(([, v]) => v === "ari").length;
+  const nashiCount = (p) => votes(p).filter(([, v]) => v === "nashi").length;
+  const numberOf = (p) => shopPhotos(p.shopId).findIndex((x) => x.id === p.id) + 1;
+  const hasNew = (p) => {
+    if (!me || !me.id || !mySeen) return false;
+    const cs = photoComments(p.id);
+    // Writing a comment yourself counts as having read what came before it.
+    const seen = Math.max((mySeen.seen || {})[p.id] || 0, ...cs.filter((c) => c.by === me.id).map((c) => c.at || 0));
+    return cs.some((c) => c.by && c.by !== me.id && c.at > seen);
+  };
+
+  const FILTERS = [
+    ["all", "すべて", () => true],
+    ["both", "ふたりともあり", (p) => ponVote(p) === "ari" && piVote(p) === "ari"],
+    ["pon", "ぽんがあり", (p) => ponVote(p) === "ari"],
+    ["pi", "ぴーがあり", (p) => piVote(p) === "ari"],
+  ];
+  if (!FILTERS.some(([k]) => k === filter)) filter = "all";
+  const SORTS = [["no", "番号順"], ["ari", "ありが多い順"], ["cmt", "コメントが多い順"], ["newc", "コメントが新しい順"]];
+  const lastComment = (p) => photoComments(p.id).reduce((m, c) => Math.max(m, c.at || 0), 0);
+  const shopOrder = () => {
+    const idx = new Map(sortedShops().map((s, i) => [s.id, i]));
+    return (p) => idx.has(p.shopId) ? idx.get(p.shopId) : 999;
+  };
+  function applyList(ps) {
+    const f = (FILTERS.find(([k]) => k === filter) || FILTERS[0])[2];
+    const so = shopOrder();
+    const byNo = (a, b) => so(a) - so(b) || a.createdAt - b.createdAt;
+    const out = ps.filter(f);
+    if (sort === "ari") out.sort((a, b) => ariCount(b) - ariCount(a) || nashiCount(a) - nashiCount(b) || byNo(a, b));
+    else if (sort === "cmt") out.sort((a, b) => photoComments(b.id).length - photoComments(a.id).length || byNo(a, b));
+    else if (sort === "newc") out.sort((a, b) => lastComment(b) - lastComment(a) || byNo(a, b));
+    else out.sort(byNo);
+    return out;
+  }
+  const sortedShops = () => [...S.shops].sort((a, b) => {
+    return a.createdAt - b.createdAt;
+  });
+
+  // ---------- tabs ----------
+  function renderTabs() {
+    return el("div", { class: "tabs", role: "group", "aria-label": "表示" },
+      el("button", { type: "button", "aria-pressed": view.where === "shops" ? "true" : "false", onclick: () => setHash(""), text: "お店ごと" }),
+      el("button", { type: "button", "aria-pressed": view.where === "all" ? "true" : "false", onclick: () => setHash("#all"), text: "ぜんぶ" }));
+  }
+
+  // ---------- filter + sort bar ----------
+  function renderBar(ps) {
+    const chips = el("div", { class: "filters", role: "group", "aria-label": "しぼりこみ" });
+    for (const [k, label, f] of FILTERS) {
+      const n = ps.filter(f).length;
+      chips.append(el("button", { class: "fchip" + (n || k === filter ? "" : " zero"), type: "button", "aria-pressed": k === filter ? "true" : "false",
+        onclick: () => { filter = k; store.set("filter", k); render(); } }, document.createTextNode(label), el("b", { text: String(n) })));
+    }
+    return el("div", { class: "bar" }, chips);
+  }
+
+  // ---------- list of shops ----------
+  function renderShops() {
+    const frag = document.createDocumentFragment();
+    frag.append(renderTabs());
+    if (canWrite) {
+      const input = el("input", { type: "text", id: "newshop", placeholder: "お店の名前を入れて追加", maxlength: "60" });
+      frag.append(el("form", { class: "addshop", onsubmit: async (e) => {
+        e.preventDefault();
+        const name = input.value.trim();
+        if (!name) return;
+        input.value = "";
+        try { await db.collection("shops").add({ name, createdAt: Date.now(), createdBy: me?.id || null }); }
+        catch (err) { flash("お店を追加できませんでした（" + err.code + "）"); }
+      } }, input, el("button", { class: "btn primary", type: "submit", text: "＋ お店" })));
+    }
+    if (!S.shops.length) {
+      frag.append(el("div", { class: "notice" }, document.createTextNode(canWrite ? "まだお店がありません。上の欄にお店の名前を入れると、そのお店のフォルダができます。" : "まだお店がありません。")));
+      return frag;
+    }
+    const grid = el("div", { class: "shops" });
+    for (const s of sortedShops()) {
+      const ps = shopPhotos(s.id);
+      const both = ps.filter(FILTERS[1][2]).length;
+      const fresh = ps.some(hasNew);
+      const glass = el("div", { class: "glass" });
+      if (ps.length) glass.append(el("img", { src: src(ps[0].asset), alt: "", loading: "lazy" }));
+      else glass.append(el("span", { class: "initial", text: (s.name || "?").slice(0, 1) }));
+      if (both) glass.append(el("span", { class: "both", text: "ふたりともあり " + both }));
+      glass.append(el("span", { class: "stack", text: ps.length + "着" }));
+      grid.append(el("button", { class: "shop", type: "button", onclick: () => go(s.id) },
+        el("div", { class: "mirror" }, glass),
+        el("span", { class: "name" }, document.createTextNode(s.name), fresh ? el("span", { class: "newdot", title: "新しいコメント" }) : null),
+));
+    }
+    frag.append(grid);
+    return frag;
+  }
+
+  // ---------- one card ----------
+  function voteRow(p) {
+    const row = el("span", { class: "vrow" });
+    const pid = ponId();
+    const people = [[pid, "ぽん"], [piIdOf(p), "ぴー"]];
+    for (const [id, who] of people) {
+      const v = id ? (p.votes || {})[id] : null;
+      if (id && isMe(id) && canWrite && (v === "ari" || v === "nashi")) {
+        // Once chosen, only the choice shows; tapping it clears it so the two buttons come back.
+        row.append(el("button", { class: "chip pick " + v, type: "button", title: "押すと選び直せます", "aria-label": who + "：" + VOTE[v] + "（押すと選び直し）", onclick: (e) => { e.stopPropagation(); vote(p, v); } }, avatar(id, who), document.createTextNode(VOTE[v])));
+      } else if (id && isMe(id) && canWrite) {
+        const mini = el("span", { class: "mini" }, avatar(id, who));
+        for (const k of ["ari", "nashi"]) mini.append(el("button", { class: k + (v === k ? " on" : ""), type: "button", "aria-pressed": v === k ? "true" : "false", "aria-label": who + "：" + VOTE[k], onclick: (e) => { e.stopPropagation(); vote(p, k); }, text: VOTE[k] }));
+        row.append(mini);
+      } else if (v === "ari" || v === "nashi") {
+        row.append(el("span", { class: "chip " + v }, avatar(id, who), document.createTextNode(VOTE[v])));
+      }
+    }
+    return row;
+  }
+
+  function card(p, showShop) {
+    const n = photoComments(p.id).length;
+    const shop = S.shops.find((s) => s.id === p.shopId);
+    return el("div", { class: "photo" },
+      el("button", { class: "imgbtn", type: "button", "aria-label": (shop ? shop.name + " " : "") + "No." + numberOf(p) + " を開く", onclick: () => openPhoto(p.id) },
+        el("span", { class: "no" }, document.createTextNode("No." + numberOf(p))),
+        el("img", { src: src(p.asset), alt: "ドレスの写真", loading: "lazy", onerror: (e) => e.target.replaceWith(el("div", { class: "ph" })) })),
+      el("div", { class: "cap" },
+        showShop && shop ? el("span", { class: "shopname", text: shop.name }) : null,
+        el("span", { class: "row" },
+          voteRow(p),
+          el("span", { class: "cc" }, document.createTextNode("💬 " + n), hasNew(p) ? el("span", { class: "newdot", title: "新しいコメント" }) : null))));
+  }
+
+  function photoGrid(list, showShop) {
+    if (!list.length) return el("div", { class: "empty", text: "この条件の写真はありません" });
+    const grid = el("div", { class: "photos" });
+    for (const p of list) grid.append(card(p, showShop));
+    return grid;
+  }
+
+  // ---------- every photo ----------
+  function renderAll() {
+    const frag = document.createDocumentFragment();
+    frag.append(renderTabs());
+    if (!S.photos.length) { frag.append(el("div", { class: "notice", text: "まだ写真がありません。お店を開いて写真を追加してください。" })); return frag; }
+    frag.append(renderBar(S.photos), el("div", { class: "status", "aria-live": "polite", text: status }), photoGrid(applyList(S.photos), true));
+    return frag;
+  }
+
+  // ---------- one shop ----------
+  function renderShop(shop) {
+    const frag = document.createDocumentFragment();
+    const ps = shopPhotos(shop.id);
+    const tools = el("div", { class: "tools" });
+    if (canWrite && assets) tools.append(el("button", { class: "btn primary", type: "button", onclick: () => picker.click(), text: "＋ 写真を追加" }));
+    if (canWrite) tools.append(el("button", { class: "link", type: "button", onclick: () => { view.renaming = !view.renaming; render(); }, text: "店名を編集" }));
+    if (canWrite && ps.length === 0) {
+      tools.append(view.confirmShop
+        ? el("span", { class: "tools" }, el("button", { class: "btn danger", type: "button", onclick: deleteShop, text: "本当に削除" }), el("button", { class: "link", type: "button", onclick: () => { view.confirmShop = false; render(); }, text: "やめる" }))
+        : el("button", { class: "link", type: "button", onclick: () => { view.confirmShop = true; render(); }, text: "このお店を削除" }));
+    }
+    const both = ps.filter(FILTERS[1][2]).length;
+    frag.append(el("div", { class: "shophead" },
+      el("div", { class: "left" },
+        el("button", { class: "btn backbtn", type: "button", onclick: () => go(null), text: "‹ お店の一覧にもどる" }),
+        el("h2", {}, document.createTextNode(shop.name), el("span", { class: "h2count", text: ps.length + "着" }))),
+      tools));
+    if (view.renaming) {
+      const input = el("input", { type: "text", id: "rename", value: shop.name, maxlength: "60" });
+      frag.append(el("form", { class: "rename", onsubmit: async (e) => {
+        e.preventDefault();
+        const name = input.value.trim();
+        if (!name) return;
+        view.renaming = false;
+        try { await db.doc("shops/" + shop.id).update({ name }); } catch (err) { flash("名前を変えられませんでした（" + err.code + "）"); }
+        render();
+      } }, input, el("button", { class: "btn", type: "submit", text: "保存" })));
+    }
+    frag.append(el("div", { class: "status", "aria-live": "polite", text: status }));
+    if (canWrite && !assets) frag.append(el("div", { class: "notice", text: "写真の追加は、このページの編集者だけができます。あり・なしとコメントは使えます。" }));
+    if (!ps.length) {
+      frag.append(el("div", { class: "notice" }, document.createTextNode(assets ? "「写真を追加」から、このお店で着たドレスの写真を選んでください。何枚でもまとめて選べます。" : "まだ写真がありません。")));
+      return frag;
+    }
+    frag.append(renderBar(ps), photoGrid(applyList(ps), false));
+    return frag;
+  }
+
+  // The photos the viewer is paging through: the list they opened it from.
+  function navList() {
+    const p = S.photos.find((x) => x.id === view.photo);
+    if (!p) return [];
+    const base = view.from === "all" ? S.photos : shopPhotos(p.shopId);
+    const list = applyList(base);
+    return list.some((x) => x.id === p.id) ? list : applyList(base).concat([p]);
+  }
+
+  // ---------- photo sheet ----------
+  function renderSheet() {
+    const p = S.photos.find((x) => x.id === view.photo);
+    if (!p) { closeSheet(); return; }
+    const draftBox = document.getElementById("draft");
+    const draft = draftBox && draftBox.dataset.photo === p.id ? draftBox.value : "";
+    const hadDraftFocus = draftBox && document.activeElement === draftBox;
+    const scroller = sheet.querySelector(".panel");
+    const scrollTop = scroller && scroller.dataset.photo === p.id ? scroller.scrollTop : 0;
+
+    const vs = votes(p);
+    const mine = myVote(p);
+    const likebar = el("div", { class: "likebar" });
+    if (canWrite && me && me.id && !mine) for (const k of ["ari", "nashi"]) likebar.append(el("button", { class: "like " + k, type: "button", onclick: () => vote(p, k), text: VOTE[k] }));
+    const lk = el("span", { class: "chips" });
+    for (const [id, v] of vs) lk.append(el("span", { class: "chip " + v }, avatar(id), document.createTextNode(nameOf(id) + "：" + VOTE[v])));
+    likebar.append(lk);
+    if (canWrite && mine) likebar.append(el("button", { class: "link", type: "button", onclick: () => vote(p, mine), text: "選び直す" }));
+
+    const list = el("div", { class: "comments" });
+    const cs = photoComments(p.id);
+    for (const c of cs) {
+      const mineC = isMe(c.by);
+      list.append(el("div", { class: "c" + (mineC ? " mine" : "") },
+        avatar(c.by),
+        el("div", { class: "bubble" },
+          el("div", { class: "who" }, document.createTextNode(nameOf(c.by)), el("span", { class: "when", text: fmt(c.at) }),
+            mineC ? el("button", { class: "link", type: "button", style: "margin-left:6px;font-size:12px", onclick: () => deleteComment(c.id), text: "消す" }) : null),
+          el("div", { class: "txt", text: c.text }))));
+    }
+
+    const ta = el("textarea", { id: "draft", "data-photo": p.id, placeholder: "コメントを書く", onkeydown: (e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); sendComment(); } } });
+    ta.value = draft;
+    const composer = canWrite ? el("div", { class: "composer" }, ta, el("button", { class: "btn primary", type: "button", onclick: sendComment, text: "送る" })) : null;
+
+    // Deleting is rare, so it hides behind a small "…" button.
+    const foot = canWrite ? el("div", { class: "foot" }, view.confirmPhoto === "ask"
+      ? el("span", { class: "tools" }, el("button", { class: "btn danger", type: "button", onclick: () => deletePhoto(p), text: "写真とコメントを削除" }), el("button", { class: "link", type: "button", onclick: () => { view.confirmPhoto = false; renderSheet(); }, text: "やめる" }))
+      : view.confirmPhoto
+        ? el("button", { class: "link", type: "button", onclick: () => { view.confirmPhoto = "ask"; renderSheet(); }, text: "この写真を削除" })
+        : el("button", { class: "link more", type: "button", "aria-label": "その他", onclick: () => { view.confirmPhoto = true; renderSheet(); }, text: "…" })) : null;
+
+    const nl = navList();
+    const i = nl.findIndex((x) => x.id === p.id);
+    const prev = i > 0 ? nl[i - 1] : null, next = i >= 0 && i < nl.length - 1 ? nl[i + 1] : null;
+    const imgBox = el("div", { class: "img" },
+      el("div", { class: "frame" }, el("img", { src: src(p.asset), alt: "ドレスの写真（押すと拡大）", onclick: () => openZoom(p) })),
+      el("button", { class: "nav prev", type: "button", "aria-label": "前の写真", disabled: !prev, onclick: () => prev && stepTo(prev.id), text: "‹" }),
+      el("button", { class: "nav next", type: "button", "aria-label": "次の写真", disabled: !next, onclick: () => next && stepTo(next.id), text: "›" }),
+      el("span", { class: "no" }, document.createTextNode("No." + numberOf(p))),
+      nl.length > 1 ? el("span", { class: "pos", text: (i + 1) + " / " + nl.length }) : null);
+    let sx = null, sy = null;
+    imgBox.addEventListener("touchstart", (e) => { if (e.touches.length === 1) { sx = e.touches[0].clientX; sy = e.touches[0].clientY; } else sx = null; }, { passive: true });
+    imgBox.addEventListener("touchend", (e) => {
+      if (sx == null) return;
+      const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+      sx = null;
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) { const t = dx < 0 ? next : prev; if (t) stepTo(t.id); }
+    });
+
+    const shop = S.shops.find((s) => s.id === p.shopId);
+    const panel = el("div", { class: "panel", "data-photo": p.id },
+      imgBox,
+      el("div", { class: "side" },
+        likebar,
+        cs.length ? list : null,
+        composer, foot));
+    sheet.replaceChildren(panel, el("button", { class: "x", type: "button", "aria-label": "閉じる", onclick: back, text: "×" }));
+    sheet.hidden = false;
+    panel.scrollTop = scrollTop;
+    if (hadDraftFocus) document.getElementById("draft")?.focus();
+    markSeen(p);
+  }
+
+  // ---------- zoom ----------
+  function openZoom(p) {
+    const img = el("img", { src: src(p.asset), alt: "ドレスの写真（拡大）", onclick: closeZoom });
+    const w = Math.round(Math.max(window.innerWidth * 2.2, Math.min(window.innerWidth * 3, 1600)));
+    img.style.width = w + "px";
+    zoom.replaceChildren(img, el("button", { class: "x", type: "button", "aria-label": "拡大を閉じる", onclick: closeZoom, text: "×", style: "z-index:31" }));
+    zoom.hidden = false;
+    const center = () => { zoom.scrollLeft = (zoom.scrollWidth - zoom.clientWidth) / 4; zoom.scrollTop = (zoom.scrollHeight - zoom.clientHeight) / 3; };
+    if (img.complete) center(); else img.addEventListener("load", center, { once: true });
+  }
+  function closeZoom() { zoom.hidden = true; zoom.replaceChildren(); }
+
+  // ---------- writes ----------
+  let voting = false;
+  async function vote(p, k) {
+    if (voting || !me || !me.id) return;
+    voting = true;
+    const next = (p.votes || {})[me.id] === k ? null : k;
+    try { await db.doc("photos/" + p.id).update({ votes: { [me.id]: next } }); }
+    catch (err) { flash("選べませんでした（" + err.code + "）"); }
+    voting = false;
+  }
+
+  // Remember, per person, when each photo's comments were last read.
+  let seenChain = Promise.resolve();
+  function markSeen(p) {
+    if (!seenRef || !mySeen) return;
+    const last = photoComments(p.id).reduce((m, c) => Math.max(m, c.at || 0), 0);
+    if (!last || ((mySeen.seen || {})[p.id] || 0) >= last) return;
+    mySeen = { ...mySeen, seen: { ...(mySeen.seen || {}), [p.id]: last } };
+    const exists = mySeen.exists;
+    mySeen.exists = true;
+    seenChain = seenChain.then(() => exists ? seenRef.update({ seen: { [p.id]: last } }) : seenRef.set({ seen: mySeen.seen })).catch(() => {});
+  }
+
+  let sending = false;
+  async function sendComment() {
+    const box = document.getElementById("draft");
+    const text = box ? box.value.trim() : "";
+    if (!text || sending || !view.photo) return;
+    sending = true;
+    try {
+      await db.collection("comments").add({ photoId: view.photo, text, by: me?.id || null, at: Date.now() });
+      const d = document.getElementById("draft"); if (d) d.value = "";
+    } catch (err) { flash("コメントを送れませんでした（" + err.code + "）"); }
+    sending = false;
+  }
+
+  async function deleteComment(id) {
+    try { await db.doc("comments/" + id).delete(); } catch (err) { flash("消せませんでした（" + err.code + "）"); }
+  }
+
+  async function deletePhoto(p) {
+    try {
+      for (const c of photoComments(p.id)) await db.doc("comments/" + c.id).delete();
+      await db.doc("photos/" + p.id).delete();
+      if (assets) { try { await assets.delete(p.asset); } catch (e) { /* the row is gone; the file stays if someone else uploaded it */ } }
+      if (view.from === "all") setHash("#all"); else go(p.shopId);
+    } catch (err) { flash("削除できませんでした（" + err.code + "）"); }
+  }
+
+  async function deleteShop() {
+    const id = view.shop;
+    if (!id || shopPhotos(id).length) return;
+    try { await db.doc("shops/" + id).delete(); go(null); } catch (err) { flash("削除できませんでした（" + err.code + "）"); }
+  }
+
+  // ---------- uploads ----------
+  async function shrink(file) {
+    try {
+      const bmp = await createImageBitmap(file);
+      const k = Math.min(1, 2000 / Math.max(bmp.width, bmp.height));
+      const c = document.createElement("canvas");
+      c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+      c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+      const b = await new Promise((r) => c.toBlob(r, "image/jpeg", 0.86));
+      if (b) return b;
+    } catch (e) { /* fall back to the original file */ }
+    return file;
+  }
+
+  picker.addEventListener("change", async () => {
+    const files = [...picker.files];
+    picker.value = "";
+    const shopId = view.shop;
+    if (!files.length || !shopId || !assets) return;
+    let done = 0, failed = 0;
+    for (const f of files) {
+      setStatus("写真を追加しています… " + (done + failed + 1) + " / " + files.length);
+      try {
+        const blob = await shrink(f);
+        const r = await assets.upload(blob, { type: blob.type || "image/jpeg" });
+        await db.collection("photos").add({ shopId, asset: r.id, votes: {}, createdAt: Date.now(), createdBy: me?.id || null });
+        done++;
+      } catch (err) {
+        failed++;
+      }
+    }
+    setStatus(failed ? done + "枚追加、" + failed + "枚は追加できませんでした" : done + "枚追加しました ♡");
+    setTimeout(() => setStatus(""), 4000);
+  });
+
+  // ---------- navigation (the hash keeps the phone's back gesture working) ----------
+  const okId = (id) => /^[A-Za-z0-9-]+$/.test(id || "");
+  function setHash(h) {
+    if (location.hash === h || (!h && !location.hash)) { applyHash(); return; }
+    if (h) location.hash = h;
+    else history.pushState(null, "", location.pathname + location.search);
+    applyHash();
+  }
+  function applyHash() {
+    const h = location.hash.slice(1);
+    let where = "shops", shop = null, photo = null;
+    if (h.startsWith("p-")) {
+      photo = h.slice(2);
+      const p = S.photos.find((x) => x.id === photo);
+      if (view.where === "all" || (view.photo && view.from === "all")) where = "all";
+      else { where = "shop"; shop = p ? p.shopId : view.shop; }
+    } else if (h.startsWith("s-")) { where = "shop"; shop = h.slice(2); }
+    else if (h === "all") where = "all";
+    const changed = where !== view.where || shop !== view.shop;
+    if (changed) { view = { where, shop, photo: null, from: null, renaming: false, confirmShop: false, confirmPhoto: false }; status = ""; }
+    if (photo !== view.photo) { view.photo = photo; view.from = photo ? (where === "all" ? "all" : "shop") : null; view.confirmPhoto = false; sheet.replaceChildren(); }
+    if (!photo) { sheet.hidden = true; sheet.replaceChildren(); closeZoom(); }
+    render();
+    if (changed) window.scrollTo(0, 0);
+  }
+  window.addEventListener("hashchange", applyHash);
+  window.addEventListener("popstate", applyHash);
+  function go(shopId) { setHash(shopId && okId(shopId) ? "#s-" + shopId : ""); }
+  function openPhoto(id) {
+    if (okId(id)) setHash("#p-" + id);
+    else { view.photo = id; view.from = view.where === "all" ? "all" : "shop"; view.confirmPhoto = false; sheet.replaceChildren(); renderSheet(); }
+  }
+  // Paging inside the viewer replaces the entry, so "back" still returns to the list.
+  function stepTo(id) {
+    closeZoom();
+    if (okId(id) && location.hash.startsWith("#p-")) { history.replaceState(null, "", "#p-" + id); view.photo = id; view.confirmPhoto = false; renderSheet(); }
+    else { view.photo = id; view.confirmPhoto = false; renderSheet(); }
+  }
+  function closeSheet() {
+    view.photo = null; view.confirmPhoto = false;
+    sheet.hidden = true;
+    sheet.replaceChildren();
+    render();
+  }
+  function back() {
+    if (!zoom.hidden) { closeZoom(); return; }
+    if (view.photo) {
+      if (location.hash.startsWith("#p-")) { if (view.from === "all") setHash("#all"); else go(view.shop); }
+      else closeSheet();
+    } else go(null);
+  }
+  sheet.addEventListener("click", (e) => { if (e.target === sheet) back(); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && (!sheet.hidden || !zoom.hidden)) { back(); return; }
+    if (sheet.hidden || !zoom.hidden) return;
+    const t = e.target;
+    if (t && (t.tagName === "TEXTAREA" || t.tagName === "INPUT" || t.tagName === "SELECT")) return;
+    if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+      const nl = navList(), i = nl.findIndex((x) => x.id === view.photo);
+      const t2 = nl[i + (e.key === "ArrowRight" ? 1 : -1)];
+      if (i >= 0 && t2) { e.preventDefault(); stepTo(t2.id); }
+    }
+  });
+
+  function setStatus(t) { status = t; const s = main.querySelector(".status"); if (s) s.textContent = t; }
+  function flash(t) { setStatus(t); if (!main.querySelector(".status")) summary.textContent = t; }
+
+  function render() {
+    if (S.ready < 3) return;
+    summary.textContent = "";
+    const shop = view.shop && S.shops.find((s) => s.id === view.shop);
+    if (view.where === "shop" && !shop) { view.where = "shops"; view.shop = null; }
+    // The title belongs to the top screens only; inside a shop the shop name is the heading.
+    document.querySelector("header.top").hidden = view.where === "shop";
+    const y = window.scrollY;
+    main.replaceChildren(view.where === "all" ? renderAll() : shop ? renderShop(shop) : renderShops());
+    window.scrollTo(0, y);
+    if (view.photo) renderSheet();
+  }
+
+  let pending = null, routed = false;
+  function update() {
+    if (pending) return;
+    pending = Promise.resolve().then(() => {
+      pending = null;
+      if (!routed && S.ready >= 3) { routed = true; applyHash(); } else render();
+    });
+  }
+
+  function fail(msg) { main.replaceChildren(el("div", { class: "notice", text: msg })); }
+
+  async function start() {
+    if (!window.claude || !window.claude.use) { fail("読み込めませんでした。ページを開き直してください。"); return; }
+    [db, user, assets] = await Promise.all([window.claude.use("db"), window.claude.use("user"), window.claude.use("assets")]);
+    if (!db) { fail("データを読み込めませんでした。電波のよい所で開き直してください。"); return; }
+    if (user) {
+      me = await user.me();
+      const c = await user.can("data.write");
+      if (c === false) canWrite = false;
+    }
+    db.doc("settings/owner").onSnapshot((d) => {
+      ownerId = d.exists ? d.data().id : null;
+      if (me && me.isOwner && me.id && ownerId !== me.id && canWrite) db.doc("settings/owner").set({ id: me.id }).catch(() => {});
+      if (S.ready >= 3) render();
+    }, () => {});
+    if (me && me.id) {
+      seenRef = db.doc("data/users/" + me.id + "/state");
+      seenRef.onSnapshot((d) => {
+        const data = d.exists ? d.data() : {};
+        // Keep marks made locally that the server has not echoed yet.
+        mySeen = { exists: d.exists || !!(mySeen && mySeen.exists), seen: { ...((mySeen && mySeen.seen) || {}), ...(data.seen || {}) } };
+        if (S.ready >= 3) render();
+      }, () => { mySeen = null; });
+    }
+    const onErr = (e) => fail("データの読み込みが止まりました（" + e.code + "）。ページを開き直してください。");
+    const seen = {};
+    const mark = (k) => { if (!seen[k]) { seen[k] = true; S.ready++; } };
+    db.collection("shops").orderBy("createdAt").onSnapshot((s) => { S.shops = s.docs.map((d) => ({ id: d.id, ...d.data() })); mark("shops"); update(); }, onErr);
+    db.collection("photos").orderBy("createdAt").onSnapshot((s) => { S.photos = s.docs.map((d) => ({ id: d.id, ...d.data() })); mark("photos"); update(); }, onErr);
+    db.collection("comments").orderBy("at").onSnapshot((s) => { S.comments = s.docs.map((d) => ({ id: d.id, ...d.data() })); mark("comments"); update(); }, onErr);
+  }
+  start();
+})();
+</script>
+</body>
+</html>
