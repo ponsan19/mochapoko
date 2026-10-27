@@ -197,7 +197,7 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
 .hint{font-size:12px;color:var(--muted)}
 #zoom[hidden]{display:none}
 #zoom{position:fixed;inset:0;z-index:30;background:#120c10;overflow:hidden;display:flex;align-items:center;justify-content:center;touch-action:none;user-select:none;-webkit-user-select:none}
-#zoom img{display:block;max-width:100%;max-height:100%;object-fit:contain;transform-origin:center center;will-change:transform;-webkit-user-drag:none}
+#zoom img{display:block;flex:none;min-width:0;min-height:0;max-width:100vw;max-height:100vh;max-height:100dvh;object-fit:contain;transform-origin:center center;will-change:transform;-webkit-user-drag:none}
 .empty{color:var(--muted);text-align:center;padding:28px 12px;border:1px dashed var(--line);border-radius:14px}
 </style>
 </head>
@@ -686,6 +686,15 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
     zoom.replaceChildren(img, el("button", { class: "x", type: "button", "aria-label": "拡大を閉じる", onclick: closeZoom, text: "×", style: "z-index:31" }));
     zoom.hidden = false;
     let sc = 1, tx = 0, ty = 0;
+    const fit = () => {
+      const nw = img.naturalWidth, nh = img.naturalHeight;
+      if (!nw || !nh) return;
+      const k = Math.min(zoom.clientWidth / nw, zoom.clientHeight / nh);
+      img.style.width = Math.floor(nw * k) + "px"; img.style.height = Math.floor(nh * k) + "px";
+      apply();
+    };
+    img.addEventListener("load", fit);
+    window.addEventListener("resize", fit);
     const W = () => zoom.clientWidth, H = () => zoom.clientHeight;
     const clamp = () => {
       sc = Math.min(5, Math.max(1, sc));
@@ -730,7 +739,7 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
     };
     zoom.onpointerup = up; zoom.onpointercancel = up;
     zoom.onwheel = (e) => { e.preventDefault(); zoomAt(e.clientX, e.clientY, sc * (e.deltaY < 0 ? 1.15 : 1 / 1.15)); };
-    apply();
+    if (img.complete) fit(); else apply();
   }
   function closeZoom() { zoom.hidden = true; zoom.replaceChildren(); }
 
