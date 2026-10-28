@@ -351,32 +351,48 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
   }
 
   // Photos are stored as data URLs in images/<id>, kept under Firestore's 1 MB document limit.
-  async function toDataUrl(blob) {
-    let bmp = null;
-    try { bmp = await createImageBitmap(blob); } catch (e) {}
-    if (!bmp) return await new Promise((r, j) => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.onerror = j; fr.readAsDataURL(blob); });
-    for (const [size, q] of [[1600, 0.82], [1400, 0.75], [1200, 0.7], [1000, 0.65]]) {
-      const k = Math.min(1, size / Math.max(bmp.width, bmp.height));
-      const c = document.createElement("canvas");
-      c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
-      c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
-      const url = c.toDataURL("image/jpeg", q);
-      if (url.length < 950000) return url;
-    }
-    throw Object.assign(new Error("too large"), { code: "too_large" });
+  // A picture is kept twice: a small preview in images/<id>.d for the lists, and the
+  // full-quality JPEG cut into pieces (images/<id>-p0, -p1, ...) because one
+  // Firestore document holds at most 1 MB.
+  const PART = 900000;
+  function jpeg(bmp, max, q) {
+    const k = Math.min(1, max / Math.max(bmp.width, bmp.height));
+    const c = document.createElement("canvas");
+    c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+    c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+    return c.toDataURL("image/jpeg", q);
   }
-  const cache = new Map();
-  window.loadAsset = (id) => {
-    // A plain REST read: Safari stalls on big docs over the live channel.
-    if (!cache.has(id)) cache.set(id, fetch(REST + "images/" + encodeURIComponent(id) + "?mask.fieldPaths=d")
+  async function encode(blob) {
+    const bmp = await createImageBitmap(blob);
+    let thumb = jpeg(bmp, 900, 0.8);
+    if (thumb.length > PART) thumb = jpeg(bmp, 600, 0.7);
+    return { thumb, full: jpeg(bmp, 2600, 0.92) };
+  }
+  const restGet = (path, field) => fetch(REST + path + "?mask.fieldPaths=" + field)
+    .then((r) => r.ok ? r.json() : Promise.reject(new Error("http " + r.status)));
+  const meta = new Map(), full = new Map();
+  // A plain REST read: Safari stalls on big docs over the live channel.
+  const loadMeta = (id) => {
+    if (!meta.has(id)) meta.set(id, fetch(REST + "images/" + encodeURIComponent(id) + "?mask.fieldPaths=d&mask.fieldPaths=parts")
       .then((r) => r.ok ? r.json() : Promise.reject(new Error("http " + r.status)))
-      .then((j) => j.fields.d.stringValue)
+      .then((j) => ({ d: j.fields.d.stringValue, parts: +(j.fields.parts?.integerValue || 0) }))
       .catch(() => fs().then(async ({ f, db }) => {
         const d = await f.getDoc(f.doc(db, "images", id));
         if (!d.exists()) throw new Error("missing");
-        return d.data().d;
+        return { d: d.data().d, parts: d.data().parts || 0 };
       })));
-    return cache.get(id);
+    return meta.get(id);
+  };
+  window.loadAsset = (id) => loadMeta(id).then((m) => m.d);
+  window.loadFull = (id) => {
+    if (!full.has(id)) full.set(id, loadMeta(id).then(async (m) => {
+      if (!m.parts) return m.d;
+      const bits = await Promise.all([...Array(m.parts).keys()].map((k) =>
+        restGet("images/" + encodeURIComponent(id + "-p" + k), "c").then((j) => j.fields.c.stringValue)
+          .catch(() => fs().then(async ({ f, db }) => (await f.getDoc(f.doc(db, "images", id + "-p" + k))).data().c))));
+      return bits.join("");
+    }));
+    return full.get(id);
   };
 
   window.claude = {
@@ -391,12 +407,20 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
       };
       if (name === "assets") return {
         async upload(blob) {
-          const d = await toDataUrl(blob);
-          const ref = await f.addDoc(f.collection(db, "images"), { d, at: Date.now(), by: who });
-          cache.set(ref.id, Promise.resolve(d));
-          return { id: ref.id };
+          const { thumb, full: big } = await encode(blob);
+          const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+          const n = Math.ceil(big.length / PART);
+          for (let k = 0; k < n; k++) await f.setDoc(f.doc(db, "images", id + "-p" + k), { c: big.slice(k * PART, (k + 1) * PART) });
+          await f.setDoc(f.doc(db, "images", id), { d: thumb, parts: n, at: Date.now(), by: who });
+          meta.set(id, Promise.resolve({ d: thumb, parts: n }));
+          full.set(id, Promise.resolve(big));
+          return { id };
         },
-        delete: (id) => f.deleteDoc(f.doc(db, "images", id)),
+        async delete(id) {
+          const m = await loadMeta(id).catch(() => ({ parts: 0 }));
+          for (let k = 0; k < m.parts; k++) await f.deleteDoc(f.doc(db, "images", id + "-p" + k));
+          await f.deleteDoc(f.doc(db, "images", id));
+        },
       };
       return null;
     },
@@ -408,6 +432,13 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
 (() => {
   const main = document.getElementById("main");
   const sheet = document.getElementById("sheet");
+  // iPhone keeps fixed layers full height under the keyboard; size the photo
+  // sheet to the visible area instead so the comment box sits on the keyboard.
+  const vv = window.visualViewport;
+  if (vv) {
+    const fitSheet = () => { sheet.style.top = vv.offsetTop + "px"; sheet.style.bottom = "auto"; sheet.style.height = vv.height + "px"; };
+    vv.addEventListener("resize", fitSheet); vv.addEventListener("scroll", fitSheet); fitSheet();
+  }
   const zoom = document.getElementById("zoom");
   const picker = document.getElementById("picker");
   let addTo = null; // a dress id when adding pictures to it instead of making a new one
@@ -434,6 +465,14 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
         const id = v.slice(6);
         n.dataset.asset = id;
         window.loadAsset(id).then((u) => { n.src = u; }).catch(() => n.dispatchEvent(new Event("error")));
+      }
+      else if (k === "src" && typeof v === "string" && v.startsWith("full:")) {
+        // Preview first, then the full-quality picture once it arrives.
+        const id = v.slice(5);
+        n.dataset.asset = id;
+        let got = false;
+        window.loadAsset(id).then((u) => { if (!got) n.src = u; }).catch(() => {});
+        window.loadFull(id).then((u) => { got = true; n.src = u; }).catch(() => {});
       }
       else if (v !== false && v != null) n.setAttribute(k, v === true ? "" : v);
     }
@@ -687,7 +726,7 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
           el("div", { class: "txt", text: c.text }))));
     }
 
-    const ta = el("textarea", { id: "draft", "data-photo": p.id, placeholder: "コメントを書く", onkeydown: (e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); sendComment(); } } });
+    const ta = el("textarea", { id: "draft", "data-photo": p.id, placeholder: "コメントを書く", onfocus: () => setTimeout(() => ta.scrollIntoView({ block: "nearest" }), 350), onkeydown: (e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); sendComment(); } } });
     ta.value = draft;
     const composer = canWrite ? el("div", { class: "composer" }, ta, el("button", { class: "btn primary", type: "button", onclick: sendComment, text: "送る" })) : null;
 
@@ -711,7 +750,7 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
     const side = Math.min(view.side || 0, sides.length - 1);
     const canPrev = side > 0 || !!prev, canNext = side < sides.length - 1 || !!next;
     const imgBox = el("div", { class: "img" },
-      el("div", { class: "frame" }, el("img", { src: src(sides[side]), alt: "ドレスの写真（押すと拡大）", onclick: () => openZoom(p) })),
+      el("div", { class: "frame" }, el("img", { src: "full:" + sides[side], alt: "ドレスの写真（押すと拡大）", onclick: () => openZoom(p) })),
       el("button", { class: "nav prev", type: "button", "aria-label": "前へ", disabled: !canPrev, onclick: () => move(-1), text: "‹" }),
       el("button", { class: "nav next", type: "button", "aria-label": "次へ", disabled: !canNext, onclick: () => move(1), text: "›" }),
       el("span", { class: "no" }, document.createTextNode("No." + numberOf(p))),
@@ -743,7 +782,7 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
   // Opens fitted to the screen; pinch or double-tap to zoom, drag to move.
   function openZoom(p) {
     const sides = sidesOf(p), cur = Math.min(view.side || 0, sides.length - 1);
-    const img = el("img", { src: src(sides[cur]), alt: "ドレスの写真（拡大）", draggable: "false" });
+    const img = el("img", { src: "full:" + sides[cur], alt: "ドレスの写真（拡大）", draggable: "false" });
     zoom.replaceChildren(img, el("button", { class: "x", type: "button", "aria-label": "拡大を閉じる", onclick: closeZoom, text: "×", style: "z-index:31" }),
       sides.length > 1 ? el("span", { class: "zdots" }, ...sides.map((_, k) => el("i", { class: k === cur ? "on" : "" }))) : null);
     zoom.hidden = false;
@@ -869,7 +908,7 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
   async function adjustSide(p, k) {
     const ss = sidesOf(p);
     try {
-      const blob = await (await fetch(await window.loadAsset(ss[k]))).blob();
+      const blob = await (await fetch(await window.loadFull(ss[k]))).blob();
       const c = await cropPhoto(blob, "写真を調整");
       if (!c || c === blob) return;
       const id = (await assets.upload(c, { type: "image/jpeg" })).id;
@@ -916,11 +955,11 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
   async function shrink(file) {
     try {
       const bmp = await createImageBitmap(file);
-      const k = Math.min(1, 2000 / Math.max(bmp.width, bmp.height));
+      const k = Math.min(1, 3000 / Math.max(bmp.width, bmp.height));
       const c = document.createElement("canvas");
       c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
       c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
-      const b = await new Promise((r) => c.toBlob(r, "image/jpeg", 0.86));
+      const b = await new Promise((r) => c.toBlob(r, "image/jpeg", 0.95));
       if (b) return b;
     } catch (e) { /* fall back to the original file */ }
     return file;
@@ -933,11 +972,11 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
     if (!bmp || bmp.width < bmp.height * 1.2) return [await shrink(file)];
     const half = Math.floor(bmp.width / 2), out = [];
     for (const x of [0, half]) {
-      const k = Math.min(1, 1600 / Math.max(half, bmp.height));
+      const k = Math.min(1, 3000 / Math.max(half, bmp.height));
       const c = document.createElement("canvas");
       c.width = Math.round(half * k); c.height = Math.round(bmp.height * k);
       c.getContext("2d").drawImage(bmp, x, 0, half, bmp.height, 0, 0, c.width, c.height);
-      out.push(await new Promise((r) => c.toBlob(r, "image/jpeg", 0.86)));
+      out.push(await new Promise((r) => c.toBlob(r, "image/jpeg", 0.95)));
     }
     return out;
   }
@@ -996,7 +1035,7 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
         if (s === 1 && x === 0 && y === 0) { finish(blob); return; } // untouched: keep the whole picture
         const k = base * s, sw = fw / k, sh = fh / k;
         const sx = W / 2 - x / k - sw / 2, sy = H / 2 - y / k - sh / 2;
-        const q = Math.min(1, 1600 / sh);
+        const q = Math.min(1, 2600 / sh);
         const c = document.createElement("canvas");
         c.width = Math.round(sw * q); c.height = Math.round(sh * q);
         c.getContext("2d").drawImage(img, sx, sy, sw, sh, 0, 0, c.width, c.height);
