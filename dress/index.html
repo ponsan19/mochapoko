@@ -177,6 +177,9 @@ textarea{resize:vertical;min-height:84px}
 .composer{display:flex;gap:8px;align-items:flex-end}
 .composer textarea{min-height:46px;height:46px;border-radius:22px;flex:1;min-width:0}
 .foot{border-top:1.5px dashed var(--line);padding-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.editbox{margin-top:10px}
+.editbox .tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.likebar .btn.small{margin-left:auto;min-height:30px;padding:2px 14px;font-size:13px}
 .foot .by{font-size:12px;color:var(--muted);margin-right:auto}
 @media (max-width:720px){
   .panel{grid-template-columns:1fr;border-radius:24px}
@@ -224,6 +227,7 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
 #crop{position:fixed;inset:0;z-index:40;background:#120c10;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;touch-action:none;user-select:none;-webkit-user-select:none}
 #crop .cframe{position:relative;overflow:hidden;border-radius:14px;outline:2px solid rgba(255,255,255,.85);touch-action:none;cursor:grab}
 #crop .cimg{position:absolute;left:50%;top:50%;max-width:none;max-height:none;transform-origin:center center;pointer-events:none;-webkit-user-drag:none}
+#crop .cg{position:absolute;background:rgba(255,255,255,.6);pointer-events:none;box-shadow:0 0 1px rgba(0,0,0,.4)}
 #crop .ctip{font-size:13px;opacity:.85}
 #crop .cbtns{display:flex;gap:10px;align-items:center}
 #crop .link{color:#fff;opacity:.8}
@@ -663,7 +667,7 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
     const lk = el("span", { class: "chips" });
     for (const [id, v] of vs) lk.append(el("span", { class: "chip " + v }, avatar(id), document.createTextNode(VOTE[v])));
     likebar.append(lk);
-    if (canWrite && mine) likebar.append(el("button", { class: "link", type: "button", onclick: () => vote(p, mine), text: "選び直す" }));
+    if (canWrite && !view.confirmPhoto) likebar.append(el("button", { class: "btn small", type: "button", onclick: () => { view.confirmPhoto = true; renderSheet(); }, text: "編集" }));
 
     const list = el("div", { class: "comments" });
     const cs = photoComments(p.id);
@@ -681,17 +685,18 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
     ta.value = draft;
     const composer = canWrite ? el("div", { class: "composer" }, ta, el("button", { class: "btn primary", type: "button", onclick: sendComment, text: "送る" })) : null;
 
-    // Editing is rare, so its buttons show only after tapping 編集.
+    // Everything that changes this dress sits behind the one 編集 button next to the votes.
     const sidesNow = sidesOf(p), shown = Math.min(view.side || 0, sidesNow.length - 1);
-    const foot = canWrite ? el("div", { class: "foot" }, view.confirmPhoto === "ask"
+    const foot = canWrite && view.confirmPhoto ? el("div", { class: "editbox" }, view.confirmPhoto === "ask"
       ? el("span", { class: "tools" }, el("button", { class: "btn danger", type: "button", onclick: () => deleteSide(p, shown), text: sidesNow.length > 1 ? "この写真を削除する" : "このドレスを削除する" }), el("button", { class: "link", type: "button", onclick: () => { view.confirmPhoto = false; renderSheet(); }, text: "やめる" }))
       : view.confirmPhoto
         ? el("span", { class: "tools" },
+            mine ? el("button", { class: "btn", type: "button", onclick: () => { view.confirmPhoto = false; vote(p, mine); }, text: "あり・なしを選び直す" }) : null,
             assets ? el("button", { class: "btn", type: "button", onclick: () => { addTo = p.id; picker.click(); }, text: "写真を追加" }) : null,
             assets ? el("button", { class: "btn", type: "button", onclick: () => adjustSide(p, shown), text: "写真を調整" }) : null,
             el("button", { class: "btn", type: "button", onclick: () => { view.confirmPhoto = "ask"; renderSheet(); }, text: "写真を削除" }),
             el("button", { class: "link", type: "button", onclick: () => { view.confirmPhoto = false; renderSheet(); }, text: "閉じる" }))
-        : el("button", { class: "btn", type: "button", onclick: () => { view.confirmPhoto = true; renderSheet(); }, text: "編集" })) : null;
+        : null) : null;
 
     const nl = navList();
     const i = nl.findIndex((x) => x.id === p.id);
@@ -718,9 +723,9 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
     const panel = el("div", { class: "panel", "data-photo": p.id },
       imgBox,
       el("div", { class: "side" },
-        likebar,
+        likebar, foot,
         cs.length ? list : null,
-        composer, foot));
+        composer));
     sheet.replaceChildren(panel, el("button", { class: "x", type: "button", "aria-label": "閉じる", onclick: back, text: "×" }));
     sheet.hidden = false;
     panel.scrollTop = scrollTop;
@@ -934,7 +939,10 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
       let s = 1, x = 0, y = 0;
       img.className = "cimg"; img.draggable = false;
       img.style.width = W * base + "px"; img.style.height = H * base + "px";
-      const frame = el("div", { class: "cframe", style: "width:" + fw + "px;height:" + fh + "px" }, img);
+      // Thirds grid to line the dress up.
+      const grid = ["left:33.33%", "left:66.67%"].map((v) => el("i", { class: "cg", style: v + ";top:0;bottom:0;width:1px" }))
+        .concat(["top:33.33%", "top:66.67%"].map((v) => el("i", { class: "cg", style: v + ";left:0;right:0;height:1px" })));
+      const frame = el("div", { class: "cframe", style: "width:" + fw + "px;height:" + fh + "px" }, img, ...grid);
       const draw = () => {
         s = Math.min(Math.max(s, 1), 6);
         const mx = (W * base * s - fw) / 2, my = (H * base * s - fh) / 2;
