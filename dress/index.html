@@ -222,7 +222,7 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
 .newdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--rose);margin-left:4px;vertical-align:1px}
 .mirror .both{position:absolute;left:8px;bottom:8px;background:var(--rose);color:var(--rose-ink);border-radius:999px;font-size:12px;padding:1px 9px;font-variant-numeric:tabular-nums}
 .panel .img{position:relative;touch-action:pan-y}
-.panel .img img{cursor:zoom-in}
+.panel .img img{cursor:pointer}
 .nav{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;border:0;background:var(--surface);color:var(--rose);font-size:22px;line-height:1;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.18);opacity:.92}
 .nav.prev{left:8px}.nav.next{right:8px}
 .nav[disabled]{opacity:0;pointer-events:none}
@@ -710,7 +710,14 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
     const likebar = el("div", { class: "likebar" });
     if (canWrite && me && me.id && !mine) for (const k of ["ari", "nashi"]) likebar.append(el("button", { class: "like " + k, type: "button", onclick: () => vote(p, k), text: VOTE[k] }));
     const lk = el("span", { class: "chips" });
-    for (const [id, v] of vs) lk.append(el("span", { class: "chip " + v }, avatar(id), document.createTextNode(VOTE[v])));
+    // Tapping your own chip opens あり / なし to pick again.
+    for (const [id, v] of vs) {
+      if (canWrite && me && id === me.id && view.picking === p.id)
+        for (const k of ["ari", "nashi"]) lk.append(el("button", { class: "like " + k + (k === v ? " on" : ""), type: "button", onclick: () => { view.picking = null; if (k === v) renderSheet(); else vote(p, k); }, text: VOTE[k] }));
+      else if (canWrite && me && id === me.id)
+        lk.append(el("button", { class: "chip pick " + v, type: "button", "aria-label": VOTE[v] + "（押すと選び直せます）", onclick: () => { view.picking = p.id; renderSheet(); } }, avatar(id), document.createTextNode(VOTE[v])));
+      else lk.append(el("span", { class: "chip " + v }, avatar(id), document.createTextNode(VOTE[v])));
+    }
     likebar.append(lk);
     if (canWrite && !view.confirmPhoto) likebar.append(el("button", { class: "btn small", type: "button", onclick: () => { view.confirmPhoto = true; renderSheet(); }, text: "編集" }));
 
@@ -736,7 +743,6 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
       ? el("span", { class: "tools" }, el("button", { class: "btn danger", type: "button", onclick: () => deleteSide(p, shown), text: sidesNow.length > 1 ? "この写真を削除する" : "このドレスを削除する" }), el("button", { class: "link", type: "button", onclick: () => { view.confirmPhoto = false; renderSheet(); }, text: "やめる" }))
       : view.confirmPhoto
         ? el("span", { class: "tools" },
-            mine ? el("button", { class: "btn", type: "button", onclick: () => { view.confirmPhoto = false; vote(p, mine); }, text: "あり・なしを選び直す" }) : null,
             assets ? el("button", { class: "btn", type: "button", onclick: () => { addTo = p.id; picker.click(); }, text: "写真を追加" }) : null,
             assets ? el("button", { class: "btn", type: "button", onclick: () => adjustSide(p, shown), text: "写真を調整" }) : null,
             el("button", { class: "btn", type: "button", onclick: () => { view.confirmPhoto = "ask"; renderSheet(); }, text: "写真を削除" }),
@@ -762,6 +768,8 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
       const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
       sx = null;
       if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) move(dx < 0 ? 1 : -1);
+      // A plain tap on the picture opens it full screen; iPhone does not always send a click.
+      else if (Math.abs(dx) < 10 && Math.abs(dy) < 10 && !e.target.closest("button")) { e.preventDefault(); openZoom(p); }
     });
 
     const shop = S.shops.find((s) => s.id === p.shopId);
