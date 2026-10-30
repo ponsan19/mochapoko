@@ -514,11 +514,16 @@ button.chip.pick .av{width:24px;height:24px;font-size:11px}
     return cs.some((c) => c.by && c.by !== me.id && c.at > seen);
   };
 
+  // Done means that person has both voted and written a comment on the dress.
+  const ponDone = (p) => { const id = ponId(); return !!ponVote(p) && photoComments(p.id).some((c) => id && c.by === id); };
+  const piDone = (p) => { const id = ponId(); return !!piVote(p) && photoComments(p.id).some((c) => c.by && c.by !== id); };
   const FILTERS = [
     ["all", "すべて", () => true],
     ["both", "ふたりともあり", (p) => ponVote(p) === "ari" && piVote(p) === "ari"],
     ["pon", "ぽんがあり", (p) => ponVote(p) === "ari"],
     ["pi", "ぴーがあり", (p) => piVote(p) === "ari"],
+    ["ponTodo", "ぽんがまだ", (p) => !ponDone(p)],
+    ["piTodo", "ぴーがまだ", (p) => !piDone(p)],
   ];
   if (!FILTERS.some(([k]) => k === filter)) filter = "all";
   const SORTS = [["no", "番号順"], ["ari", "ありが多い順"], ["cmt", "コメントが多い順"], ["newc", "コメントが新しい順"]];
